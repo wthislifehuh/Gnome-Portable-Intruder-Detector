@@ -4,7 +4,7 @@ from camera import Camera
 app = Flask(__name__)
 
 # Initialize the VideoStream object
-video_stream = Camera(camera_index=0)
+camera = Camera(camera_index=0)
 
 
 # Route for home page
@@ -16,7 +16,7 @@ def index():
 # Route for video feed
 @app.route("/video_feed")
 def video_feed_route():
-    return video_stream.video_feed()
+    return camera.stream_video()
 
 
 if __name__ == "__main__":

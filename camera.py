@@ -6,8 +6,8 @@ class Camera:
     def __init__(self, camera_index=0):
         self.camera_index = camera_index
 
-    def generate_frames(self):
-        camera = cv2.VideoCapture(self.camera_index)  # Use 0 for the default camera
+    def start_camera(self):
+        camera = cv2.VideoCapture(self.camera_index)
 
         while True:
             success, frame = camera.read()
@@ -25,7 +25,7 @@ class Camera:
 
         camera.release()
 
-    def video_feed(self):
+    def stream_video(self):
         return Response(
-            self.generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
+            self.start_camera(), mimetype="multipart/x-mixed-replace; boundary=frame"
         )
