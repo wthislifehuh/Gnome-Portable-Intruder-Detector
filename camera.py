@@ -1,5 +1,6 @@
 import cv2
 from flask import Response
+from event_detector import EventDetector
 
 
 class Camera:
@@ -8,7 +9,7 @@ class Camera:
 
     def start_camera(self):
         camera = cv2.VideoCapture(self.camera_index)
-        # Make an object instance for frame analyzer here!!!
+        event_detector = EventDetector()
 
         while True:
             success, frame = camera.read()
