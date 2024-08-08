@@ -13,9 +13,9 @@ def index():
     return render_template("index.html")
 
 
-# Route for video feed
-@app.route("/video_feed")
-def video_feed_route():
+# Route to stream video
+@app.route("/stream_video")
+def stream_video():
     return camera.stream_video()
 
 

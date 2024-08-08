@@ -8,12 +8,16 @@ class Camera:
 
     def start_camera(self):
         camera = cv2.VideoCapture(self.camera_index)
+        # Make an object instance for frame analyzer here!!!
 
         while True:
             success, frame = camera.read()
             if not success:
                 break
             else:
+
+                # Do analysis here!!!
+
                 # Encode the frame in JPEG format
                 ret, buffer = cv2.imencode(".jpg", frame)
                 frame = buffer.tobytes()
