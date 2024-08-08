@@ -34,6 +34,7 @@ class Camera:
 
             if event_detected:
                 print("Event Detected in ROI")
+                # Invoke object detection module here!!!
             else:
                 print("No Event Detected in ROI")
 
