@@ -32,35 +32,15 @@ class Camera:
             roi = frame[:, line_position:]
 
             # Analyze the frame for events within the ROI
-            fg_mask, event_detected = self.event_detector.analyze_frame(roi)
+            fg_mask, is_event = self.event_detector.analyze_frame(roi)
 
-            if event_detected:
+            if is_event:
                 print("Event Detected in ROI")
 
                 # Invoke object detection module here!!!
-                # Detect objects within the ROI
-                detected_objects = self.object_detector.detect_objects(roi)
 
-                # Check for and display detected objects
-                for obj in detected_objects:
-                    name, xmin, ymin, xmax, ymax = obj
-                    cv2.rectangle(
-                        roi,
-                        (int(xmin), int(ymin)),
-                        (int(xmax), int(ymax)),
-                        (255, 0, 0),
-                        2,
-                    )
-                    cv2.putText(
-                        roi,
-                        name,
-                        (int(xmin), int(ymin) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.9,
-                        (255, 0, 0),
-                        2,
-                    )
-                    print(f"Detected: {name} in ROI")
+                self.object_detector.display_detections(roi)
+
             else:
                 print("No Event Detected in ROI")
 
