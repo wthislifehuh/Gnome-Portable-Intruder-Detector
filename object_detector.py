@@ -64,7 +64,7 @@ class ObjectDetector:
         Detect animals and faces within the ROI and display them on the frame.
         """
         # Detect animals and faces within the ROI
-        detected_objects = self.object_detector.detect_objects(roi)
+        detected_objects = self.detect_objects(roi)
 
         # Check for and display detected objects
         for obj in detected_objects:
