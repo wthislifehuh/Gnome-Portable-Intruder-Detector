@@ -1,16 +1,18 @@
 import cv2
 from flask import Response
 from event_detector import EventDetector
+from object_detector import ObjectDetector
 
 
 class Camera:
     def __init__(self, camera_index=0):
         self.camera_index = camera_index
         self.event_detector = EventDetector()
+        self.object_detector = ObjectDetector()  # Initialize the ObjectDetector
 
     def start_camera(self):
         camera = cv2.VideoCapture(self.camera_index)
-        line_position = 320  # Vertical line position (x-coordinate)
+        line_position = 200  # Vertical line position (x-coordinate)
 
         while True:
             success, frame = camera.read()
@@ -34,7 +36,31 @@ class Camera:
 
             if event_detected:
                 print("Event Detected in ROI")
+
                 # Invoke object detection module here!!!
+                # Detect objects within the ROI
+                detected_objects = self.object_detector.detect_objects(roi)
+
+                # Check for and display detected objects
+                for obj in detected_objects:
+                    name, xmin, ymin, xmax, ymax = obj
+                    cv2.rectangle(
+                        roi,
+                        (int(xmin), int(ymin)),
+                        (int(xmax), int(ymax)),
+                        (255, 0, 0),
+                        2,
+                    )
+                    cv2.putText(
+                        roi,
+                        name,
+                        (int(xmin), int(ymin) - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.9,
+                        (255, 0, 0),
+                        2,
+                    )
+                    print(f"Detected: {name} in ROI")
             else:
                 print("No Event Detected in ROI")
 

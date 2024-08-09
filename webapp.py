@@ -4,7 +4,7 @@ from camera import Camera
 app = Flask(__name__)
 
 # Initialize the VideoStream object
-camera = Camera(camera_index=0)
+camera = Camera(camera_index=1)
 
 
 # Route for home page
