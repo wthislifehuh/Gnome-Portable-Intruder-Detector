@@ -11,14 +11,10 @@ class ObjectDetector:
             "person",
             "dog",
             "cat",
-            "bird",
             "horse",
             "sheep",
             "cow",
-            "elephant",
             "bear",
-            "zebra",
-            "giraffe",
         ]
 
     def detect_objects(self, frame):
