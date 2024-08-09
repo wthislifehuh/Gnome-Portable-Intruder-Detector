@@ -5,7 +5,7 @@ from object_detector import ObjectDetector
 
 
 class Camera:
-    def __init__(self, camera_index=0):
+    def __init__(self, camera_index):
         self.camera_index = camera_index
         self.event_detector = EventDetector()
         self.object_detector = ObjectDetector()  # Initialize the ObjectDetector
