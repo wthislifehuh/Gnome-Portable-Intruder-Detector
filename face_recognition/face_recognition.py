@@ -37,6 +37,7 @@ while True:
             # Perform face recognition on the cropped face
             recognition = DeepFace.find(img_path=face_img, model_name="Facenet512", db_path=db_path, enforce_detection=False, silent=True)
 
+            print(recognition)
             # Perform analysis
             # results = DeepFace.analyze(frame, actions=['emotion', 'age', 'gender', 'race'])
             # To access results: eg. results["age"]
