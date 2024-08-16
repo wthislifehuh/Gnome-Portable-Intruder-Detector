@@ -1,5 +1,4 @@
-# pip install deepface
-# pip install cv2
+# pip install deepface opencv-python tf-keras
 #================================================================
 # WORKING VERSION
 #================================================================
@@ -14,7 +13,7 @@ import re
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 # Define the database path where images are stored
-db_path = "./human_recognition/faces/"
+db_path = "./face_recognition/faces/"
 
 # Open the webcam
 cap = cv2.VideoCapture(0)
