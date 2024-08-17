@@ -3,7 +3,7 @@ import cv2
 
 def start():
     # Open a connection to the default camera (usually the first camera)
-    cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+    cap = cv2.VideoCapture(0)
 
     # Check if the camera opened successfully
     if not cap.isOpened():

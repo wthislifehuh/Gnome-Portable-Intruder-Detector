@@ -1,6 +1,8 @@
 import cv2
 from flask import Response, stream_with_context
 from event_detector import EventDetector
+from object_detector import ObjectDetector
+import threading
 
 
 class Camera:
@@ -8,6 +10,7 @@ class Camera:
         self.camera_index = camera_index
         self.cap = None
         self.event_detector = EventDetector()
+        self.object_detector = ObjectDetector()
 
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
@@ -29,16 +32,6 @@ class Camera:
             if not ret:
                 break
 
-            # Encode the frame to JPEG format
-            ret, buffer = cv2.imencode(".jpg", frame)
-            processed_frame = buffer.tobytes()
-
-            # Yield the frame as a byte array
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: image/jpeg\r\n\r\n" + processed_frame + b"\r\n"
-            )
-
             # ---------------------------------------- Frame analysis starts here ----------------------------------------
 
             # Draw the vertical line to separate inside and outside areas
@@ -57,7 +50,7 @@ class Camera:
 
             if is_event:
                 print("Event Detected in ROI")
-
+                # self.object_detector.display_detections(roi)
             else:
                 print("No Event Detected in ROI")
 
@@ -66,7 +59,23 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
+    def generate_frame(self):
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                break
+
+            # Encode the frame to JPEG format
+            ret, buffer = cv2.imencode(".jpg", frame)
+            processed_frame = buffer.tobytes()
+
+            # Yield the frame as a byte array
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + processed_frame + b"\r\n"
+            )
+
     def stream_video(self):
         return Response(
-            self.process_video(), mimetype="multipart/x-mixed-replace; boundary=frame"
+            self.generate_frame(), mimetype="multipart/x-mixed-replace; boundary=frame"
         )

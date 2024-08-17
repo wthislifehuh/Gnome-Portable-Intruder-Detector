@@ -14,6 +14,10 @@ app = Flask(
 camera = Camera(camera_index=0)
 cap = camera.start_camera()
 
+# Start the video processing in a separate thread
+video_processing_thread = Thread(target=camera.process_video, daemon=True)
+video_processing_thread.start()
+
 
 # Route for the home page
 @app.route("/")
@@ -29,7 +33,7 @@ def stream_video():
 
 def start_flask_app():
     # Start the Flask web server without debug mode
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
 
 
 if __name__ == "__main__":
