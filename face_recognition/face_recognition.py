@@ -1,7 +1,7 @@
 # pip install deepface opencv-python tf-keras
-#================================================================
+# ================================================================
 # WORKING VERSION
-#================================================================
+# ================================================================
 
 import cv2
 from deepface import DeepFace
@@ -10,7 +10,7 @@ import logging
 import re
 
 # Suppress DeepFace logging
-logging.getLogger('tensorflow').setLevel(logging.ERROR)
+logging.getLogger("tensorflow").setLevel(logging.ERROR)
 
 # Define the database path where images are stored
 db_path = "./face_recognition/faces/"
@@ -27,15 +27,23 @@ while True:
 
     try:
         # Detect faces in the frame
-        face_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        face_detector = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        )
         faces = face_detector.detectMultiScale(frame, scaleFactor=1.1, minNeighbors=5)
 
-        for (x, y, w, h) in faces:
+        for x, y, w, h in faces:
             # Crop the face area from the frame
-            face_img = frame[y:y+h, x:x+w]
+            face_img = frame[y : y + h, x : x + w]
 
             # Perform face recognition on the cropped face
-            recognition = DeepFace.find(img_path=face_img, model_name="Facenet512", db_path=db_path, enforce_detection=False, silent=True)
+            recognition = DeepFace.find(
+                img_path=face_img,
+                model_name="Facenet512",
+                db_path=db_path,
+                enforce_detection=False,
+                silent=True,
+            )
 
             print(recognition)
             # Perform analysis
@@ -44,41 +52,58 @@ while True:
 
             # Determine identity
             if recognition and not recognition[0].empty:
-                filename = recognition[0]["identity"].values[0].split('/')[-1]  # Get the filename, e.g., 'joe_ee2.jpg'
+                filename = (
+                    recognition[0]["identity"].values[0].split("/")[-1]
+                )  # Get the filename, e.g., 'joe_ee2.jpg'
                 # Remove the file extension
                 name_without_extension = os.path.splitext(filename)[0]  # Get 'joe_ee2'
                 # Remove digits from the name
-                name_without_numbers = re.sub(r'\d+', '', name_without_extension)  # Get 'joe_ee'
+                name_without_numbers = re.sub(
+                    r"\d+", "", name_without_extension
+                )  # Get 'joe_ee'
                 # Replace underscores with spaces and capitalize each word
-                identity = name_without_numbers.replace('_', ' ').title()  # Get 'Joe Ee'
+                identity = name_without_numbers.replace(
+                    "_", " "
+                ).title()  # Get 'Joe Ee'
             else:
                 identity = "Unknown"
 
             print(identity)
 
             # Draw a rectangle around the face
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Prepare the text to display
-            text = f'Name: {identity}'
+            text = f"Name: {identity}"
 
             # Calculate text size
-            (text_width, text_height), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+            (text_width, text_height), _ = cv2.getTextSize(
+                text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2
+            )
 
             # Ensure text is above the face rectangle
             y_text = y - 10 if y - 10 > text_height else y + h + text_height + 10
 
             # Overlay the text above the face
-            cv2.putText(frame, text, (x, y_text), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(
+                frame,
+                text,
+                (x, y_text),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 0),
+                2,
+                cv2.LINE_AA,
+            )
 
     except Exception as e:
         print("Error in analyzing frame:", str(e))
 
     # Display the resulting frame
-    cv2.imshow('Webcam', frame)
+    cv2.imshow("Webcam", frame)
 
-    # Break the loop when 'q' is pressed   
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    # Break the loop when 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 # Release the capture and close windows
@@ -86,24 +111,24 @@ cap.release()
 cv2.destroyAllWindows()
 
 
-#=========================== TESTING VERSION =====================================
+# =========================== TESTING VERSION =====================================
 # import cv2
 # from deepface import DeepFace
 
 # # Define the database path where images are stored
-# db_path = "./human_recognition/faces/"  
+# db_path = "./human_recognition/faces/"
 # # Predefined image for identity matching
 # img_path = "joe_ee.jpg"
 
 # models = [
-#   "VGG-Face", 
-#   "Facenet", 
-#   "Facenet512", 
-#   "OpenFace", 
-#   "DeepFace", 
-#   "DeepID", 
-#   "ArcFace", 
-#   "Dlib", 
+#   "VGG-Face",
+#   "Facenet",
+#   "Facenet512",
+#   "OpenFace",
+#   "DeepFace",
+#   "DeepID",
+#   "ArcFace",
+#   "Dlib",
 #   "SFace",
 #   "GhostFaceNet",
 # ]
@@ -140,18 +165,18 @@ cv2.destroyAllWindows()
 # # To end the stream, press 'q' on the webcam window
 
 
-#=========================== TESTING VERSION =====================================
+# =========================== TESTING VERSION =====================================
 # WORKING MODULES using Deepface and webcam
 
 # models = [
-#   "VGG-Face", 
-#   "Facenet", 
-#   "Facenet512", 
-#   "OpenFace", 
-#   "DeepFace", 
-#   "DeepID", 
-#   "ArcFace", 
-#   "Dlib", 
+#   "VGG-Face",
+#   "Facenet",
+#   "Facenet512",
+#   "OpenFace",
+#   "DeepFace",
+#   "DeepID",
+#   "ArcFace",
+#   "Dlib",
 #   "SFace",
 #   "GhostFaceNet",
 # ]
@@ -162,7 +187,7 @@ cv2.destroyAllWindows()
 
 # # Define the database path where images are stored
 # db_path = "./human_recognition/faces/"
-  
+
 # # Predefined image for identity matching
 # img_path = "joe_ee.jpg"
 
@@ -188,7 +213,7 @@ cv2.destroyAllWindows()
 
 #         else:
 #             identity = "Unknown"
-        
+
 #         print(identity)
 
 #         # Perform analysis
@@ -206,10 +231,9 @@ cv2.destroyAllWindows()
 #     # Display the resulting frame
 #     cv2.imshow('Webcam', frame)
 
-#     # Break the loop when 'q' is pressed   
+#     # Break the loop when 'q' is pressed
 #     if cv2.waitKey(1) & 0xFF == ord('q'):
 #         break
-
 
 
 # ============================ TESTING VERSION =====================================
@@ -243,7 +267,7 @@ cv2.destroyAllWindows()
 #         # Perform face recognition
 #         recognition = DeepFace.find(img_path=frame, model_name="Facenet512", db_path=db_path, enforce_detection= False, silent=True)
 #         print(recognition)
-    
+
 #         # Check if recognition list is not empty
 #         if len(recognition) > 0 and len(recognition[0]) > 0:
 #             filename = recognition[0]["identity"].values[0].split('/')[-1]  # Get 'joe_ee2.jpg'
@@ -257,7 +281,7 @@ cv2.destroyAllWindows()
 #             identity = name_without_numbers.replace('_', ' ').title()  # Get 'Joe Ee'
 #         else:
 #             identity = "Unknown"
-        
+
 #         print(identity)
 
 #         # Perform analysis (currently commented out)
@@ -295,12 +319,10 @@ cv2.destroyAllWindows()
 #     # Display the resulting frame
 #     cv2.imshow('Webcam', frame)
 
-#     # Break the loop when 'q' is pressed   
+#     # Break the loop when 'q' is pressed
 #     if cv2.waitKey(1) & 0xFF == ord('q'):
 #         break
 
 # # Release the capture and close windows
 # cap.release()
 # cv2.destroyAllWindows()
-
-
