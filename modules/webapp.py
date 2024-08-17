@@ -2,17 +2,23 @@
 
 from flask import Flask, render_template
 from camera import Camera
+import os
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "templates"
+    ),
+)
 
 # Initialize the VideoStream object
-camera = Camera(camera_index=1)
+camera = Camera(camera_index=0)
 
 
 # Route for home page
 @app.route("/")
 def index():
-    return render_template("../templates/index.html")
+    return render_template("index.html")
 
 
 # Route to stream video
