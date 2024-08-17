@@ -1,9 +1,7 @@
-# droidcam on mobile device
-
 from flask import Flask, render_template
-from camera import Camera
+from camera_v2 import Camera
 import os
-import cv2
+from threading import Thread
 
 app = Flask(
     __name__,
@@ -12,11 +10,12 @@ app = Flask(
     ),
 )
 
-# Initialize the VideoStream object
+# Initialize the Camera object
 camera = Camera(camera_index=0)
+cap = camera.start_camera()
 
 
-# Route for home page
+# Route for the home page
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -28,39 +27,20 @@ def stream_video():
     return camera.stream_video()
 
 
-if __name__ == "__main__":
+def start_flask_app():
+    # Start the Flask web server without debug mode
     app.run(host="0.0.0.0", port=5000, debug=True)
 
 
-# import cv2
+def process_camera_frames():
+    # Process and display frames using OpenCV
+    camera.process_video_frame()
 
-# # DroidCam typically uses IP cameras, and the URL is in this format
-# # Replace 'http://your_droidcam_ip:port/mjpegfeed' with your actual DroidCam IP and port
-# droidcam_url = "http://192.168.1.17:4747"
 
-# # Open the video capture with the DroidCam URL
-# cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # or cv2.CAP_MSMF
+if __name__ == "__main__":
+    # Start the Flask app in a separate thread
+    flask_thread = Thread(target=process_camera_frames)
+    flask_thread.start()
 
-# if not cap.isOpened():
-#     print("Error: Could not open video stream from DroidCam.")
-# else:
-#     print("Connected to DroidCam successfully.")
-
-#     while True:
-#         # Capture frame-by-frame
-#         ret, frame = cap.read()
-
-#         if not ret:
-#             print("Error: Could not read frame.")
-#             break
-
-#         # Display the resulting frame
-#         cv2.imshow('DroidCam Feed', frame)
-
-#         # Press 'q' to exit the video stream
-#         if cv2.waitKey(1) & 0xFF == ord('q'):
-#             break
-
-#     # When everything done, release the capture
-#     cap.release()
-#     cv2.destroyAllWindows()
+    # Start processing frames (this will run in the main thread)
+    start_flask_app()
