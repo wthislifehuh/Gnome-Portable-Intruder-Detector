@@ -8,7 +8,9 @@ app = Flask(
     template_folder=os.path.join(
         os.path.dirname(os.path.dirname(__file__)), "templates"
     ),
+    static_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),
 )
+
 
 # Initialize the Camera object
 camera = Camera(camera_index=0)
