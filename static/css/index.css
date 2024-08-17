@@ -41,6 +41,12 @@ header .nav-link {
     margin-bottom: 40px;
 }
 
+.videoSize {
+    width: 60%;
+    height: auto;
+    max-width: 80%;
+  }
+
 .live-stream-text{
     color: #211F19;
     font-family: 'Poppins', sans-serif;

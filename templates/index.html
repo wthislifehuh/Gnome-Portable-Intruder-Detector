@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Intruder Detection Live Stream</title>
+    <title>Gnome - Intruder Detector</title>
     <!-- Core theme CSS-->
     <link
       rel="stylesheet"
@@ -17,21 +17,8 @@
       crossorigin="anonymous"
     />
     <!-- Font Awesome icons -->
-<<<<<<< Updated upstream
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    <link rel="icon" href="../assets/images/logo.png" type="image/png">
-=======
-    <script
-      src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
-      crossorigin="anonymous"
-    ></script>
-    <!-- Favicon -->
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='images/gnome-logo.png') }}"
-      type="image/png"
-    />
->>>>>>> Stashed changes
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <!-- Font style -->
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans|Poppins:400,700&display=swap"
@@ -79,8 +66,7 @@
         </h1>
         <img
           src="{{ url_for('stream_video') }}"
-          width="640"
-          height="480"
+          class="videoSize"
           onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
         />
         <div id="no-stream" style="display: none; color: #e8e0d8">
@@ -121,24 +107,14 @@
 
     <!-- ====================== Hero ====================== -->
     <div id="stay-secure" class="stay-secure row align-items-center mb-5">
-      <div class="col-md-5" style="margin-left: 80px">
-        <img
-          src="{{ url_for('static', filename='images/gnome_logo.png') }}"
-          class="img-fluid"
-          alt="Stay Secure"
-        />
-      </div>
-      <div class="col-md-5">
-        <h2>Stay Secure, Stay Informed</h2>
-        <p>
-          Gnome, the Intruder Detector, is your vigilant companion, keeping an
-          eye on things when you can't.
-        </p>
-        <p>
-          Whether you're looking to protect your personal space or just want
-          peace of mind, this bot has you covered.
-        </p>
-      </div>
+        <div class="col-md-5" style="margin-left: 80px; border-radius: 20px;">
+            <img src="{{ url_for('static', filename='images/gnome_logo.png') }}" class="img-fluid" alt="Stay Secure">
+        </div>
+        <div class="col-md-5">
+            <h2>Stay Secure, Stay Informed</h2>
+            <p>Gnome, the Intruder Detector, is your vigilant companion, keeping an eye on things when you can't.</p>
+            <p>Whether you're looking to protect your personal space or just want peace of mind, this bot has you covered.</p>
+        </div>
     </div>
 
     <!-- ====================== Features ====================== -->

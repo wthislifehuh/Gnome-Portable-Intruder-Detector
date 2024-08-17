@@ -38,7 +38,7 @@ class Camera:
             fg_mask, is_event = self.event_detector.analyze_frame(roi)
 
             if is_event:
-                # TODO: NEED to apply this 2 lines of code to if intruders is detected
+                # TODO: NEED to apply this 2 lines of code to if intruder is detected
                 if not self.is_recording:
                     self.start_recording(camera)
 
@@ -47,7 +47,7 @@ class Camera:
                 # Invoke object detection module here
                 self.object_detector.display_detections(roi)
             else:
-                # TODO: NEED to apply this 2 lines of code to if intruders is NOT detected
+                # TODO: NEED to apply this 2 lines of code to if intruder is NOT detected
                 if self.is_recording:
                     self.stop_recording()
 
