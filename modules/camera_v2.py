@@ -50,7 +50,7 @@ class Camera:
 
             if is_event:
                 print("Event Detected in ROI")
-                self.object_detector.display_detections(roi)
+                self.object_detector.analyze_object(roi)
             else:
                 print("No Event Detected in ROI")
 

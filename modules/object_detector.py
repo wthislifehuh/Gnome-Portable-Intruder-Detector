@@ -78,13 +78,13 @@ class ObjectDetector:
                 r"\d+", "", name_without_extension
             )  # Get 'joe_ee'
             # Replace underscores with spaces and capitalize each word
-            identity = name_without_numbers.replace("_", " ").title()  # Get 'Joe Ee'
+            identity = name_without_numbers.replace("_", " ").title()
         else:
             identity = "Unknown"
 
         return identity
 
-    def display_detections(self, roi):
+    def analyze_object(self, roi):
         # Detect humans and animals within the ROI
         detected_objects = self.detect_objects(roi)
 
@@ -105,7 +105,7 @@ class ObjectDetector:
 
                         # Recognize the face
                         identity = self.recognize_face(face_img)
-                        print(identity)
+
                         # Draw a rectangle around the face
                         cv2.rectangle(
                             roi,
@@ -142,6 +142,7 @@ class ObjectDetector:
                             2,
                             cv2.LINE_AA,
                         )
+
                 else:
                     # If no face is detected, still draw the bounding box for the person
                     cv2.rectangle(
