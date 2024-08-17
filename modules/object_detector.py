@@ -104,44 +104,44 @@ class ObjectDetector:
                         face_img = person_roi[fy : fy + fh, fx : fx + fw]
 
                         # Recognize the face
-                        # identity = self.recognize_face(face_img)
+                        identity = self.recognize_face(face_img)
+                        print(identity)
+                        # Draw a rectangle around the face
+                        cv2.rectangle(
+                            roi,
+                            (int(xmin) + fx, int(ymin) + fy),
+                            (int(xmin) + fx + fw, int(ymin) + fy + fh),
+                            (0, 255, 0),
+                            2,
+                        )
 
-                        # # Draw a rectangle around the face
-                        # cv2.rectangle(
-                        #     roi,
-                        #     (int(xmin) + fx, int(ymin) + fy),
-                        #     (int(xmin) + fx + fw, int(ymin) + fy + fh),
-                        #     (0, 255, 0),
-                        #     2,
-                        # )
+                        # Prepare the text to display
+                        text = f"Name: {identity}"
+                        text_color = (0, 255, 0)  # Green for recognized person
 
-                        # # Prepare the text to display
-                        # text = f"Name: {identity}"
-                        # text_color = (0, 255, 0)  # Green for recognized person
+                        # Calculate text size
+                        (text_width, text_height), _ = cv2.getTextSize(
+                            text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2
+                        )
 
-                        # # Calculate text size
-                        # (text_width, text_height), _ = cv2.getTextSize(
-                        #     text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2
-                        # )
+                        # Ensure text is above the rectangle
+                        y_text = (
+                            int(ymin) + fy - 10
+                            if int(ymin) + fy - 10 > text_height
+                            else int(ymin) + fy + fh + text_height + 10
+                        )
 
-                        # # Ensure text is above the rectangle
-                        # y_text = (
-                        #     int(ymin) + fy - 10
-                        #     if int(ymin) + fy - 10 > text_height
-                        #     else int(ymin) + fy + fh + text_height + 10
-                        # )
-
-                        # # Overlay the text above the detected face
-                        # cv2.putText(
-                        #     roi,
-                        #     text,
-                        #     (int(xmin) + fx, y_text),
-                        #     cv2.FONT_HERSHEY_SIMPLEX,
-                        #     0.7,
-                        #     text_color,
-                        #     2,
-                        #     cv2.LINE_AA,
-                        # )
+                        # Overlay the text above the detected face
+                        cv2.putText(
+                            roi,
+                            text,
+                            (int(xmin) + fx, y_text),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            text_color,
+                            2,
+                            cv2.LINE_AA,
+                        )
                 else:
                     # If no face is detected, still draw the bounding box for the person
                     cv2.rectangle(
