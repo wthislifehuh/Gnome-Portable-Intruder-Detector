@@ -39,6 +39,8 @@ class Camera:
                 b"Content-Type: image/jpeg\r\n\r\n" + processed_frame + b"\r\n"
             )
 
+            # ---------------------------------------- Frame analysis starts here ----------------------------------------
+
             # Draw the vertical line to separate inside and outside areas
             cv2.line(
                 frame,
