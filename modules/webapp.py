@@ -29,18 +29,8 @@ def stream_video():
 
 def start_flask_app():
     # Start the Flask web server without debug mode
-    app.run(host="0.0.0.0", port=5000, debug=False)
-
-
-def process_camera_frames():
-    # Process and display frames using OpenCV
-    camera.process_video_frame()
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
 
 if __name__ == "__main__":
-    # Start the Flask app in a separate thread
-    flask_thread = Thread(target=start_flask_app)
-    flask_thread.start()
-
-    # Start processing frames (this will run in the main thread)
-    process_camera_frames()
+    start_flask_app()

@@ -1,11 +1,13 @@
 import cv2
 from flask import Response, stream_with_context
+from event_detector import EventDetector
 
 
 class Camera:
     def __init__(self, camera_index):
         self.camera_index = camera_index
         self.cap = None
+        self.event_detector = EventDetector()
 
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
@@ -14,39 +16,55 @@ class Camera:
             return False
         return self.cap
 
-    def stream_video(self):
-        @stream_with_context
-        def generate():
-            while True:
-                ret, frame = self.cap.read()
-                if not ret:
-                    break
+    def stop_camera(self):
+        if self.cap:
+            self.cap.release()
+            cv2.destroyAllWindows()
 
-                # Encode the frame to JPEG format
-                ret, buffer = cv2.imencode(".jpg", frame)
-                frame = buffer.tobytes()
+    def process_video(self):
+        line_position = 200
 
-                # Yield the frame as a byte array
-                yield (
-                    b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
-                )
-
-        return Response(
-            generate(), mimetype="multipart/x-mixed-replace; boundary=frame"
-        )
-
-    def process_video_frame(self):
         while True:
             ret, frame = self.cap.read()
             if not ret:
-                print("Error: Failed to capture image.")
                 break
 
-            # Display the frame using OpenCV
+            # Encode the frame to JPEG format
+            ret, buffer = cv2.imencode(".jpg", frame)
+            processed_frame = buffer.tobytes()
+
+            # Yield the frame as a byte array
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + processed_frame + b"\r\n"
+            )
+
+            # Draw the vertical line to separate inside and outside areas
+            cv2.line(
+                frame,
+                (line_position, 0),
+                (line_position, frame.shape[0]),
+                (0, 255, 0),
+                2,
+            )
+
+            # Define the region of interest (ROI) to the right of the vertical line
+            roi = frame[:, line_position:]
+
+            fg_mask, is_event = self.event_detector.analyze_frame(roi)
+
+            if is_event:
+                print("Event Detected in ROI")
+
+            else:
+                print("No Event Detected in ROI")
+
             cv2.imshow("Camera Feed", frame)
 
-            # Press 'q' to exit the video feed
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-
+    def stream_video(self):
+        return Response(
+            self.process_video(), mimetype="multipart/x-mixed-replace; boundary=frame"
+        )
