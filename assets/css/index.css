@@ -16,8 +16,12 @@
 }
 
 header {
-    background-color: #211F19;
-    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background-color: #23292E; /* Ensure background color covers the header area */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: adds a subtle shadow */
 }
 
 header .navbar-brand {
