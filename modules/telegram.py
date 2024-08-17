@@ -25,6 +25,18 @@ class TelegramNotifier:
         else:
             print(f"Failed to send video. Status code: {response.status_code}")
         return response
+    
+    def send_notification(self, status):
+        if status == "human":
+            self.send_message("WARNING: Human Intruders Detected! \nView the live feeds here:")
+        elif status == "dog":
+            self.send_message("Dog Detected!")
+        elif status == "low battery":
+            self.send_message("Mobile battery Low! Check the condition of your device.")
+        elif status == "warning":
+            self.send_message("")
+            
+
 
 if __name__ == "__main__":
     chat_id = "1116943112"
