@@ -2,7 +2,7 @@ import cv2
 from flask import Response, stream_with_context
 from event_detector import EventDetector
 from object_detector import ObjectDetector
-import threading
+import time
 
 
 class Camera:
@@ -24,9 +24,19 @@ class Camera:
             self.cap.release()
             cv2.destroyAllWindows()
 
-    def process_video(self, frame_skip=5):
+    def process_video(
+        self,
+        frame_skip=5,
+        notification_cooldown=10,
+        intruder_debounce_threshold=3,
+        animal_debounce_threshold=3,
+    ):
         line_position = 200
         frame_count = 0
+        person_last_notification_time = 0
+        animal_last_notification_time = 0
+        intruder_counter = 0
+        animal_counter = 0
 
         while True:
             ret, frame = self.cap.read()
@@ -60,6 +70,42 @@ class Camera:
                 print("Event Detected in ROI")
                 result = self.object_detector.analyze_object(roi)
                 print(result)
+
+                if result["is_intruder"]:  # If intruder is detected
+                    intruder_counter += 1  # Update intruder counter
+
+                    if (
+                        intruder_counter >= intruder_debounce_threshold
+                    ):  # Confirm that an intruder is detected
+
+                        current_time = time.time()
+
+                        if (
+                            current_time - person_last_notification_time
+                            > notification_cooldown
+                        ):  # Make sure that the notification is sent only after certain threshold
+                            # Trigger notification module here!!!
+                            print("Trigger intruder notification")
+                            person_last_notification_time = current_time
+
+                if result["is_animal"]:  # If animal is detected
+                    animal_counter += 1  # Update animal counter
+
+                    if (
+                        animal_counter >= animal_debounce_threshold
+                    ):  # Confirm that animal is detected
+
+                        current_time = time.time()
+
+                        if (
+                            current_time - animal_last_notification_time
+                            > notification_cooldown
+                        ):  # Make sure that the notification is sent only after certain threshold
+                            # Trigger notification module here!!!
+                            print(result["animal"])
+                            print("Trigger animal notification")
+                            animal_last_notification_time = current_time
+
             else:
                 print("No Event Detected in ROI")
 
