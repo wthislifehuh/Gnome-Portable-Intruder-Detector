@@ -5,13 +5,13 @@ from database import initialize_database, SubscriptionManager
 
 async def external_trigger_monitor(notifier: TelegramNotifier):
     while True:
-        await asyncio.sleep(100)  # Simulate checking for an external event every 5 seconds
+        await asyncio.sleep(10)  # Simulate checking for an external event every 5 seconds
 
         # Example: simulate external event
         is_event = True  # Replace with real event detection logic
         if is_event:
             print("Event Detected, sending notification...")
-            notifier.send_notification("trigger")
+            notifier.send_notification("human")
 
 async def main():
     # Initialize the database and notifier

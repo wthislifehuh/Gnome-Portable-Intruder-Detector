@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from notifier import TelegramNotifier
 from database import initialize_database, SubscriptionManager
+import os
 
 class BotHandler:
     def __init__(self, notifier: TelegramNotifier):
@@ -91,6 +92,9 @@ class BotHandler:
             self.subscription_manager.add_subscription(text)
             await update.message.reply_text(f"Subscription code '{text}' added successfully!")
             context.user_data['awaiting_new_subscription_code'] = False
+        else:
+            # Fallback to /start if the message is not recognized
+            await self.start(update, context)
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)
