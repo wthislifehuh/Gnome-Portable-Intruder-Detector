@@ -1,4 +1,46 @@
+# Using Method 3
+import requests
 
+class AlarmTrigger:
+    def __init__(self):
+        # Initialize the session object when the class is instantiated
+        self.session = requests.Session()
+
+    def pre_warm_connection(self):
+        """
+        Pre-warm the connection to reduce latency on the first request.
+        This method can be called ahead of time to speed up subsequent requests.
+        """
+        self.session.get("https://app.vybit.net/trigger/pre-warm")
+
+    def trigger_alarm(self, event):
+        """
+        Trigger an alarm based on the event type.
+        Parameters:
+            event (str): The type of event to trigger (e.g., 'human', 'dog', 'cat').
+        """
+        if event == "human":
+            url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+        elif event == "dog":
+            url = "https://vybit.net/trigger/2uqg0zrx9wof9jgx"
+        elif event == "cat":
+            url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+        else:
+            print(f"Unknown event: {event}")
+            return
+        
+        response = self.session.post(url)
+        print(f'Triggered {event} event with status: {response.status_code}')
+
+
+# Usage
+alarm = AlarmTrigger()
+
+# Pre-warm the connection (ideally do this in advance)
+alarm.pre_warm_connection()
+
+# Trigger the alarm
+alarm.trigger_alarm("human")
 
 
 # Method 1: 4sec to respond   ===============================================================
@@ -32,29 +74,29 @@
 
 # Method 3 - BEST PRE WARM THE SESSION ===================================
 # provide the quickest response, as it minimizes the connection setup time
-import requests
-session = requests.Session()
+# import requests
+# session = requests.Session()
 
-def pre_warm_connection():
-    # Pre-warm the connection to reduce latency on the first request
-    session.get("https://app.vybit.net/trigger/pre-warm")
+# def pre_warm_connection():
+#     # Pre-warm the connection to reduce latency on the first request
+#     session.get("https://app.vybit.net/trigger/pre-warm")
 
-def trigger_alarm(event):
-    if event == "human":
-        # Use the pre-warmed session to make the POST request
-        response = session.post("https://app.vybit.net/trigger/cc6ghxxta9zkdcd5")
-        print(f'Triggered {event} event with status: {response.status_code}')
-    elif event == "dog":
-        response = session.post("https://vybit.net/trigger/2uqg0zrx9wof9jgx")
-        print(f'Triggered {event} event with status: {response.status_code}')
-    elif event == "cat":
-        response = session.post("https://app.vybit.net/trigger/cc6ghxxta9zkdcd5")
-        print(f'Triggered {event} event with status: {response.status_code}')
+# def trigger_alarm(event):
+#     if event == "human":
+#         # Use the pre-warmed session to make the POST request
+#         response = session.post("https://app.vybit.net/trigger/cc6ghxxta9zkdcd5")
+#         print(f'Triggered {event} event with status: {response.status_code}')
+#     elif event == "dog":
+#         response = session.post("https://vybit.net/trigger/2uqg0zrx9wof9jgx")
+#         print(f'Triggered {event} event with status: {response.status_code}')
+#     elif event == "cat":
+#         response = session.post("https://app.vybit.net/trigger/cc6ghxxta9zkdcd5")
+#         print(f'Triggered {event} event with status: {response.status_code}')
 
-# Usage
-pre_warm_connection() # use this in advance to warm up the connection first
+# # Usage
+# pre_warm_connection() # use this in advance to warm up the connection first
 
-trigger_alarm("human")
+# trigger_alarm("human")
 
 
 # Combining Method 1 and Method 3 - 4 sec ===================================
@@ -80,3 +122,6 @@ trigger_alarm("human")
 #     await trigger_alarm("human")
 
 # asyncio.run(main())
+
+
+
