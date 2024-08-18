@@ -41,10 +41,9 @@ class TelegramNotifier:
         chat_ids = self.subscription_manager.get_all_chat_ids()
 
         for chat_id in chat_ids:
-            if status == "human":
-                self.send_message(chat_id, "🚨Alert! Human Intruders Detected! \nView the live feeds here or access the recordings of the intruders:", reply_markup=reply_markup)
-            elif status == "dog":
-                self.send_message(chat_id, "🚨Alert! Dog Detected! \nView the live feeds here or access the recordings of the intruders:", reply_markup=reply_markup)
+            if status == "human" or status == "dog":
+                status.capitalize()
+                self.send_message(chat_id, f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:", reply_markup=reply_markup)
             elif status == "low battery":
                 self.send_message(chat_id, "⚠️ WARNING: Mobile battery Low! Check the condition of your device.")
             elif status == "trigger":
