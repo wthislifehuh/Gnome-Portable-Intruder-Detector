@@ -24,10 +24,6 @@ class ObjectDetector:
             "person",
             "dog",
             "cat",
-            "horse",
-            "sheep",
-            "cow",
-            "bear",
         ]
         # Face recognition database path
         self.db_path = db_path
@@ -85,6 +81,15 @@ class ObjectDetector:
         return identity
 
     def analyze_object(self, roi):
+
+        # Define dictionary to be returned
+        animal_array = []
+        result = {
+            "is_intruder": False,
+            "is_animal": False,
+            "animal": animal_array,
+        }
+
         # Detect humans and animals within the ROI
         detected_objects = self.detect_objects(roi)
 
@@ -105,6 +110,9 @@ class ObjectDetector:
 
                         # Recognize the face
                         identity = self.recognize_face(face_img)
+
+                        if identity == "Unknown":
+                            result["is_intruder"] = True
 
                         # Draw a rectangle around the face
                         cv2.rectangle(
@@ -144,6 +152,9 @@ class ObjectDetector:
                         )
 
                 else:
+                    if identity == "Unknown":
+                        result["is_intruder"] = True
+
                     # If no face is detected, still draw the bounding box for the person
                     cv2.rectangle(
                         roi,
@@ -168,6 +179,9 @@ class ObjectDetector:
                     )
 
             else:
+                result["is_animal"] = True
+                result["animal"].append(name)
+
                 # For other objects (animals), just draw the bounding box and label
                 cv2.rectangle(
                     roi, (int(xmin), int(ymin)), (int(xmax), int(ymax)), (255, 0, 0), 2
@@ -183,3 +197,5 @@ class ObjectDetector:
                 )
 
             print(f"Detected: {name} in ROI")
+
+        return result

@@ -24,13 +24,21 @@ class Camera:
             self.cap.release()
             cv2.destroyAllWindows()
 
-    def process_video(self):
+    def process_video(self, frame_skip=5):
         line_position = 200
+        frame_count = 0
 
         while True:
             ret, frame = self.cap.read()
             if not ret:
                 break
+
+            # Increment the frame count
+            frame_count += 1
+
+            # Skip frames based on the frame_skip parameter
+            if frame_count % frame_skip != 0:
+                continue
 
             # ---------------------------------------- Frame analysis starts here ----------------------------------------
 
@@ -50,12 +58,15 @@ class Camera:
 
             if is_event:
                 print("Event Detected in ROI")
-                self.object_detector.analyze_object(roi)
+                result = self.object_detector.analyze_object(roi)
+                print(result)
             else:
                 print("No Event Detected in ROI")
 
+            # Display the current frame
             cv2.imshow("Camera Feed", frame)
 
+            # Check for user input to exit
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
