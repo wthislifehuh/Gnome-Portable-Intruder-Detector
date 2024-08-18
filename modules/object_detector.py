@@ -152,8 +152,7 @@ class ObjectDetector:
                         )
 
                 else:
-                    if identity == "Unknown":
-                        result["is_intruder"] = True
+                    result["is_intruder"] = True
 
                     # If no face is detected, still draw the bounding box for the person
                     cv2.rectangle(
