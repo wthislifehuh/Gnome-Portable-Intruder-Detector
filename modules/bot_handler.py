@@ -1,3 +1,4 @@
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from notifier import TelegramNotifier
@@ -10,8 +11,7 @@ class BotHandler:
         self.notifier = notifier
         self.subscription_manager = notifier.subscription_manager
         self.application = Application.builder().token(notifier.token).build()
-        # self.livefeed_link = "http://192.168.1.19:5000"
-        self.subscription_code = None
+        self.livefeed_link = "http://192.168.1.19:5000"
         self.info_link = "https://playful-router-dca.notion.site/Gnome-Intruder-Detector-1ee22862e81244a8a083ee262e2274f8"
         
 
@@ -45,82 +45,69 @@ class BotHandler:
         elif query.data == 'recordings':
             await self.list_recordings(update, context)
         elif query.data == 'live_feed':
-            await self.get_livefeed(update, context)
+            await query.message.reply_text(
+                f"Here is the link to the live feed: \n📍{self.livefeed_link}",
+            )
         elif query.data == 'emergency':
             await query.message.reply_text(
                 f"Here are some emergency contacts in Kampar: \n\n📞 General: 999\n📞 Bomba Kampar: 054664444\n📞 Hospital Kampar: 05465333\n📞 Police Kampar: 054652222"
             )
         else:
             await query.edit_message_text(text=f"Selected option: {query.data}")
+
+    # async def list_recordings(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    #     chat_id = str(update.message.chat_id)
+    #     if self.subscription_manager.verify_chat_id(chat_id):
+    #         video_folder = os.path.join(os.path.dirname(__file__), f'../static/videos/{channel}')
+    #         video_files = os.listdir(self.video_folder)
+    #         if video_files:
+    #             numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
+    #             response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view."
+    #             if update.callback_query:
+    #                 await update.callback_query.message.reply_text(response_text)
+    #             else:
+    #                 await update.message.reply_text(response_text)
+
+    #             context.user_data['awaiting_filename'] = True
+    #             context.user_data['video_files'] = video_files
+    #         else:
+    #             await update.callback_query.message.reply_text(
+    #                 "No recordings found in the database."
+    #             )
+    #     else:
+    #         await update.message.reply_text("🚫 You are not authorized to access video recordings. Please subscribe first.")
         
     async def list_recordings(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # Determine the chat ID based on whether the function was triggered by a message or a callback query
-        chat_id = None
-        if update.message:
-            chat_id = str(update.message.chat_id)
-        elif update.callback_query:
-            chat_id = str(update.callback_query.message.chat_id)
+        chat_id = str(update.message.chat_id)
         
-        if chat_id:
-            # Check if the chat_id is subscribed to any channel
-            subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
-            if subscription_code:
-                # Construct the path to the subscription's video folder
-                video_folder = os.path.join(os.path.dirname(__file__), f'../static/videos/{subscription_code}')
-                
-                if os.path.exists(video_folder):
-                    video_files = os.listdir(video_folder)
-                    if video_files:
-                        numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
-                        response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view."
+        # Check if the chat_id is subscribed to any channel
+        subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
+        if subscription_code:
+            # Construct the path to the subscription's video folder
+            video_folder = os.path.join(os.path.dirname(__file__), f'../static/videos/{subscription_code}')
+            
+            if os.path.exists(video_folder):
+                video_files = os.listdir(video_folder)
+                if video_files:
+                    numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
+                    response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view."
 
-                        if update.callback_query:
-                            await update.callback_query.message.reply_text(response_text)
-                        else:
-                            await update.message.reply_text(response_text)
-
-                        context.user_data['awaiting_filename'] = True
-                        context.user_data['video_files'] = video_files
-                        context.user_data['video_folder'] = video_folder  # Store the video folder in context
-                    else:
-                        if update.callback_query:
-                            await update.callback_query.message.reply_text("🚫 No recordings found in the database.")
-                        else:
-                            await update.message.reply_text("🚫 No recordings found in the database.")
-                else:
                     if update.callback_query:
-                        await update.callback_query.message.reply_text(f"🚫 No recordings found for subscription code '{subscription_code}'.")
+                        await update.callback_query.message.reply_text(response_text)
                     else:
-                        await update.message.reply_text(f"🚫 No recordings found for subscription code '{subscription_code}'.")
-            else:
-                if update.callback_query:
-                    await update.callback_query.message.reply_text("🚫 You are not authorized to access video recordings. Please subscribe first.")
-                else:
-                    await update.message.reply_text("🚫 You are not authorized to access video recordings. Please subscribe first.")
-        else:
-            if update.callback_query:
-                await update.callback_query.message.reply_text("🚫 Unable to determine the chat ID. Please try again.")
-            else:
-                await update.message.reply_text("🚫 Unable to determine the chat ID. Please try again.")
+                        await update.message.reply_text(response_text)
 
-    async def get_livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # Determine the chat ID based on whether the function was triggered by a message or a callback query
-        chat_id = None
-        if update.message:
-            chat_id = str(update.message.chat_id)
-        elif update.callback_query:
-            chat_id = str(update.callback_query.message.chat_id)
-        
-        if chat_id:
-            # Check if the chat_id is subscribed to any channel
-            subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
-            if subscription_code:
-                link = self.subscription_manager.get_livefeed(subscription_code)
-                response_text = f"Here is the link to the live feed: \n📍{link}",
-                if update.callback_query:
-                    await update.callback_query.message.reply_text(response_text)
+                    context.user_data['awaiting_filename'] = True
+                    context.user_data['video_files'] = video_files
+                    context.user_data['video_folder'] = video_folder  # Store the video folder in context
                 else:
-                    await update.message.reply_text(response_text)
+                    await update.message.reply_text("🚫No recordings found in the database.")
+            else:
+                await update.message.reply_text(f"🚫No recordings found for subscription code '{subscription_code}'.")
+        else:
+            await update.message.reply_text("🚫 You are not authorized to access video recordings. Please subscribe first.")
+
+
 
         
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -166,8 +153,7 @@ class BotHandler:
             await self.handle_admin_action(update, context, text)
         elif context.user_data.get('awaiting_new_subscription_code') or \
             context.user_data.get('awaiting_deletion_subscription_code') or \
-            context.user_data.get('awaiting_deletion_chat_id') or\
-            context.user_data.get('awaiting_add_livefeed'):
+            context.user_data.get('awaiting_deletion_chat_id'):
             await self.handle_admin_input(update, context, text)
         else:
             await self.start(update, context)
@@ -203,12 +189,13 @@ class BotHandler:
             await update.message.reply_text("🚫 Invalid input. Please send the number associated with the filename.")
         context.user_data['awaiting_filename'] = False
 
-    # ============================ Admin =====================================
     async def admin_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
-            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs\n5. View all subscription codes \n6. Add Live Feed\n\nPlease select an action by typing the number."
+            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs \n5. View all subscription codes\n\nPlease select an action by typing the number."
         )
         context.user_data['awaiting_admin_action'] = True
+
+
 
 
     async def handle_admin_action(self, update: Update, context: ContextTypes.DEFAULT_TYPE, action: str):
@@ -242,10 +229,6 @@ class BotHandler:
             else:
                 await update.message.reply_text("🚫 No Subscription Codes found. Returning to admin menu.")
                 await self.admin_menu(update, context)
-        if action == '6':
-            await update.message.reply_text("Please enter the livefeed subscription code to add the livefeed:")
-            context.user_data['awaiting_add_livefeed'] = True
-            context.user_data['awaiting_admin_action'] = False
         else:
             await update.message.reply_text("🚫 Invalid selection. Returning to admin menu.")
             await self.admin_menu(update, context)
@@ -278,36 +261,11 @@ class BotHandler:
                 await update.message.reply_text(f"🚫 Invalid Chat ID. Returning to admin menu.")
                 await self.admin_menu(update, context)
             context.user_data['awaiting_deletion_chat_id'] = False
-        elif context.user_data.get('awaiting_add_livefeed'):
-            context.user_data['awaiting_add_livefeed'] = False
-            if self.subscription_manager.verify_subscription_code(text):
-                await update.message.reply_text("🎊 Subscription code verified. \nPlease enter the live feed link to add.")
-                # await self.add_livefeed(update, context, text)
-                self.subscription = text
-                context.user_data['awaiting_new_livefeed'] = True
-            else:
-                await update.message.reply_text("🚫 Sorry, invalid subscription code.")
-        elif context.user_data.get('awaiting_new_livefeed'):
-            text = update.message.text
-            if self.subscription_manager.add_livefeed(self.subscription_code, text):
-                await update.message.reply_text("Live feed link added successfully.")
-                await self.admin_menu(update, context)
-                context.user_data['awaiting_new_livefeed'] = False
-
-            
-    # async def add_livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE, subscription_code:str):
-    #     context.user_data['awaiting_new_livefeed'] = True
-    #     if context.user_data.get('awaiting_new_livefeed'):
-    #         text = update.message.text
-    #         if self.subscription_manager.add_livefeed(self.subscription_code, text):
-    #             await update.message.reply_text("Live feed link added successfully.")
-    #             await self.admin_menu(update, context)
-    #             context.user_data['awaiting_new_livefeed'] = False
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)
         if self.subscription_manager.verify_chat_id(chat_id):
-            await self.get_livefeed(update, context)
+            await update.message.reply_text(f"Here is the link to the live feed: \n📍{self.livefeed_link}")
         else:
             await update.message.reply_text("🚫 You are not authorized to access the live feed. Please subscribe first.")
     
