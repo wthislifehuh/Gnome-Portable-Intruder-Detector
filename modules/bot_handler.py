@@ -55,17 +55,18 @@ class BotHandler:
             await query.edit_message_text(text=f"Selected option: {query.data}")
 
     async def list_recordings(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # List all video files in the directory
+        # List all video files in the directory with numbers
         video_files = os.listdir(self.video_folder)
         if video_files:
-            file_list = "\n".join(video_files)
+            numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
             await update.callback_query.message.reply_text(
-                f"📁 Available Recordings:\n{file_list}\n\nPlease send the filename you want to view."
+                f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view.\n\n📍Please note that the file name is in this format: date|time = yymmddhhmmss.mp4"
             )
             context.user_data['awaiting_filename'] = True
+            context.user_data['video_files'] = video_files
         else:
             await update.callback_query.message.reply_text(
-                "No recordings found in the database."
+                "📵 No recordings found in the database."
             )
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -89,7 +90,7 @@ class BotHandler:
                 )
         elif context.user_data.get('awaiting_chat_id'):
             if self.subscription_manager.verify_chat_id(text):
-                await update.message.reply_text("You are already subscribed and can access our services.")
+                await update.message.reply_text("You are already subscribed and can access our services.🚨")
             else:
                 self.subscription_manager.add_chat_id(context.user_data['subscription_code'], text)
                 await update.message.reply_text("🎊 Chat ID added successfully! \nYou now have access to our services. 🚨 Notifications will be automatically sent to your account when intruders are detected.")
@@ -112,14 +113,19 @@ class BotHandler:
             # Fallback to /start if the message is not recognized
             await self.start(update, context)
 
-    async def handle_filename_selection(self, update: Update, context: ContextTypes.DEFAULT_TYPE, filename: str):
-        # Check if the filename exists in the video folder
-        if filename in os.listdir(self.video_folder):
-            video_path = os.path.join(self.video_folder, filename)
-            await update.message.reply_text(f"📹 Sending video: {filename}")
-            await update.message.reply_video(video=open(video_path, 'rb'))
-        else:
-            await update.message.reply_text("🚫 Sorry, file does not exist in the database. Please send the correct filename to be viewed.")
+    async def handle_filename_selection(self, update: Update, context: ContextTypes.DEFAULT_TYPE, selection: str):
+        try:
+            file_index = int(selection) - 1
+            video_files = context.user_data.get('video_files', [])
+            if 0 <= file_index < len(video_files):
+                filename = video_files[file_index]
+                video_path = os.path.join(self.video_folder, filename)
+                await update.message.reply_text(f"📹 Sending video: {filename}")
+                await update.message.reply_video(video=open(video_path, 'rb'))
+            else:
+                await update.message.reply_text("🚫 Invalid selection. Please send the correct number associated with the filename.")
+        except ValueError:
+            await update.message.reply_text("🚫 Invalid input. Please send the number associated with the filename.")
         context.user_data['awaiting_filename'] = False
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
