@@ -3,7 +3,7 @@ import asyncio
 from notifier import TelegramNotifier
 from bot_handler import BotHandler
 from database import initialize_database, SubscriptionManager
-from repellent import AlarmTrigger
+from alarm import AlarmTrigger
 
 
 class NotificationAlarmHandler:
