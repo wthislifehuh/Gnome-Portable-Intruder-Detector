@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from camera_v2 import Camera
+from modules.camera import Camera
 import os
 from threading import Thread
 

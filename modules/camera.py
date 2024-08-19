@@ -1,26 +1,63 @@
 import cv2
-import os
-from flask import Response
+from flask import Response, stream_with_context
 from event_detector import EventDetector
 from object_detector import ObjectDetector
+import time
+import os
+import asyncio
+from noti_alarm_handler import NotificationAlarmHandler
 
 
 class Camera:
     def __init__(self, camera_index):
         self.camera_index = camera_index
+        self.cap = None
         self.event_detector = EventDetector()
-        self.object_detector = ObjectDetector()  # Initialize the ObjectDetector
+        self.object_detector = ObjectDetector()
+        self.notification_alarm_handler = NotificationAlarmHandler()
         self.is_recording = False
         self.out = None
 
+
     def start_camera(self):
-        camera = cv2.VideoCapture(self.camera_index)
-        line_position = 200  # Vertical line position (x-coordinate)
+        self.cap = cv2.VideoCapture(self.camera_index)
+        if not self.cap.isOpened():
+            print("Error: Could not open camera.")
+            return False
+        return self.cap
+
+    def stop_camera(self):
+        if self.cap:
+            self.cap.release()
+            cv2.destroyAllWindows()
+
+    def process_video(
+        self,
+        frame_skip=5,
+        notification_cooldown=10,
+        intruder_debounce_threshold=3,
+        animal_debounce_threshold=3,
+    ):
+        line_position = 200
+        frame_count = 0
+        person_last_notification_time = 0
+        animal_last_notification_time = 0
+        intruder_counter = 0
+        animal_counter = 0
 
         while True:
-            success, frame = camera.read()
-            if not success:
+            ret, frame = self.cap.read()
+            if not ret:
                 break
+
+            # Increment the frame count
+            frame_count += 1
+
+            # Skip frames based on the frame_skip parameter
+            if frame_count % frame_skip != 0:
+                continue
+
+            # ---------------------------------------- Frame analysis starts here ----------------------------------------
 
             # Draw the vertical line to separate inside and outside areas
             cv2.line(
@@ -34,68 +71,112 @@ class Camera:
             # Define the region of interest (ROI) to the right of the vertical line
             roi = frame[:, line_position:]
 
-            # Analyze the frame for events within the ROI
             fg_mask, is_event = self.event_detector.analyze_frame(roi)
 
             if is_event:
-                # TODO: NEED to apply this 2 lines of code to if intruder is detected
-                if not self.is_recording:
-                    self.start_recording(camera)
-
                 print("Event Detected in ROI")
+                result = self.object_detector.analyze_object(roi)
+                print(result)
 
-                # Invoke object detection module here
-                self.object_detector.display_detections(roi)
+                if result["is_intruder"]:  # If intruder is detected
+                    intruder_counter += 1  # Update intruder counter
+
+                    if (
+                        intruder_counter >= intruder_debounce_threshold
+                    ):  # Confirm that an intruder is detected
+
+                        current_time = time.time()
+
+                        if (
+                            current_time - person_last_notification_time
+                            > notification_cooldown
+                        ):  # Make sure that the notification is sent only after certain threshold
+                            # Trigger notification module here!!!
+                            asyncio.run(self.notification_alarm_handler.human_trigger())
+
+                            # Trigger video recording
+                            if not self.is_recording:
+                                self.start_recording(self.cap)
+                            person_last_notification_time = current_time
+
+                if result["is_animal"]:  # If animal is detected
+                    animal_counter += 1  # Update animal counter
+
+                    if (
+                        animal_counter >= animal_debounce_threshold
+                    ):  # Confirm that animal is detected
+
+                        current_time = time.time()
+
+                        if (
+                            current_time - animal_last_notification_time
+                            > notification_cooldown
+                        ):  # Make sure that the notification is sent only after certain threshold
+                            # Trigger notification module here!!!
+                            asyncio.run(self.notification_alarm_handler.animal_trigger(result))
+                            print(result["animal"])
+                            print("Trigger animal notification")
+                            animal_last_notification_time = current_time
+
+                # Continuously write frames to the video file while recording
+                if self.is_recording and self.out:
+                    self.out.write(frame)
+
             else:
-                # TODO: NEED to apply this 2 lines of code to if intruder is NOT detected
+                intruder_counter = 0
+                animal_counter = 0
                 if self.is_recording:
                     self.stop_recording()
-
                 print("No Event Detected in ROI")
 
-            # Encode the frame in JPEG format
-            ret, buffer = cv2.imencode(".jpg", frame)
-            frame = buffer.tobytes()
+            # Display the current frame
+            cv2.imshow("Camera Feed", frame)
 
-            # Yield the frame as a byte array
-            yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
-
-            # Break loop on 'q' key press (optional for debugging purposes)
+            # Check for user input to exit
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-        camera.release()
-        if self.out:
-            self.out.release()
-        cv2.destroyAllWindows()
-
     def start_recording(self, cap, output_filename="output.mp4"):
         # Define the path where the video will be saved
-        output_dir = os.path.join(os.getcwd(), 'assets', 'videos')
+        output_dir = os.path.join(os.getcwd(), "assets", "videos")
         os.makedirs(output_dir, exist_ok=True)
         output_filepath = os.path.join(output_dir, output_filename)
-        
+
         # Define the codec and create a VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for .mp4 files
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Codec for .mp4 files
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
-        self.out = cv2.VideoWriter(output_filepath, fourcc, 20.0, (frame_width, frame_height))
+        self.out = cv2.VideoWriter(
+            output_filepath, fourcc, 20.0, (frame_width, frame_height)
+        )
         self.is_recording = True
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-        if ret:
-            # Write the frame to the file
-            self.out.write(frame)
         print("Recording started...")
 
     def stop_recording(self):
-        self.is_recording = False
-        if self.out:
-            self.out.release()
-            self.out = None
-        print("Recording stopped.")
+        if self.is_recording:
+            self.is_recording = False
+            if self.out:
+                self.out.release()
+                self.out = None
+            print("Recording stopped.")
+
+    def generate_frame(self):
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                break
+
+            # Encode the frame to JPEG format
+            ret, buffer = cv2.imencode(".jpg", frame)
+            processed_frame = buffer.tobytes()
+
+            # Yield the frame as a byte array
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + processed_frame + b"\r\n"
+            )
 
     def stream_video(self):
         return Response(
-            self.start_camera(), mimetype="multipart/x-mixed-replace; boundary=frame"
+            self.generate_frame(), mimetype="multipart/x-mixed-replace; boundary=frame"
         )

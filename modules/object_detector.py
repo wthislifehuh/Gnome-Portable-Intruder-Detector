@@ -3,7 +3,6 @@ import cv2
 from deepface import DeepFace
 import os
 import re
-import logging
 
 
 class ObjectDetector:
