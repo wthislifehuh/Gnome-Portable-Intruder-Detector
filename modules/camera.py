@@ -10,7 +10,8 @@ from datetime import datetime
 
 
 class Camera:
-    def __init__(self, camera_index):
+    def __init__(self, channel, camera_index):
+        self.channel = channel
         self.camera_index = camera_index
         self.cap = None
         self.event_detector = EventDetector()
@@ -97,7 +98,7 @@ class Camera:
 
                             # Trigger video recording
                             if not self.is_recording:
-                                self.start_recording(self.cap)
+                                self.start_recording(self.cap, self.channel)
                             person_last_notification_time = current_time
 
                 if result["is_animal"]:  # If animal is detected
@@ -137,9 +138,9 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    def start_recording(self, cap):
+    def start_recording(self, cap, channel = "030326"):
         # Define the path where the video will be saved
-        output_dir = os.path.join(os.getcwd(), "static", "videos")
+        output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
         os.makedirs(output_dir, exist_ok=True)
         current_datetime = datetime.now()
         # Format the datetime as yymmddhhmmss
