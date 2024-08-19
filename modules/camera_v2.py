@@ -4,6 +4,8 @@ from event_detector import EventDetector
 from object_detector import ObjectDetector
 import time
 import os
+import asyncio
+from noti_alarm_handler import NotificationAlarmHandler
 
 
 class Camera:
@@ -12,8 +14,10 @@ class Camera:
         self.cap = None
         self.event_detector = EventDetector()
         self.object_detector = ObjectDetector()
+        self.notification_alarm_handler = NotificationAlarmHandler()
         self.is_recording = False
         self.out = None
+
 
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
@@ -88,7 +92,7 @@ class Camera:
                             > notification_cooldown
                         ):  # Make sure that the notification is sent only after certain threshold
                             # Trigger notification module here!!!
-                            print("Trigger intruder notification")
+                            asyncio.run(self.notification_alarm_handler.human_trigger())
 
                             # Trigger video recording
                             if not self.is_recording:
@@ -109,6 +113,7 @@ class Camera:
                             > notification_cooldown
                         ):  # Make sure that the notification is sent only after certain threshold
                             # Trigger notification module here!!!
+                            asyncio.run(self.notification_alarm_handler.animal_trigger(result))
                             print(result["animal"])
                             print("Trigger animal notification")
                             animal_last_notification_time = current_time

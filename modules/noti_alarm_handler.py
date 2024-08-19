@@ -12,25 +12,38 @@ class NotificationAlarmHandler:
         self.alarm = AlarmTrigger()
         self.notifier = TelegramNotifier(self.subscription)
 
-    async def send_notification_and_trigger_alarm(self, detection_result):
-        if detection_result['is_intruder']:
+        
+    async def human_trigger(self):
+        self.notifier.send_notification("human")
+        self.alarm.trigger_alarm("human")
+
+    async def animal_trigger(self, detection_result):
+        if len(detection_result['animal_array']) > 1:
+            # Multiple animals, trigger human alarm
             self.notifier.send_notification("human")
             self.alarm.trigger_alarm("human")
-        elif detection_result['is_animal']:
-            if len(detection_result['animal_array']) > 1:
-                # Multiple animals, trigger human alarm
-                self.notifier.send_notification("human")
-                self.alarm.trigger_alarm("human")
-            else:
-                # Single animal, trigger specific alarm
-                animal_type = detection_result['animal_array'][0]
-                self.notifier.send_notification(animal_type)
-                self.alarm.trigger_alarm(animal_type)
         else:
-             print("Nothing to trigger")
+            # Single animal, trigger specific alarm
+            animal_type = detection_result['animal_array'][0]
+            self.notifier.send_notification(animal_type)
+            self.alarm.trigger_alarm(animal_type)
 
-    async def external_trigger_monitor(self, result):
-            self.send_notification_and_trigger_alarm(result)
+    # async def send_notification_and_trigger_alarm(self):
+    #     if detection_result['is_intruder']:
+    #         self.notifier.send_notification("human")
+    #         self.alarm.trigger_alarm("human")
+    #     elif detection_result['is_animal']:
+    #         if len(detection_result['animal_array']) > 1:
+    #             # Multiple animals, trigger human alarm
+    #             self.notifier.send_notification("human")
+    #             self.alarm.trigger_alarm("human")
+    #         else:
+    #             # Single animal, trigger specific alarm
+    #             animal_type = detection_result['animal_array'][0]
+    #             self.notifier.send_notification(animal_type)
+    #             self.alarm.trigger_alarm(animal_type)
+    #     else:
+    #          print("Nothing to trigger")
 
 
 
