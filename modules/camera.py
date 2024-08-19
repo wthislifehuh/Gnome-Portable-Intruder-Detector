@@ -5,7 +5,7 @@ from object_detector import ObjectDetector
 import time
 import os
 import asyncio
-from modules.notification_alarm_handler import NotificationAlarmHandler
+from notification_alarm_handler import NotificationAlarmHandler
 from datetime import datetime
 
 
