@@ -37,7 +37,7 @@ class TelegramNotifier:
 
         button_list = [
             [{"text": "Live Feeds", "callback_data": 'live_feed'}],
-            [{"text": "Intruders Recording", "callback_data": 'send_video'}]
+            [{"text": "Intruders Recording", "callback_data": 'recordings'}]
         ]
         reply_markup = {"inline_keyboard": button_list}
 
