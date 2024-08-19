@@ -11,9 +11,9 @@ app = Flask(
     static_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),
 )
 
-
+channel = "030326"
 # Initialize the Camera object
-camera = Camera(camera_index=0)
+camera = Camera(channel, camera_index=0)
 cap = camera.start_camera()
 
 # Start the video processing in a separate thread
