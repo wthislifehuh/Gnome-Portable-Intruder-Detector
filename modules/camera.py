@@ -6,6 +6,7 @@ import time
 import os
 import asyncio
 from noti_alarm_handler import NotificationAlarmHandler
+from datetime import datetime
 
 
 class Camera:
@@ -136,10 +137,15 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    def start_recording(self, cap, output_filename="output.mp4"):
+    def start_recording(self, cap):
         # Define the path where the video will be saved
         output_dir = os.path.join(os.getcwd(), "static", "videos")
         os.makedirs(output_dir, exist_ok=True)
+        # Get the current date and time
+        current_datetime = datetime.now()
+        # Format the datetime as yymmddhhmmss
+        formatted_datetime = current_datetime.strftime('%y%m%d%H%M%S')
+        output_filename = formatted_datetime +".mp4"
         output_filepath = os.path.join(output_dir, output_filename)
 
         # Define the codec and create a VideoWriter object
