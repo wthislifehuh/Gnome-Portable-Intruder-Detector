@@ -3,6 +3,7 @@ from flask import Response, stream_with_context
 from event_detector import EventDetector
 from object_detector import ObjectDetector
 import time
+import os
 
 
 class Camera:
@@ -11,6 +12,8 @@ class Camera:
         self.cap = None
         self.event_detector = EventDetector()
         self.object_detector = ObjectDetector()
+        self.is_recording = False
+        self.out = None
 
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
@@ -24,9 +27,19 @@ class Camera:
             self.cap.release()
             cv2.destroyAllWindows()
 
-    def process_video(self, frame_skip=5):
+    def process_video(
+        self,
+        frame_skip=5,
+        notification_cooldown=10,
+        intruder_debounce_threshold=3,
+        animal_debounce_threshold=3,
+    ):
         line_position = 200
         frame_count = 0
+        person_last_notification_time = 0
+        animal_last_notification_time = 0
+        intruder_counter = 0
+        animal_counter = 0
 
         while True:
             ret, frame = self.cap.read()
@@ -76,6 +89,10 @@ class Camera:
                         ):  # Make sure that the notification is sent only after certain threshold
                             # Trigger notification module here!!!
                             print("Trigger intruder notification")
+
+                            # Trigger video recording
+                            if not self.is_recording:
+                                self.start_recording(self.cap)
                             person_last_notification_time = current_time
 
                 if result["is_animal"]:  # If animal is detected
@@ -95,6 +112,10 @@ class Camera:
                             print(result["animal"])
                             print("Trigger animal notification")
                             animal_last_notification_time = current_time
+
+                # Continuously write frames to the video file while recording
+                if self.is_recording and self.out:
+                    self.out.write(frame)
 
             else:
                 intruder_counter = 0
