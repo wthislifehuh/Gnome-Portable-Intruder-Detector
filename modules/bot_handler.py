@@ -64,7 +64,7 @@ class BotHandler:
             context.user_data['awaiting_subscription_code'] = False
 
             if self.subscription_manager.verify_subscription_code(text):
-                await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \nNOTE: You can visit BOT 'RawDataBot' and send any message to it to obtain your chat_id.")
+                await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \nNOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
                 context.user_data['awaiting_chat_id'] = True
             else:
                 await update.message.reply_text(
