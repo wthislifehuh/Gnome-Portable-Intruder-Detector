@@ -19,7 +19,7 @@ class NotificationAlarmHandler:
 
     async def animal_trigger(self, detection_result):
         if len(detection_result['animal_array']) > 1:
-            # Multiple animals, trigger human alarm
+            # Multiple animals, trigger common alarm
             self.notifier.send_notification("human")
             self.alarm.trigger_alarm("human")
         else:
