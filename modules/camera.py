@@ -138,7 +138,7 @@ class Camera:
 
     def start_recording(self, cap, output_filename="output.mp4"):
         # Define the path where the video will be saved
-        output_dir = os.path.join(os.getcwd(), "assets", "videos")
+        output_dir = os.path.join(os.getcwd(), "static", "videos")
         os.makedirs(output_dir, exist_ok=True)
         output_filepath = os.path.join(output_dir, output_filename)
 
