@@ -1,17 +1,10 @@
-# Using Method 3
+# Using Method 2
 import requests
 
 class AlarmTrigger:
     def __init__(self):
         # Initialize the session object when the class is instantiated
         self.session = requests.Session()
-
-    def pre_warm_connection(self):
-        """
-        Pre-warm the connection to reduce latency on the first request.
-        This method can be called ahead of time to speed up subsequent requests.
-        """
-        self.session.get("https://app.vybit.net/trigger/pre-warm")
 
     def trigger_alarm(self, event):
         """
@@ -34,13 +27,10 @@ class AlarmTrigger:
 
 
 # Usage
-alarm = AlarmTrigger()
+# alarm = AlarmTrigger()
 
-# Pre-warm the connection (ideally do this in advance)
-alarm.pre_warm_connection()
-
-# Trigger the alarm
-alarm.trigger_alarm("human")
+# # Trigger the alarm
+# alarm.trigger_alarm("human")
 
 
 # Method 1: 4sec to respond   ===============================================================

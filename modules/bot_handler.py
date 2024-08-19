@@ -3,6 +3,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 from notifier import TelegramNotifier
 from database import initialize_database, SubscriptionManager
 import os
+import asyncio
 
 class BotHandler:
     def __init__(self, notifier: TelegramNotifier):
@@ -125,9 +126,17 @@ class BotHandler:
         self.application.add_handler(CommandHandler('livefeed', self.livefeed))
         self.application.add_handler(CommandHandler('subscription', self.subscription))
         self.application.add_handler(CommandHandler('info', self.info))
-        self.application.add_handler(CallbackQueryHandler(self.button))  # Ensure this is correct
+        self.application.add_handler(CallbackQueryHandler(self.button)) 
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
         await self.application.initialize()  # Ensure the application is initialized
         await self.application.start()  # Start the application
         await self.application.updater.start_polling()  # Start polling
+        print("Bot is running and waiting for user requests...")
+        try:
+            while True:
+                await asyncio.sleep(5)  # Sleep in small increments to keep the loop alive
+        except asyncio.CancelledError:
+            # If the loop is cancelled, perform cleanup if necessary
+            print("Bot is shutting down...")
+            await self.application.stop()
