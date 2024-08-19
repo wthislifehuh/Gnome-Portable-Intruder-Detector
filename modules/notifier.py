@@ -32,6 +32,9 @@ class TelegramNotifier:
         return response
 
     def send_notification(self, status: str):
+        # Capitalize the first letter of the status
+        status = status.capitalize()
+
         button_list = [
             [{"text": "Live Feeds", "callback_data": 'live_feed'}],
             [{"text": "Intruders Recording", "callback_data": 'send_video'}]
@@ -41,12 +44,12 @@ class TelegramNotifier:
         chat_ids = self.subscription_manager.get_all_chat_ids()
 
         for chat_id in chat_ids:
-            if status == "human" or status == "dog":
-                status.capitalize()
+            if status == "Human" or status == "Dog":
                 self.send_message(chat_id, f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:", reply_markup=reply_markup)
-            elif status == "low battery":
+            elif status == "Low battery":
                 self.send_message(chat_id, "⚠️ WARNING: Mobile battery Low! Check the condition of your device.")
-            elif status == "trigger":
+            elif status == "Trigger":
                 self.send_message(chat_id, "🚨 Alert! An event has been detected in the ROI!", reply_markup=reply_markup)
-            elif status == "warning":
+            elif status == "Warning":
                 self.send_message(chat_id, "⚠️ WARNING: Unspecified alert!")
+
