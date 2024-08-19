@@ -17,7 +17,8 @@ class BotHandler:
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         button_list = [
             [InlineKeyboardButton("Subscription", callback_data='subscription')],
-            [InlineKeyboardButton("Information", callback_data='info')]
+            [InlineKeyboardButton("Information", callback_data='info')],
+            [InlineKeyboardButton("Emergency", callback_data='emergency')],
         ]
 
         reply_markup = InlineKeyboardMarkup(button_list)
@@ -39,18 +40,21 @@ class BotHandler:
                 f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}",
             )
         elif query.data == 'send_video':
-            # Send the video file to the user
             video_path = os.path.join(os.path.dirname(__file__), '../static/videos/030326.mp4')
-            await query.message.reply_video(video=open(video_path, 'rb'))
             #TODO: replace time with systme recording time
             await query.message.reply_text(
-                f"👆🏻 Here is the latest video recording of the intruders at TIME",
+                f"👇🏻 Here is the latest video recording of the intruders at TIME",
             )
+            await query.message.reply_video(video=open(video_path, 'rb'))
+            
         elif query.data == 'live_feed':
-            # Reply with the live feed link
             await query.message.reply_text(
                 f"Here is the link to the live feed: \n📍{self.livefeed_link}",
             )
+        elif query.data == 'emergency':
+            await query.message.reply_text(
+                f"Here are some emergency contacts in Kampar: \n\n📞 General: 999\n📞 Bomba Kampar: 054664444\n📞 Hospital Kampar: 05465333\n📞 Police Kampar: 054652222"
+                )
         else:
             await query.edit_message_text(text=f"Selected option: {query.data}")
         
@@ -107,6 +111,9 @@ class BotHandler:
     async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}",)
     
+    async def emergency(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text(f"Here are some emergency contacts in Kampar: \n\n📞General: 999\n📞Bomba Kampar: 054664444\n📞Hospital Kampar: 05465333\n📞Police Kampar: 054652222")
+
     async def prompt_subscription(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Prompt the user to enter their subscription code."""
         await update.message.reply_text("Please enter your subscription code:")
@@ -125,6 +132,7 @@ class BotHandler:
         self.application.add_handler(CommandHandler('admin', self.admin))
         self.application.add_handler(CommandHandler('livefeed', self.livefeed))
         self.application.add_handler(CommandHandler('subscription', self.subscription))
+        self.application.add_handler(CommandHandler('emergency', self.emergency))
         self.application.add_handler(CommandHandler('info', self.info))
         self.application.add_handler(CallbackQueryHandler(self.button)) 
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
