@@ -1,4 +1,3 @@
-# database.py
 import sqlite3
 
 DB_PATH = 'subscriptions.db'
@@ -7,13 +6,23 @@ def initialize_database():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Create subscriptions table
+    # Create subscriptions table with livefeed column
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS subscriptions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        subscription_code TEXT UNIQUE NOT NULL
+        subscription_code TEXT UNIQUE NOT NULL,
+        livefeed TEXT
     )
     ''')
+
+    # Add the livefeed column if it doesn't exist
+    cursor.execute('''
+    PRAGMA table_info(subscriptions)
+    ''')
+    columns = [info[1] for info in cursor.fetchall()]
+    if 'livefeed' not in columns:
+        cursor.execute('ALTER TABLE subscriptions ADD COLUMN livefeed TEXT')
+        conn.commit()
 
     # Create chat_ids table
     cursor.execute('''
@@ -28,6 +37,7 @@ def initialize_database():
     conn.commit()
     conn.close()
 
+
 class SubscriptionManager:
     def __init__(self, db_path=DB_PATH):
         self.db_path = db_path
@@ -37,6 +47,15 @@ class SubscriptionManager:
         cursor = conn.cursor()
         cursor.execute('''
         INSERT OR IGNORE INTO subscriptions (subscription_code) VALUES (?)
+        ''', (subscription_code,))
+        conn.commit()
+        conn.close()
+
+    def delete_subscription(self, subscription_code):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+        DELETE FROM subscriptions WHERE subscription_code = ?
         ''', (subscription_code,))
         conn.commit()
         conn.close()
@@ -58,6 +77,16 @@ class SubscriptionManager:
         else:
             print(f"Subscription code {subscription_code} does not exist.")
         
+        conn.close()
+
+    def delete_chat_id(self, chat_id):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+        DELETE FROM chat_ids WHERE chat_id = ?
+        ''', (chat_id,))
+        conn.commit()
         conn.close()
 
     def verify_subscription_code(self, subscription_code):
@@ -87,6 +116,51 @@ class SubscriptionManager:
         chat_ids = cursor.fetchall()
         conn.close()
         return [chat_id for (chat_id,) in chat_ids]
+    
+    def get_all_subscription_ids(self):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT subscription_code FROM subscriptions")
+        subscriptions = cursor.fetchall()
+        conn.close()
+        return [subscription_code for (subscription_code,) in subscriptions]
+    
+    def get_subscription_code_by_chat_id(self, chat_id):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT s.subscription_code FROM subscriptions s
+        JOIN chat_ids c ON s.id = c.subscription_id
+        WHERE c.chat_id = ?
+        ''', (chat_id,))
+        result = cursor.fetchone()
+        conn.close()
+        return result[0] if result else None
 
+    def add_livefeed(self, subscription_code, livefeed_url):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+        UPDATE subscriptions SET livefeed = ? WHERE subscription_code = ?
+        ''', (livefeed_url, subscription_code))
+        conn.commit()
+        conn.close()
 
-# To delete a chat_id : DELETE FROM chat_ids WHERE chat_id = '11169431';
+    # def delete_livefeed(self, subscription_code):
+    #     conn = sqlite3.connect(self.db_path)
+    #     cursor = conn.cursor()
+    #     cursor.execute('''
+    #     UPDATE subscriptions SET livefeed = NULL WHERE subscription_code = ?
+    #     ''', (subscription_code,))
+    #     conn.commit()
+    #     conn.close()
+
+    def get_livefeed(self, subscription_code):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT livefeed FROM subscriptions WHERE subscription_code = ?
+        ''', (subscription_code,))
+        result = cursor.fetchone()
+        conn.close()
+        return result[0] if result else None

@@ -36,8 +36,9 @@ class TelegramNotifier:
         status = status.capitalize()
 
         button_list = [
-            [{"text": "Live Feeds", "callback_data": 'live_feed'}],
-            [{"text": "Intruders Recording", "callback_data": 'recordings'}]
+            [{"text": "📺 Live Feeds", "callback_data": 'live_feed'}],
+            [{"text": "📽️ Intruders Recording", "callback_data": 'recordings'}],
+            [{"text": "📞 Emergency Contact", "callback_data": 'emergency'}],
         ]
         reply_markup = {"inline_keyboard": button_list}
 
