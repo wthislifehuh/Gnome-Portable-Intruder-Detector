@@ -241,7 +241,7 @@ class BotHandler:
 
     async def admin_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
-            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs \n5. View all subscription codes\n6. Update livefeed link\n\nPlease select an action by typing the number."
+            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs \n5. View all subscription codes\n6. Update livefeed link\n7. View all Subscriptions Info\n\nPlease select an action by typing the number."
         )
         context.user_data['awaiting_admin_action'] = True
 
@@ -281,6 +281,14 @@ class BotHandler:
             await update.message.reply_text("Please enter the subscription code and link to update. \n\nFollow this format: subscription_code <space> link")
             context.user_data['awaiting_update_livefeed'] = True
             context.user_data['awaiting_admin_action'] = False
+        elif action == '7':
+            infolist = self.subscription_manager.get_all()
+            if infolist:
+                await update.message.reply_text(f"📃 Subscriptions Info:\n\n{infolist}")
+                await self.admin_menu(update, context)
+            else:
+                await update.message.reply_text("🚫 No info found. Returning to admin menu.")
+                await self.admin_menu(update, context)
         else:
             await update.message.reply_text("🚫 Invalid selection. Returning to admin menu.")
             await self.admin_menu(update, context)
@@ -329,7 +337,7 @@ class BotHandler:
             else:
                 await update.message.reply_text(f"🚫 Invalid input format. Returning to admin menu.")
                 await self.admin_menu(update, context)
-            context.user_data.get('awaiting_update_livefeed') = False
+            context.user_data['awaiting_update_livefeed'] = False
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)

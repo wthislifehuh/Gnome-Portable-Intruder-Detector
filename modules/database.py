@@ -164,3 +164,34 @@ class SubscriptionManager:
         result = cursor.fetchone()
         conn.close()
         return result[0] if result else None
+
+    def get_all(self):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Get all subscription codes with their live feed links
+        cursor.execute('''
+        SELECT subscription_code, livefeed FROM subscriptions
+        ''')
+        subscriptions = cursor.fetchall()
+
+        result = []
+
+        for idx, (subscription_code, livefeed) in enumerate(subscriptions, start=1):
+            result.append(f"{idx}. {subscription_code} | {livefeed}")
+            
+            # Get all chat IDs associated with this subscription code
+            cursor.execute('''
+            SELECT chat_id FROM chat_ids WHERE subscription_id = (
+                SELECT id FROM subscriptions WHERE subscription_code = ?
+            )
+            ''', (subscription_code,))
+            chat_ids = cursor.fetchall()
+
+            for chat_id in chat_ids:
+                result.append(f"- {chat_id[0]}")
+
+        conn.close()
+
+        # Join all lines into a single string with new lines separating each entry
+        return "\n".join(result)
