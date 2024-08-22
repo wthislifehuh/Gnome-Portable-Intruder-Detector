@@ -4,6 +4,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 from notifier import TelegramNotifier
 from database import initialize_database, SubscriptionManager
 import os
+import re
 import asyncio
 
 class BotHandler:
@@ -138,7 +139,7 @@ class BotHandler:
             subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
             if subscription_code:
                 link = self.subscription_manager.get_livefeed(subscription_code)
-                response_text = f"Here is the link to the live feed: \n📍{link}",
+                response_text = f"Here is the link to the live feed: \n📍{link}"
                 if update.callback_query:
                     await update.callback_query.message.reply_text(response_text)
                 else:
@@ -201,7 +202,8 @@ class BotHandler:
             await self.handle_admin_action(update, context, text)
         elif context.user_data.get('awaiting_new_subscription_code') or \
             context.user_data.get('awaiting_deletion_subscription_code') or \
-            context.user_data.get('awaiting_deletion_chat_id'):
+            context.user_data.get('awaiting_deletion_chat_id') or \
+            context.user_data.get('awaiting_update_livefeed'):
             await self.handle_admin_input(update, context, text)
         else:
             await self.start(update, context)
@@ -239,11 +241,9 @@ class BotHandler:
 
     async def admin_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
-            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs \n5. View all subscription codes\n\nPlease select an action by typing the number."
+            "📋 Admin Menu:\n1. Add Subscription Code\n2. Delete Subscription Code\n3. Delete Chat ID\n4. View all chat IDs \n5. View all subscription codes\n6. Update livefeed link\n\nPlease select an action by typing the number."
         )
         context.user_data['awaiting_admin_action'] = True
-
-
 
 
     async def handle_admin_action(self, update: Update, context: ContextTypes.DEFAULT_TYPE, action: str):
@@ -277,6 +277,10 @@ class BotHandler:
             else:
                 await update.message.reply_text("🚫 No Subscription Codes found. Returning to admin menu.")
                 await self.admin_menu(update, context)
+        elif action == '6':
+            await update.message.reply_text("Please enter the subscription code and link to update. \n\nFollow this format: subscription_code <space> link")
+            context.user_data['awaiting_update_livefeed'] = True
+            context.user_data['awaiting_admin_action'] = False
         else:
             await update.message.reply_text("🚫 Invalid selection. Returning to admin menu.")
             await self.admin_menu(update, context)
@@ -303,12 +307,29 @@ class BotHandler:
         elif context.user_data.get('awaiting_deletion_chat_id'):
             if self.subscription_manager.verify_chat_id(text):
                 self.subscription_manager.delete_chat_id(text)
-                await update.message.reply_text(f"Chat ID '{text}' deleted successfully!")
+                await update.message.reply_text(f"🎊 Chat ID '{text}' deleted successfully!")
                 context.user_data['awaiting_admin_action'] = False
             else:
                 await update.message.reply_text(f"🚫 Invalid Chat ID. Returning to admin menu.")
                 await self.admin_menu(update, context)
             context.user_data['awaiting_deletion_chat_id'] = False
+        elif context.user_data.get('awaiting_update_livefeed'):
+            pattern = r'^(\d{6})\s+(https?://.+)'
+            match = re.match(pattern, text)
+            if match:
+                subscription_code = match.group(1)
+                url = match.group(2)
+                if self.subscription_manager.verify_subscription_code(subscription_code):
+                    self.subscription_manager.add_livefeed(subscription_code, url)
+                    await update.message.reply_text(f"🎊 Livefeed URL '{url}' added in {subscription_code} successfully!")
+                    context.user_data['awaiting_admin_action'] = False
+                else:
+                    await update.message.reply_text(f"🚫 Invalid Subscription code in '{text}'!")
+                    context.user_data['awaiting_admin_action'] = False
+            else:
+                await update.message.reply_text(f"🚫 Invalid input format. Returning to admin menu.")
+                await self.admin_menu(update, context)
+            context.user_data.get('awaiting_update_livefeed') = False
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)
