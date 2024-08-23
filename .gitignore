@@ -168,3 +168,7 @@ cohesive-totem-429413-e3-652ae2430f2e.json
 yolov5s.pt 
 yolov8s.pt
 ds_model_facenet512_detector_opencv_aligned_normalization_base_expand_0.pkl
+
+# Database files
+subscriptions.db
+firebase-adminsdk.json
