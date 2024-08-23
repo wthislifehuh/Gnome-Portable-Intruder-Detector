@@ -2,7 +2,8 @@
 import asyncio
 from notifier import TelegramNotifier
 from bot_handler import BotHandler
-from database import initialize_database, SubscriptionManager
+from database2 import SubscriptionManager
+# , initialize_database
 from alarm import AlarmTrigger
 
 

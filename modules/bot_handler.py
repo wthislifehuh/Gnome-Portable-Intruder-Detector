@@ -2,7 +2,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from notifier import TelegramNotifier
-from database import initialize_database, SubscriptionManager
 import os
 import re
 import asyncio
