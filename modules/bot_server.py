@@ -2,7 +2,7 @@
 import asyncio
 from bot_handler import BotHandler
 from notifier import TelegramNotifier
-from database2 import  SubscriptionManager
+from database3 import  SubscriptionManager
 # , initialize_database
 
 async def main():
