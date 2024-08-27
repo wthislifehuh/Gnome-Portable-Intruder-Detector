@@ -1,3 +1,4 @@
+# SQLite  =================================================================
 import sqlite3
 
 DB_PATH = 'subscriptions.db'
