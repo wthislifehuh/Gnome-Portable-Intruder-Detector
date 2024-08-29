@@ -52,28 +52,6 @@ class BotHandler:
             )
         else:
             await query.edit_message_text(text=f"Selected option: {query.data}")
-
-    # async def list_recordings(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    #     chat_id = str(update.message.chat_id)
-    #     if self.subscription_manager.verify_chat_id(chat_id):
-    #         video_folder = os.path.join(os.path.dirname(__file__), f'../static/videos/{channel}')
-    #         video_files = os.listdir(self.video_folder)
-    #         if video_files:
-    #             numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
-    #             response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view."
-    #             if update.callback_query:
-    #                 await update.callback_query.message.reply_text(response_text)
-    #             else:
-    #                 await update.message.reply_text(response_text)
-
-    #             context.user_data['awaiting_filename'] = True
-    #             context.user_data['video_files'] = video_files
-    #         else:
-    #             await update.callback_query.message.reply_text(
-    #                 "No recordings found in the database."
-    #             )
-    #     else:
-    #         await update.message.reply_text("🚫 You are not authorized to access video recordings. Please subscribe first.")
         
     async def list_recordings(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Determine the chat ID based on whether the function was triggered by a message or a callback query
@@ -94,7 +72,7 @@ class BotHandler:
                     video_files = os.listdir(video_folder)
                     if video_files:
                         numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
-                        response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view."
+                        response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view.\n\n🔗Note: The filename is the time of the intrusion in this format: [YYMMDDHHMMSS].mp4"
 
                         if update.callback_query:
                             await update.callback_query.message.reply_text(response_text)
@@ -167,7 +145,7 @@ class BotHandler:
             context.user_data['awaiting_subscription_code'] = False
 
             if self.subscription_manager.verify_subscription_code(text):
-                await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \nNOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
+                await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \n🔗NOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
                 context.user_data['awaiting_chat_id'] = True
             else:
                 await update.message.reply_text(
@@ -207,20 +185,16 @@ class BotHandler:
         else:
             await self.start(update, context)
 
-    # async def handle_filename_selection(self, update: Update, context: ContextTypes.DEFAULT_TYPE, selection: str):
-    #     try:
-    #         file_index = int(selection) - 1
-    #         video_files = context.user_data.get('video_files', [])
-    #         if 0 <= file_index < len(video_files):
-    #             filename = video_files[file_index]
-    #             video_path = os.path.join(self.video_folder, filename)
-    #             await update.message.reply_text(f"📹 Sending video: {filename}")
-    #             await update.message.reply_video(video=open(video_path, 'rb'))
-    #         else:
-    #             await update.message.reply_text("🚫 Invalid selection. Please send the correct number associated with the filename.")
-    #     except ValueError:
-    #         await update.message.reply_text("🚫 Invalid input. Please send the number associated with the filename.")
-    #     context.user_data['awaiting_filename'] = False
+    def extract_datetime_info(self, filename):
+        datetime_part = filename.split('.')[0]
+        year = datetime_part[0:2]
+        month = datetime_part[2:4]
+        date = datetime_part[4:6]
+        hour = datetime_part[6:8]
+        minute = datetime_part[8:10]
+        second = datetime_part[10:12]
+        return f"Date: {date}/{month}/20{year}\nTime: {hour}:{minute}:{second}"
+
     async def handle_filename_selection(self, update: Update, context: ContextTypes.DEFAULT_TYPE, selection: str):
         try:
             file_index = int(selection) - 1
@@ -229,8 +203,8 @@ class BotHandler:
 
             if 0 <= file_index < len(video_files):
                 filename = video_files[file_index]
-                video_path = os.path.join(video_folder, filename)  # Use the correct video folder
-                await update.message.reply_text(f"📹 Sending video: {filename}")
+                video_path = os.path.join(video_folder, filename) 
+                await update.message.reply_text(f"📹 Sending video: {filename}\n\n🚨 Intrusion time\n{self.extract_datetime_info(filename)}")
                 await update.message.reply_video(video=open(video_path, 'rb'))
             else:
                 await update.message.reply_text("🚫 Invalid selection. Please send the correct number associated with the filename.")
