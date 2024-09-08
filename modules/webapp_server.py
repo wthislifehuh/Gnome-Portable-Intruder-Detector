@@ -7,8 +7,6 @@ import os
 from database3 import SubscriptionManager
 from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code, add_chatID
 
-
-
 app = Flask(
     __name__,
     template_folder=os.path.join(
