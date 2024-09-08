@@ -59,6 +59,19 @@
     <!-- ====================== Display Video and Timestamp in columns and rows ====================== -->
     <div class="container mt-5">
       <h2 class="text-center mb-4">Intrusion History</h2>
+
+        <!-- ====================== Filter Section ====================== -->
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <form id="filterForm" method="GET" action="{{ url_for('history') }}">
+                    <div class="input-group mb-3">
+                        <input type="date" class="form-control" id="filterDate" name="filter_date" placeholder="Choose a date" value="{{ selected_date }}">
+                        <button class="btn btn-dark" type="submit">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
       <ul class="list-group">
         {% for video in video_list %}
         <li class="list-group-item d-flex justify-content-between align-items-center">

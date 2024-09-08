@@ -6,7 +6,8 @@ from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
 from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code, add_chatID
-import datetime
+from datetime import datetime
+
 
 app = Flask(
     __name__,
@@ -52,18 +53,39 @@ def stream_video():
     return camera.stream_video()
 
 
-
 @app.route('/history')
 def history():
     subscription_code = session.get('subscription_code')
-    if not subscription_code:
-        return redirect(url_for('index'))
+    
+    # Retrieve the selected date from the query string
+    selected_date = request.args.get('filter_date')
 
-    # Get list of video files for the subscription
-    video_list = get_video_list(subscription_code)
+    video_list = []
+    video_dir = os.path.join('static', 'videos', subscription_code)
+    
+    if os.path.exists(video_dir):
+        for video_file in os.listdir(video_dir):
+            if video_file.endswith('.mp4'):
+                # Extract the timestamp from the filename
+                timestamp_str = video_file.split('.')[0]
+                timestamp = datetime.strptime(timestamp_str, '%y%m%d%H%M%S')
 
-    return render_template('history.html', video_list=video_list)
+                # Format the timestamp to dd/MM/yy HH:mm:ss
+                formatted_timestamp = timestamp.strftime('%d/%m/%y %H:%M:%S')
 
+                # If a filter date is provided, filter the videos
+                if selected_date:
+                    filter_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+                    if timestamp.date() != filter_date:
+                        continue  # Skip videos that don't match the filter date
+
+                # Add the video to the list with its formatted timestamp and URL
+                video_list.append({
+                    'timestamp': formatted_timestamp,
+                    'url': url_for('static', filename=f'videos/{subscription_code}/{video_file}')
+                })
+
+    return render_template('history.html', video_list=video_list, selected_date=selected_date)
 
 def get_video_list(subscription_code):
     """ Helper function to get list of video files in mp4 format from the file system """
