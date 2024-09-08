@@ -126,14 +126,24 @@ def update_password():
 
 # Route to handle face photo uploads
 def upload_photo():
-    if 'file' not in request.files:
-        return jsonify({'success': False, 'message': 'No file part'})
+    if 'file' not in request.files or 'subscriptionCode' not in request.form:
+        return jsonify({'success': False, 'message': 'No file or subscription code part'})
 
     file = request.files['file']
+    subscription_code = request.form['subscriptionCode']  # Retrieve the subscription code
+
     if file.filename == '':
         return jsonify({'success': False, 'message': 'No selected file'})
 
-    if file:
+    if file and subscription_code:
+        # Create the folder for the subscription if it doesn't exist
+        subscription_dir = os.path.join('face_recognition/faces', subscription_code)
+        os.makedirs(subscription_dir, exist_ok=True)
+
+        # Save the file in the subscription folder
         filename = secure_filename(file.filename)
-        file.save(os.path.join('face_recognition/faces/', filename))
+        file.save(os.path.join(subscription_dir, filename))
+
         return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'message': 'File or subscription code missing'})

@@ -28,35 +28,35 @@
   </head>
   <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <div class="container-fluid">
-            <a class="navbar-brand" href="#">Gnome - Intruder Detector</a>
-            <button
-              class="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNav"
-              aria-controls="navbarNav"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-              <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                  <a class="nav-link" href="#features">Features</a>
-                </li>
-                <li class="nav-item flex-end">
-                  <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</button>
-                </li>
-                <li class="nav-item flex-end"></li>
-                  <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
-                </li>
-              </ul>
-            </div>
+              <a class="navbar-brand" href="#">Gnome - Intruder Detector</a>
+              <button
+                  class="navbar-toggler"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#navbarNav"
+                  aria-controls="navbarNav"
+                  aria-expanded="false"
+                  aria-label="Toggle navigation"
+              >
+                  <span class="navbar-toggler-icon"></span>
+              </button>
+              <li class="nav-item">
+                <a class="nav-link" href="#features">Features</a>
+              </li>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                  <ul class="navbar-nav ms-auto"> <!-- 'ms-auto' pushes the items to the right -->
+                      <li class="nav-item">
+                          <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</button>
+                      </li>
+                      <li class="nav-item" style="margin-left: 10px;">
+                          <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
+                      </li>
+                  </ul>
+              </div>
           </div>
-        </nav>
+      </nav>
     </header>
 
     <!-- Sign Up Modal -->
@@ -332,6 +332,7 @@
     </footer>
 
     <script>
+      let globalSubscriptionCode = null;
 
       // Sign Up
       document.addEventListener('DOMContentLoaded', function() {
@@ -343,7 +344,7 @@
               // Validate that the chat ID is a 10-digit number
               const chatIDRegex = /^\d{10}$/;
               if (!chatIDRegex.test(telegramChatID)) {
-                showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
+                  showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
                   return;
               }
 
@@ -361,25 +362,25 @@
               })
               .then((response) => response.json())
               .then((data) => {
-                if (data.success) {
-                  showLeftFaceUploadModal();
-                } else {
-                  showAlertInSignUpModal(data.message, 'danger');
-                }
+                  if (data.success) {
+                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
+                      showLeftFaceUploadModal(); // Proceed to face photo upload
+                  } else {
+                      showAlertInSignUpModal(data.message, 'danger');
+                  }
               })
               .catch((error) => {
-                console.error('Error:', error);
-                showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
+                  console.error('Error:', error);
+                  showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
               });
           });
       });
-
 
       // Sign In
       document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('signInSubmit').addEventListener('click', function() {
               const subscriptionCode = document.getElementById('subscriptionCode-signIn').value;
-              const password = document.getElementById('password-signIn').value; 
+              const password = document.getElementById('password-signIn').value;
 
               // Make an AJAX request to validate subscription code, password
               fetch('/validate_signIn', {
@@ -391,24 +392,20 @@
                     subscriptionCode: subscriptionCode,
                     password: password,
                   }),
-                })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        window.location.href = '/home';
-                    } else {
+              })
+              .then((response) => response.json())
+              .then((data) => {
+                  if (data.success) {
+                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
+                      window.location.href = '/home';  // Redirect to home
+                  } else {
                       showAlertInSignInModal(data.message, 'danger');
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
-                });
+                  }
+              })
+              .catch((error) => {
+                  console.error('Error:', error);
+                  showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
+              });
           });
       });
 
@@ -480,6 +477,7 @@
       function handleUploadPhoto(file, faceType) {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('subscriptionCode', globalSubscriptionCode);  // Attach subscription code
 
         fetch('/upload_photo', {
           method: 'POST',
@@ -493,7 +491,6 @@
             } else if (faceType === 'right') {
               showMiddleFaceUploadModal();
             } else if (faceType === 'middle') {
-              showMiddleFaceUploadModal();
               window.location.href = '/home';
             }
           } else {
@@ -506,18 +503,18 @@
       }
 
       document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
-        const fileInput = document.getElementById('leftFacePhoto').files[0];
-        handleUploadPhoto(fileInput, 'left');
+          const fileInput = document.getElementById('leftFacePhoto').files[0];
+          handleUploadPhoto(fileInput, 'left');
       });
 
       document.getElementById('uploadRightPhotoButton').addEventListener('click', function() {
-        const fileInput = document.getElementById('rightFacePhoto').files[0];
-        handleUploadPhoto(fileInput, 'right');
+          const fileInput = document.getElementById('rightFacePhoto').files[0];
+          handleUploadPhoto(fileInput, 'right');
       });
 
       document.getElementById('uploadMiddlePhotoButton').addEventListener('click', function() {
-        const fileInput = document.getElementById('middleFacePhoto').files[0];
-        handleUploadPhoto(fileInput, 'middle');
+          const fileInput = document.getElementById('middleFacePhoto').files[0];
+          handleUploadPhoto(fileInput, 'middle');
       });
     </script>
     
