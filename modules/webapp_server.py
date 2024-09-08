@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from camera import Camera
 import os
 from threading import Thread
@@ -41,10 +41,19 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/user_account')
+def user_account():
+    return render_template('userAccount.html')
+
+
 # Route to stream video
 @app.route("/stream_video")
 def stream_video():
-    return camera.stream_video()
+    return Response(
+        camera.generate_frame(), 
+        mimetype="multipart/x-mixed-replace; boundary=frame",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+    )
 
 
 def start_flask_app():
