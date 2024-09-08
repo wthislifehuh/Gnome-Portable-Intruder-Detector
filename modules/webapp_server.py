@@ -124,7 +124,7 @@ def serve_face_images(subscription_code, filename):
 
 
 def start_flask_app():
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
 
 if __name__ == "__main__":
     start_flask_app()
