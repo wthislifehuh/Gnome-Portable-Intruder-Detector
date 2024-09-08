@@ -122,6 +122,12 @@ def store_subscription_code():
     return jsonify({'success': False, 'message': 'No subscription code provided'})
 
 
+def remove_subscription_code():
+    if 'subscription_code' in session:
+        session.pop('subscription_code')  
+        return jsonify({'success': True, 'message': 'Subscription code removed successfully'})
+    return jsonify({'success': False, 'message': 'No subscription code found in session'})
+
 # Route to update password
 def update_password():
     data = request.json

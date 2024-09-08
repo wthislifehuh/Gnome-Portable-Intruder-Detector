@@ -175,6 +175,7 @@
                 <button class="btn btn-dark mt-5 float-end" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Upload Photo</button>
             </div>
         </div>
+        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px;" data-bs-toggle="modal" data-bs-target="#logOutModal" id="logOutModal">Log Out</button>
     </div>
 
     <!-- ====================== Footer ====================== -->
@@ -280,7 +281,33 @@
         successModal.show();
       }
 
+      document.getElementById('logOutModal').addEventListener('click', function(e) {
+        // removeSubscriptionCodeInSession(subscriptionCode);
+        showSuccessModal("Sign Out Successfully", "success") 
+        window.location.href = '/';
+      })
 
+    //   Remove subscription code from session
+      function removeSubscriptionCodeInSession(subscriptionCode) {
+        fetch('/remove_subscription_code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionCode: "{{ subscription_code }}",
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) {
+            console.error("Failed to remove subscription code in session.");
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+      }
 
 
       function showLeftFaceUploadModal() {

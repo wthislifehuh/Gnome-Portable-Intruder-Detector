@@ -5,7 +5,7 @@ from threading import Thread
 from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
-from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code
+from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code
 
 
 
@@ -39,6 +39,7 @@ app.add_url_rule('/validate_signUp', 'validate_signUp', validate_signUp, methods
 app.add_url_rule('/update_password', 'update_password', update_password, methods=['POST'])
 app.add_url_rule('/upload_photo', 'upload_photo', upload_photo, methods=['POST'])
 app.add_url_rule('/store_subscription_code', 'store_subscription_code', store_subscription_code, methods=['POST'])
+app.add_url_rule('/remove_subscription_code', 'remove_subscription_code', remove_subscription_code, methods=['POST'])
 
 @app.route('/home')
 def home():
