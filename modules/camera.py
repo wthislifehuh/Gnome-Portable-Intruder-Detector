@@ -149,7 +149,7 @@ class Camera:
         output_filepath = os.path.join(output_dir, output_filename)
 
         # Define the codec and create a VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Codec for .mp4 files
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v") 
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         self.out = cv2.VideoWriter(

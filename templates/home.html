@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gnome - Intruder Detector</title>
+    <!-- Core theme CSS-->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <!-- Font Awesome icons -->
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Logo Image -->
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <!-- Font style -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans|Poppins:400,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Gnome - Intruder Detector</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="#live-stream">Live Stream</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#features">Features</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- ====================== Live Stream ====================== -->
+    <div class="container mt-5">
+      <div id="live-stream" class="live-stream">
+        <h1
+          style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
+          class="mb-5 mt-2"
+        >
+          📸 Live Stream
+        </h1>
+        <img
+          src="{{ url_for('stream_video') }}"
+          class="videoSize"
+          onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
+        />
+        <div id="no-stream" style="display: none; color: #e8e0d8">
+          <div
+            class="d-flex align-items-center justify-content-center mb-3 mt-3 p-3"
+            style="background-color: #e8e0d8; border-radius: 20px"
+          >
+            <img
+              src="{{ url_for('static', filename='images/icons/novideo.png') }}"
+              class="m-1"
+              style="width: 30px"
+              alt="Notifications"
+            />
+            <p
+              class="live-stream-text text-black mb-0 ml-2"
+              style="margin-left: 10px"
+            >
+              No Live Stream Available
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Display ====================== -->
+    <section class="display-section text-center" id="display">
+      <div class="text container">
+        <p class="text-black" id="sameline">Gnome is</p>
+        <p id="sameline">
+          <span class="word wisteria"> effective.</span>
+          <span class="word belize"> efficient.</span>
+          <span class="word pomegranate"> reliable.</span>
+          <span class="word green"> real-time.</span>
+          <span class="word midnight"> secure.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ====================== Hero ====================== -->
+    <div id="stay-secure" class="stay-secure row align-items-center mb-5">
+        <div class="col-md-5" style="margin-left: 80px;">
+            <img src="../static/images/gnome_logo.png" class="img-fluid" alt="Stay Secure">
+        </div>
+        <div class="col-md-5">
+            <h2>Stay Secure, Stay Informed</h2>
+            <p>Gnome, the Intruder Detector, is your vigilant companion, keeping an eye on things when you can't.</p>
+            <p>Whether you're looking to protect your personal space or just want peace of mind, this bot has you covered.</p>
+        </div>
+    </div>
+
+    <!-- ====================== Features ====================== -->
+    <div class="container pb-5">
+      <div id="features" class="features">
+        <h2 class="text-center mb-5 mt-3">Our Features</h2>
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <div class="feature text-center">
+              <div
+                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/icons/real-time.png') }}"
+                  alt="Real-Time"
+                />
+              </div>
+              <h3 class="mb-3">Real-Time Intrusion Detection</h3>
+              <p>
+                The Intruder Detector Bot transforms your mobile phone into a
+                vigilant security guard. Utilizing the phone's sensors, it can
+                detect any unauthorized presence in its vicinity. The moment an
+                intruder is detected, the bot instantly sends an alert via
+                Telegram, ensuring you're always aware of what's happening
+                around your device.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="feature text-center">
+              <div
+                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/icons/alert.png') }}"
+                  alt="Alerts"
+                />
+              </div>
+              <h3 class="mb-3">Immediate Alerts & Deterrents</h3>
+              <p>
+                Upon detecting an intruder, the bot doesn’t just notify you—it
+                takes action. Your mobile phone will emit a loud alarm to scare
+                off intruders, and it can also activate a sound repellent to
+                further deter them. These features add an extra layer of
+                security, providing peace of mind whether you're nearby or away.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="feature text-center">
+              <div
+                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/icons/message.png') }}"
+                  alt="Notifications"
+                />
+              </div>
+              <h3 class="mb-3">Interactive Notifications</h3>
+              <p>
+                The alerts you receive aren't just informative—they're
+                interactive. With a single tap on the notification, you can
+                prompt the bot to provide a direct link to a web app, where you
+                can view a live video stream from the mobile phone’s camera.
+                This allows you to monitor the situation in real time, no matter
+                where you are.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="feature text-center">
+              <div
+                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/icons/video.png') }}"
+                  alt="Videos"
+                />
+              </div>
+              <h3 class="mb-3">Access to Video Evidence</h3>
+              <p>
+                Missed the live event? No problem. The bot also offers you the
+                option to view a short video recording of the intrusion event.
+                This feature ensures you have visual evidence of any
+                unauthorized activity, which can be crucial for reporting and
+                addressing the issue.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== Footer ====================== -->
+    <footer class="footer small text-center text-white-50 mt-5">
+      <div class="container-fluid waves">
+        <div class="wave" id="wave1"></div>
+        <div class="wave" id="wave2"></div>
+        <div class="wave" id="wave3"></div>
+        <div class="wave" id="wave4"></div>
+      </div>
+      <div class="social d-flex justify-content-center align-items-center">
+        <a
+          class="mx-2"
+          href="https://instagram.com/_furrtastic_?utm_source=qr&igshid=NGExMmI2YTkyZg%3D%3D"
+          ><i class="fab fa-instagram"></i
+        ></a>
+        <a
+          class="mx-2"
+          href="https://www.facebook.com/furtastic.2023?mibextid=ZbWKwL"
+          ><i class="fab fa-facebook-f"></i
+        ></a>
+        <a class="mx-2" href="https://pin.it/7Gfff5a"
+          ><i class="fab fa-pinterest"></i
+        ></a>
+        <a class="mx-2" href="https://github.com/wthislifehuh/Furtastic"
+          ><i class="fab fa-github"></i
+        ></a>
+        <a class="mx-2" href="https://t.me/furtastic2023"
+          ><i class="fab fa-telegram"></i
+        ></a>
+      </div>
+      <div class="container px-4 px-lg-5">
+        <p>&copy; Gnome - Intruder Detector 2024 | All Rights Reserved</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JS-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Core theme JS-->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>

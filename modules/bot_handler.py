@@ -221,7 +221,7 @@ class BotHandler:
 
     async def handle_admin_action(self, update: Update, context: ContextTypes.DEFAULT_TYPE, action: str):
         if action == '1':
-            await update.message.reply_text("Please enter the subscription code to add:")
+            await update.message.reply_text("Please enter the subscription code to add. \n\nFormat: subscription code<space>temporary password (more than 6 digits)")
             context.user_data['awaiting_new_subscription_code'] = True
             context.user_data['awaiting_admin_action'] = False
         elif action == '2':
@@ -268,14 +268,35 @@ class BotHandler:
 
     async def handle_admin_input(self, update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
         if context.user_data.get('awaiting_new_subscription_code'):
-            if len(text) == 6 and text.isdigit():
-                self.subscription_manager.add_subscription(text)
-                await update.message.reply_text(f"Subscription code '{text}' added successfully!")
-                context.user_data['awaiting_admin_action'] = False
+            # The pattern now captures a 6-digit subscription code and a password of at least 6 characters
+            pattern = r'^(\d{6})\s+(\S{6,})$'
+            match = re.match(pattern, text)
+            
+            if match:
+                subscription_code = match.group(1)
+                password = match.group(2)
+                
+                if len(subscription_code) == 6 and subscription_code.isdigit():
+                    if not self.subscription_manager.verify_subscription_code(subscription_code):
+                        if len(password) >= 6:
+                            self.subscription_manager.add_subscription(subscription_code, password)
+                            await update.message.reply_text(f"Subscription code '{subscription_code}' added successfully!")
+                            context.user_data['awaiting_admin_action'] = False
+                        else:
+                            await update.message.reply_text("🚫 Password needs to be more than 6 characters! Returning to admin menu.")
+                            await self.admin_menu(update, context)
+                    else:
+                        await update.message.reply_text("🚫 Subscription code exists! Returning to admin menu.")
+                        await self.admin_menu(update, context)
+                else:
+                    await update.message.reply_text("🚫 Invalid subscription code format (6 digits). Returning to admin menu.")
+                    await self.admin_menu(update, context)
             else:
-                await update.message.reply_text(f"🚫 Invalid subscription code format (6 digits). Returning to admin menu.")
+                await update.message.reply_text("🚫 Invalid input format. Returning to admin menu.")
                 await self.admin_menu(update, context)
+            
             context.user_data['awaiting_new_subscription_code'] = False
+
         elif context.user_data.get('awaiting_deletion_subscription_code'):
             if self.subscription_manager.verify_subscription_code(text):
                 self.subscription_manager.delete_subscription(text)
@@ -306,7 +327,7 @@ class BotHandler:
                     context.user_data['awaiting_admin_action'] = False
                 else:
                     await update.message.reply_text(f"🚫 Invalid Subscription code in '{text}'!")
-                    context.user_data['awaiting_admin_action'] = False
+                    await self.admin_menu(update, context)
             else:
                 await update.message.reply_text(f"🚫 Invalid input format. Returning to admin menu.")
                 await self.admin_menu(update, context)

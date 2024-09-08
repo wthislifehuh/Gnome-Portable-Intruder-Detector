@@ -28,65 +28,151 @@
   </head>
   <body>
     <header>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">Gnome - Intruder Detector</a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="#live-stream">Live Stream</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#features">Features</a>
-              </li>
-            </ul>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="#">Gnome - Intruder Detector</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNav"
+              aria-controls="navbarNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="#features">Features</a>
+                </li>
+                <li class="nav-item flex-end">
+                  <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</button>
+                </li>
+                <li class="nav-item flex-end"></li>
+                  <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
+                </li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
     </header>
 
-    <!-- ====================== Live Stream ====================== -->
-    <div class="container mt-5">
-      <div id="live-stream" class="live-stream">
-        <h1
-          style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
-          class="mb-5 mt-2"
-        >
-          📸 Live Stream
-        </h1>
-        <img
-          src="{{ url_for('stream_video') }}"
-          class="videoSize"
-          onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
-        />
-        <div id="no-stream" style="display: none; color: #e8e0d8">
-          <div
-            class="d-flex align-items-center justify-content-center mb-3 mt-3 p-3"
-            style="background-color: #e8e0d8; border-radius: 20px"
-          >
-            <img
-              src="{{ url_for('static', filename='images/icons/novideo.png') }}"
-              class="m-1"
-              style="width: 30px"
-              alt="Notifications"
-            />
-            <p
-              class="live-stream-text text-black mb-0 ml-2"
-              style="margin-left: 10px"
-            >
-              No Live Stream Available
-            </p>
+    <!-- Sign Up Modal -->
+    <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h5 class="modal-title" id="signUpModalLabel">Sign Up</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          <!-- Alert placeholder -->
+          <div id="modal-alert-placeholder-signUp"></div>
+
+          <!-- Subscription Code, Password, and Telegram Chat ID -->
+          <form id="signUpForm">
+              <div class="mb-3">
+              <label for="subscriptionCode-signUp" class="form-label">Channel Subscription Code</label>
+              <input type="text" class="form-control" id="subscriptionCode-signUp" required>
+              <small class="form-text text-muted">📍NOTE: If you lost your subscription code, please contact our staff at Telegram @gnomeIntruderDetector.</small>
+              </div>
+              <div class="mb-3">
+              <label for="password-signUp" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password-signUp" required>
+              <small class="form-text text-muted">Enter your password (or temporary password).</small>
+              </div>
+              <div class="mb-3">
+              <label for="telegramChatID" class="form-label">Telegram Chat ID</label>
+              <input type="text" class="form-control" id="telegramChatID" required>
+              <small class="form-text text-muted">🔗NOTE: Visit BOT @raw_info_bot and send any message to it to obtain your chat_id. It should be a 10-digit number.</small>
+              </div>
+              <button type="button" class="btn btn-dark" id="nextStepButton">Next</button>
+          </form>
+          </div>
+      </div>
+      </div>
+    </div>
+
+
+    <!-- Sign In Modal -->
+    <div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h5 class="modal-title" id="signInModalLabel">Sign In</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          <!-- Alert placeholder -->
+          <div id="modal-alert-placeholder-signIn"></div>
+
+          <!-- Subscription Code, Password -->
+          <form id="signInForm">
+              <div class="mb-3">
+              <label for="subscriptionCode-signIn" class="form-label">Channel Subscription Code</label>
+              <input type="text" class="form-control" id="subscriptionCode-signIn" required>
+              <small class="form-text text-muted">📍NOTE: If you lost your subscription code, please contact our staff at Telegram @gnomeIntruderDetector.</small>
+              </div>
+              <div class="mb-3">
+                <label for="password-signIn" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password-signIn" required>
+                <small class="form-text text-muted">Enter your password.</small>
+              </div>
+              <button type="button" class="btn btn-dark mt-3" id="signInSubmit">Submit</button>
+          </form>
+          </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Left Face Photo Upload Modal -->
+    <div class="modal fade" id="leftFaceModal" tabindex="-1" aria-labelledby="leftFaceModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="leftFaceModalLabel">Upload Left-Side Face Photo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Please upload a clear photo showing your left side face.</p>
+            <input type="file" id="leftFacePhoto" class="form-control" accept="image/*">
+            <button type="button" class="btn btn-dark mt-3" id="uploadLeftPhotoButton">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Face Photo Upload Modal -->
+    <div class="modal fade" id="rightFaceModal" tabindex="-1" aria-labelledby="rightFaceModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rightFaceModalLabel">Upload Right-Side Face Photo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Please upload a clear photo showing your right side face.</p>
+            <input type="file" id="rightFacePhoto" class="form-control" accept="image/*">
+            <button type="button" class="btn btn-dark mt-3" id="uploadRightPhotoButton">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Face Photo Upload Modal -->
+    <div class="modal fade" id="middleFaceModal" tabindex="-1" aria-labelledby="middleFaceModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="middleFaceModalLabel">Upload Middle Face Photo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Please upload a clear photo showing your front face.</p>
+            <input type="file" id="middleFacePhoto" class="form-control" accept="image/*">
+            <button type="button" class="btn btn-dark mt-3" id="uploadMiddlePhotoButton">Submit</button>
           </div>
         </div>
       </div>
@@ -245,6 +331,198 @@
       </div>
     </footer>
 
+    <script>
+
+      // Sign Up
+      document.addEventListener('DOMContentLoaded', function() {
+          document.getElementById('nextStepButton').addEventListener('click', function() {
+              const subscriptionCode = document.getElementById('subscriptionCode-signUp').value;
+              const password = document.getElementById('password-signUp').value; 
+              const telegramChatID = document.getElementById('telegramChatID').value;
+
+              // Validate that the chat ID is a 10-digit number
+              const chatIDRegex = /^\d{10}$/;
+              if (!chatIDRegex.test(telegramChatID)) {
+                showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
+                  return;
+              }
+
+              // Make an AJAX request to validate subscription code, password, and chat ID
+              fetch('/validate_signUp', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    subscriptionCode: subscriptionCode,
+                    password: password,
+                    telegramChatID: telegramChatID,
+                  }),
+              })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  showLeftFaceUploadModal();
+                } else {
+                  showAlertInSignUpModal(data.message, 'danger');
+                }
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+                showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
+              });
+          });
+      });
+
+
+      // Sign In
+      document.addEventListener('DOMContentLoaded', function() {
+          document.getElementById('signInSubmit').addEventListener('click', function() {
+              const subscriptionCode = document.getElementById('subscriptionCode-signIn').value;
+              const password = document.getElementById('password-signIn').value; 
+
+              // Make an AJAX request to validate subscription code, password
+              fetch('/validate_signIn', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    subscriptionCode: subscriptionCode,
+                    password: password,
+                  }),
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        window.location.href = '/home';
+                    } else {
+                      showAlertInSignInModal(data.message, 'danger');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
+                });
+          });
+      });
+
+      // Function to display a Bootstrap alert inside the signup modal
+      function showAlertInSignUpModal(message, type) {
+        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signUp');
+        const alertHTML = `
+          <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        alertPlaceholder.innerHTML = alertHTML;
+      }
+
+      // Function to display a Bootstrap alert inside the signIn modal
+      function showAlertInSignInModal(message, type) {
+        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signIn');
+        const alertHTML = `
+          <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        alertPlaceholder.innerHTML = alertHTML;
+      }
+
+
+      function showLeftFaceUploadModal() {
+        // Hide the sign-in modal
+        const signInModalElement = document.getElementById('signUpModal');
+        const signInModalInstance = bootstrap.Modal.getInstance(signInModalElement);
+        if (signInModalInstance) {
+          signInModalInstance.hide();
+        }
+
+        // Show the left-side face photo upload modal
+        const leftFaceModal = new bootstrap.Modal(document.getElementById('leftFaceModal'));
+        leftFaceModal.show();
+      }
+
+      function showRightFaceUploadModal() {
+        // Hide the left-side face modal
+        const leftFaceModalElement = document.getElementById('leftFaceModal');
+        const leftFaceModalInstance = bootstrap.Modal.getInstance(leftFaceModalElement);
+        if (leftFaceModalInstance) {
+          leftFaceModalInstance.hide(); // Hide the left-side face modal
+        }
+
+        // Show the right-side face photo upload modal
+        const rightFaceModal = new bootstrap.Modal(document.getElementById('rightFaceModal'));
+        rightFaceModal.show();
+      }
+
+      function showMiddleFaceUploadModal() {
+        // Hide the right-side face modal
+        const rightFaceModalElement = document.getElementById('rightFaceModal');
+        const rightFaceModalInstance = bootstrap.Modal.getInstance(rightFaceModalElement);
+        if (rightFaceModalInstance) {
+          rightFaceModalInstance.hide(); // Hide the right-side face modal
+        }
+
+        // Show the middle face photo upload modal
+        const middleFaceModal = new bootstrap.Modal(document.getElementById('middleFaceModal'));
+        middleFaceModal.show();
+      }
+
+
+      function handleUploadPhoto(file, faceType) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload_photo', {
+          method: 'POST',
+          body: formData,
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            if (faceType === 'left') {
+              showRightFaceUploadModal();
+            } else if (faceType === 'right') {
+              showMiddleFaceUploadModal();
+            } else if (faceType === 'middle') {
+              showMiddleFaceUploadModal();
+              window.location.href = '/home';
+            }
+          } else {
+            alert('Error uploading photo. Please try again.');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      }
+
+      document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
+        const fileInput = document.getElementById('leftFacePhoto').files[0];
+        handleUploadPhoto(fileInput, 'left');
+      });
+
+      document.getElementById('uploadRightPhotoButton').addEventListener('click', function() {
+        const fileInput = document.getElementById('rightFacePhoto').files[0];
+        handleUploadPhoto(fileInput, 'right');
+      });
+
+      document.getElementById('uploadMiddlePhotoButton').addEventListener('click', function() {
+        const fileInput = document.getElementById('middleFacePhoto').files[0];
+        handleUploadPhoto(fileInput, 'middle');
+      });
+    </script>
+    
+        
+
     <!-- Bootstrap core JS-->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
@@ -254,5 +532,6 @@
 
     <!-- Core theme JS-->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- <script src="./index.js"></script> -->
   </body>
 </html>

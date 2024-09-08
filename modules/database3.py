@@ -1,6 +1,7 @@
 # MongoDB database  =================================================================
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Replace with your MongoDB connection string
 MONGO_URI = 'mongodb+srv://2103160:zSdnikf6JsDJRy15@gnome.kaqdi.mongodb.net/?retryWrites=true&w=majority&appName=Gnome'
@@ -16,19 +17,42 @@ def initialize_database():
     
     client.close()
 
+
 class SubscriptionManager:
     def __init__(self, mongo_uri=MONGO_URI, db_name=DB_NAME):
         self.client = MongoClient(mongo_uri)
         self.db = self.client[db_name]
 
-    def add_subscription(self, subscription_code):
+    def add_subscription(self, subscription_code, password):
         try:
+            # Hash the password before storing it
+            hashed_password = generate_password_hash(password)
             self.db.subscriptions.insert_one({
                 'subscription_code': subscription_code,
+                'password': hashed_password,  # Store hashed password
                 'livefeed': None
             })
         except Exception as e:
             print(f"Error adding subscription: {e}")
+
+    def update_password(self, subscription_code, new_password):
+        try:
+            # Hash the new password before updating it
+            hashed_password = generate_password_hash(new_password)
+            result = self.db.subscriptions.update_one(
+                {'subscription_code': subscription_code},
+                {'$set': {'password': hashed_password}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            print(f"Error updating password: {e}")
+            return False
+
+    def verify_password(self, subscription_code, password):
+        subscription = self.db.subscriptions.find_one({'subscription_code': subscription_code})
+        if subscription:
+            return check_password_hash(subscription['password'], password)
+        return False
 
     def delete_subscription(self, subscription_code):
         self.db.subscriptions.delete_one({
