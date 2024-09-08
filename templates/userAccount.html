@@ -43,86 +43,12 @@
                   <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarNav">
-                  <ul class="navbar-nav ms-auto"> <!-- 'ms-auto' pushes the items to the right -->
-                      <li class="nav-item" style="margin-left: 10px; margin-bottom: 10px; min-width: 40px;">
-                          <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</button>
-                      </li>
-                      <li class="nav-item" style="margin-left: 10px; margin-bottom: 10px; min-width: 40px;">
-                          <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
-                      </li>
-                  </ul>
               </div>
           </div>
       </nav>
     </header>
 
-    <!-- Sign Up Modal -->
-    <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-          <h5 class="modal-title" id="signUpModalLabel">Sign Up</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-          <!-- Alert placeholder -->
-          <div id="modal-alert-placeholder-signUp"></div>
 
-          <!-- Subscription Code, Password, and Telegram Chat ID -->
-          <form id="signUpForm">
-              <div class="mb-3">
-              <label for="subscriptionCode-signUp" class="form-label">Channel Subscription Code</label>
-              <input type="text" class="form-control" id="subscriptionCode-signUp" required>
-              <small class="form-text text-muted">📍NOTE: If you lost your subscription code, please contact our staff at Telegram @gnomeIntruderDetector.</small>
-              </div>
-              <div class="mb-3">
-              <label for="password-signUp" class="form-label">Password</label>
-              <input type="password" class="form-control" id="password-signUp" required>
-              <small class="form-text text-muted">Enter your password (or temporary password).</small>
-              </div>
-              <div class="mb-3">
-              <label for="telegramChatID" class="form-label">Telegram Chat ID</label>
-              <input type="text" class="form-control" id="telegramChatID" required>
-              <small class="form-text text-muted">🔗NOTE: Visit BOT @raw_info_bot and send any message to it to obtain your chat_id. It should be a 10-digit number.</small>
-              </div>
-              <button type="button" class="btn btn-dark" id="nextStepButton">Next</button>
-          </form>
-          </div>
-      </div>
-      </div>
-    </div>
-
-
-    <!-- Sign In Modal -->
-    <div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-          <h5 class="modal-title" id="signInModalLabel">Sign In</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-          <!-- Alert placeholder -->
-          <div id="modal-alert-placeholder-signIn"></div>
-
-          <!-- Subscription Code, Password -->
-          <form id="signInForm">
-              <div class="mb-3">
-              <label for="subscriptionCode-signIn" class="form-label">Channel Subscription Code</label>
-              <input type="text" class="form-control" id="subscriptionCode-signIn" required>
-              <small class="form-text text-muted">📍NOTE: If you lost your subscription code, please contact our staff at Telegram @gnomeIntruderDetector.</small>
-              </div>
-              <div class="mb-3">
-                <label for="password-signIn" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password-signIn" required>
-                <small class="form-text text-muted">Enter your password.</small>
-              </div>
-              <button type="button" class="btn btn-dark mt-3" id="signInSubmit">Submit</button>
-          </form>
-          </div>
-      </div>
-      </div>
-    </div>
 
     <!-- Left Face Photo Upload Modal -->
     <div class="modal fade" id="leftFaceModal" tabindex="-1" aria-labelledby="leftFaceModalLabel" aria-hidden="true">
@@ -175,31 +101,6 @@
       </div>
     </div>
 
-    <!-- ====================== Display ====================== -->
-    <section class="display-section text-center" id="display">
-      <div class="text container">
-        <p class="text-black" id="sameline">Gnome is</p>
-        <p id="sameline">
-          <span class="word wisteria"> effective.</span>
-          <span class="word belize"> efficient.</span>
-          <span class="word pomegranate"> reliable.</span>
-          <span class="word green"> real-time.</span>
-          <span class="word midnight"> secure.</span>
-        </p>
-      </div>
-    </section>
-
-    <!-- ====================== Hero ====================== -->
-    <div id="stay-secure" class="stay-secure row align-items-center mb-5">
-        <div class="col-md-5" style="margin-left: 80px;">
-            <img src="../static/images/gnome_logo.png" class="img-fluid" alt="Stay Secure">
-        </div>
-        <div class="col-md-5">
-            <h2>Stay Secure, Stay Informed</h2>
-            <p>Gnome, the Intruder Detector, is your vigilant companion, keeping an eye on things when you can't.</p>
-            <p>Whether you're looking to protect your personal space or just want peace of mind, this bot has you covered.</p>
-        </div>
-    </div>
 
     <!-- ====================== Features ====================== -->
     <div class="container pb-5">
