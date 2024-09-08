@@ -5,7 +5,7 @@ from threading import Thread
 from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
-from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code
+from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code, add_chatID
 
 
 
@@ -30,7 +30,7 @@ video_processing_thread = Thread(target=camera.process_video, daemon=True)
 video_processing_thread.start()
 
 
-# Route for the home page
+# Route for the main page
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -40,11 +40,19 @@ app.add_url_rule('/update_password', 'update_password', update_password, methods
 app.add_url_rule('/upload_photo', 'upload_photo', upload_photo, methods=['POST'])
 app.add_url_rule('/store_subscription_code', 'store_subscription_code', store_subscription_code, methods=['POST'])
 app.add_url_rule('/remove_subscription_code', 'remove_subscription_code', remove_subscription_code, methods=['POST'])
+app.add_url_rule('/add_chatID', 'add_chatID', add_chatID, methods=['POST'])
 
+# Home page (home.html - livestream page)
 @app.route('/home')
 def home():
     return render_template('home.html')
 
+# Route to stream video
+@app.route("/stream_video")
+def stream_video():
+    return camera.stream_video()
+
+# User Account Page
 @app.route('/user_account')
 def user_account():
     subscription_code = session.get('subscription_code')
@@ -74,12 +82,6 @@ def get_registered_photos(subscription_code):
 def serve_face_images(subscription_code, filename):
     face_directory = os.path.join('face_recognition', 'faces', subscription_code)
     return send_from_directory(face_directory, filename)
-
-
-# Route to stream video
-@app.route("/stream_video")
-def stream_video():
-    return camera.stream_video()
 
 
 

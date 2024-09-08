@@ -106,6 +106,33 @@
       </div>
     </div>
 
+
+     <!-- Add Chat ID Modal -->
+     <div class="modal fade" id="addChatIDModal" tabindex="-1" aria-labelledby="addChatIDModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="addChatIDModalLabel">Sign Up</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <!-- Alert placeholder -->
+            <div id="modal-alert-placeholder-chat"></div>
+  
+            <!-- Telegram Chat ID -->
+            <form id="addChatIDForm">
+                <div class="mb-3">
+                <label for="telegramChatID" class="form-label">Add Telegram Chat ID</label>
+                <input type="text" class="form-control" id="telegramChatID" required>
+                <small class="form-text text-muted">🔗NOTE: Visit BOT @raw_info_bot and send any message to it to obtain your chat_id. It should be a 10-digit number.</small>
+                </div>
+                <button type="submit" class="btn btn-dark" id="addChatIDButton">Add</button>
+            </form>
+            </div>
+        </div>
+        </div>
+      </div>
+
     <!-- Update Password Modal -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -158,6 +185,7 @@
                         <li>{{ chat_id }}</li>
                     {% endfor %}
                 </ul>
+                <button class="btn btn-dark float-end" data-bs-toggle="modal" style="min-width: 70px;" data-bs-target="#addChatIDModal">   Add Chat ID   </button>
             </div>
         </div>
 
@@ -175,7 +203,7 @@
                 <button class="btn btn-dark mt-5 float-end" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Upload Photo</button>
             </div>
         </div>
-        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px;" data-bs-toggle="modal" data-bs-target="#logOutModal" id="logOutModal">Log Out</button>
+        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px;" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">Log Out</button>
     </div>
 
     <!-- ====================== Footer ====================== -->
@@ -214,6 +242,46 @@
 
     <script>
       let globalSubscriptionCode = null;
+        // Add chat ID Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('addChatIDButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                const telegramChatID = document.getElementById('telegramChatID').value;
+
+                // Validate Telegram Chat ID
+                const chatIDRegex = /^\d{10}$/;
+                if (!chatIDRegex.test(telegramChatID)) {
+                    showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
+                    return;
+                }
+
+                // AJAX Request to add chat ID
+                fetch('/add_chatID', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        subscriptionCode: "{{ subscription_code }}", 
+                        telegramChatID: telegramChatID,
+                    }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        showAlertInModal('Telegram ChatID added successfully', 'success', 'modal-alert-placeholder-chat')
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addChatIDModal'));
+                        modal.hide();
+                    } else {
+                        showAlertInModal(data.message, 'danger', 'modal-alert-placeholder-chat');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showAlertInModal('An error occurred. Please try again later.', 'danger', 'modal-alert-placeholder-chat');
+                });
+            });
+        });
 
       // Handle update password form submission
       document.getElementById('updatePasswordForm').addEventListener('submit', function(e) {
@@ -222,7 +290,7 @@
 
             // Validate password
             if (newPassword.length < 6) {
-                showAlertInPasswordModal('Password must be more than 6 characters.', 'danger');
+                showAlertInModal('Password must be more than 6 characters.', 'danger', 'passwords-placeholder');
                 return;
             }
 
@@ -239,18 +307,18 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessModal('Password updated successfully', 'success')
+                    showAlertInModal('Password updated successfully', 'success', 'passwords-placeholder')
                     const modal = bootstrap.Modal.getInstance(document.getElementById('updatePasswordModal'));
                     modal.hide();
                 } else {
-                    showAlertInPasswordModal(data.message, 'danger');
+                    showAlertInModal(data.message, 'danger', 'passwords-placeholder');
                 }
             });
         });
 
       // Function to display a Bootstrap alert inside the password modal
-      function showAlertInPasswordModal(message, type) {
-        const alertPlaceholder = document.getElementById('passwords-placeholder');
+      function showAlertInModal(message, type, placeholder) {
+        const alertPlaceholder = document.getElementById(placeholder);
         const alertHTML = `
           <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -283,7 +351,7 @@
 
       document.getElementById('logOutModal').addEventListener('click', function(e) {
         // removeSubscriptionCodeInSession(subscriptionCode);
-        showSuccessModal("Sign Out Successfully", "success") 
+        showSuccessModal("Sign Out Successfully", "success", 'passwords-placeholder') 
         window.location.href = '/';
       })
 
@@ -394,7 +462,6 @@
       });
     </script>
     
-        
 
     <!-- Bootstrap core JS-->
     <script

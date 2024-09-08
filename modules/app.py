@@ -128,6 +128,23 @@ def remove_subscription_code():
         return jsonify({'success': True, 'message': 'Subscription code removed successfully'})
     return jsonify({'success': False, 'message': 'No subscription code found in session'})
 
+
+# Route to add chatId
+def add_chatID():
+    data = request.json
+    subscription_code = data.get('subscriptionCode')
+    telegram_chat_id = data.get('telegramChatID')
+
+    # Check if the chat ID already exists
+    if sub_manager.verify_chat_id(telegram_chat_id):
+        return jsonify({'success': False, 'message': 'ChatID has already registered.'})
+
+    # Proceed with adding the new chat ID if it doesn't exist
+    if sub_manager.add_chat_id(subscription_code, telegram_chat_id):
+        return jsonify({'success': True, 'message': 'Chat ID added successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'Error adding Chat ID'})
+
 # Route to update password
 def update_password():
     data = request.json

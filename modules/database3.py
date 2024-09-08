@@ -73,10 +73,12 @@ class SubscriptionManager:
                     'subscription_code': subscription_code,
                     'chat_id': chat_id
                 })
+                return True
             except Exception as e:
                 print(f"Error adding chat ID: {e}")
         else:
             print(f"Subscription code {subscription_code} does not exist.")
+        return False
 
     def delete_chat_id(self, chat_id):
         self.db.chat_ids.delete_one({
