@@ -108,6 +108,13 @@ class SubscriptionManager:
             'chat_id': chat_id
         })
         return chat['subscription_code'] if chat else None
+    
+    def get_chat_ids_by_subscription_code(self, subscription_code):
+        """
+        Retrieve all chat IDs associated with the given subscription code.
+        """
+        chat_ids = self.db.chat_ids.find({'subscription_code': subscription_code}, {'chat_id': 1, '_id': 0})
+        return [chat['chat_id'] for chat in chat_ids]
 
     def add_livefeed(self, subscription_code, livefeed_url):
         self.db.subscriptions.update_one(

@@ -51,7 +51,7 @@
     
 
     
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
@@ -112,6 +112,15 @@ def validate_signIn():
         print(f"Error: {e}")
         return jsonify({'success': False, 'message': 'Server error'}), 500
 
+def store_subscription_code():
+    data = request.json
+    subscription_code = data.get('subscriptionCode')
+
+    if subscription_code:
+        session['subscription_code'] = subscription_code  # Store in session
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'No subscription code provided'})
+
 
 # Route to update password
 def update_password():
@@ -123,6 +132,7 @@ def update_password():
         return jsonify({'success': True, 'message': 'Password updated successfully'})
     else:
         return jsonify({'success': False, 'message': 'Error updating password'})
+    
 
 # Route to handle face photo uploads
 def upload_photo():

@@ -43,6 +43,11 @@
                   <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                      <a class="nav-link" href="{{ url_for('home') }}">Live Stream</a>
+                    </li>
+                </ul>
               </div>
           </div>
       </nav>
@@ -101,94 +106,75 @@
       </div>
     </div>
 
+    <!-- Update Password Modal -->
+    <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePasswordModalLabel">Update Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Alert placeholder -->
+                    <div id="passwords-placeholder"></div>
+                    <form id="updatePasswordForm">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <!-- Alert placeholder -->
+                    <div id="success-placeholder"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ====================== User Account Information ====================== -->
-    <div class="container pb-5">
-      <div id="features" class="features">
-        <h2 class="text-center mb-5 mt-3">User Account</h2>
-        <div class="row mt-3">
-          <div class="col-md-6">
-            <div class="feature text-center">
-              <div
-                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
-              >
-                <img
-                  src="{{ url_for('static', filename='images/icons/real-time.png') }}"
-                  alt="Real-Time"
-                />
-              </div>
-              <h3 class="mb-3">Real-Time Intrusion Detection</h3>
-              <p>
-                The Intruder Detector Bot transforms your mobile phone into a
-                vigilant security guard. Utilizing the phone's sensors, it can
-                detect any unauthorized presence in its vicinity. The moment an
-                intruder is detected, the bot instantly sends an alert via
-                Telegram, ensuring you're always aware of what's happening
-                around your device.
-              </p>
+        <!-- Account Information -->
+    <div class="container mt-5">
+        <h2 class="text-center mb-5">Account Information</h2>
+
+        <!-- Container 1: Subscription Code & Telegram Chat IDs -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Subscription Code: {{ subscription_code }}</h5>
+                <button class="btn btn-dark float-end" data-bs-toggle="modal" data-bs-target="#updatePasswordModal">Update Password</button>
+                <h6 class="mt-4">Telegram Chat IDs:</h6>
+                <ul>
+                    {% for chat_id in telegram_chat_ids %}
+                        <li>{{ chat_id }}</li>
+                    {% endfor %}
+                </ul>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="feature text-center">
-              <div
-                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
-              >
-                <img
-                  src="{{ url_for('static', filename='images/icons/alert.png') }}"
-                  alt="Alerts"
-                />
-              </div>
-              <h3 class="mb-3">Immediate Alerts & Deterrents</h3>
-              <p>
-                haha
-              </p>
-            </div>
-          </div>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="feature text-center">
-              <div
-                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
-              >
-                <img
-                  src="{{ url_for('static', filename='images/icons/message.png') }}"
-                  alt="Notifications"
-                />
-              </div>
-              <h3 class="mb-3">Interactive Notifications</h3>
-              <p>
-                The alerts you receive aren't just informative—they're
-                interactive. With a single tap on the notification, you can
-                prompt the bot to provide a direct link to a web app, where you
-                can view a live video stream from the mobile phone’s camera.
-                This allows you to monitor the situation in real time, no matter
-                where you are.
-              </p>
+
+        <!-- Container 2: Photo Album & Upload Button -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Photo Album</h5>
+                <div class="row">
+                    {% for photo in registered_photos %}
+                        <div class="col-md-3">
+                            <img src="{{ url_for('serve_face_images', subscription_code=subscription_code, filename=photo) }}" class="img-fluid img-thumbnail" alt="Registered Face">
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-dark mt-5 float-end" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Upload Photo</button>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="feature text-center">
-              <div
-                class="icon d-flex align-items-center justify-content-center mb-3 mt-3"
-              >
-                <img
-                  src="{{ url_for('static', filename='images/icons/video.png') }}"
-                  alt="Videos"
-                />
-              </div>
-              <h3 class="mb-3">Access to Video Evidence</h3>
-              <p>
-                Missed the live event? No problem. The bot also offers you the
-                option to view a short video recording of the intrusion event.
-                This feature ensures you have visual evidence of any
-                unauthorized activity, which can be crucial for reporting and
-                addressing the issue.
-              </p>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
 
     <!-- ====================== Footer ====================== -->
@@ -228,84 +214,42 @@
     <script>
       let globalSubscriptionCode = null;
 
-      // Sign Up
-      document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('nextStepButton').addEventListener('click', function() {
-              const subscriptionCode = document.getElementById('subscriptionCode-signUp').value;
-              const password = document.getElementById('password-signUp').value; 
-              const telegramChatID = document.getElementById('telegramChatID').value;
+      // Handle update password form submission
+      document.getElementById('updatePasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
 
-              // Validate that the chat ID is a 10-digit number
-              const chatIDRegex = /^\d{10}$/;
-              if (!chatIDRegex.test(telegramChatID)) {
-                  showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
-                  return;
-              }
+            // Validate password
+            if (newPassword.length < 6) {
+                showAlertInPasswordModal('Password must be more than 6 characters.', 'danger');
+                return;
+            }
 
-              // Make an AJAX request to validate subscription code, password, and chat ID
-              fetch('/validate_signUp', {
-                  method: 'POST',
-                  headers: {
+            fetch('/update_password', {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    subscriptionCode: subscriptionCode,
-                    password: password,
-                    telegramChatID: telegramChatID,
-                  }),
-              })
-              .then((response) => response.json())
-              .then((data) => {
-                  if (data.success) {
-                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
-                      showLeftFaceUploadModal(); // Proceed to face photo upload
-                  } else {
-                      showAlertInSignUpModal(data.message, 'danger');
-                  }
-              })
-              .catch((error) => {
-                  console.error('Error:', error);
-                  showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
-              });
-          });
-      });
+                },
+                body: JSON.stringify({
+                    subscriptionCode: "{{ subscription_code }}",  // Use the current subscription code
+                    newPassword: newPassword,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccessModal('Password updated successfully', 'success')
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('updatePasswordModal'));
+                    modal.hide();
+                } else {
+                    showAlertInPasswordModal(data.message, 'danger');
+                }
+            });
+        });
 
-      // Sign In
-      document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('signInSubmit').addEventListener('click', function() {
-              const subscriptionCode = document.getElementById('subscriptionCode-signIn').value;
-              const password = document.getElementById('password-signIn').value;
-
-              // Make an AJAX request to validate subscription code, password
-              fetch('/validate_signIn', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    subscriptionCode: subscriptionCode,
-                    password: password,
-                  }),
-              })
-              .then((response) => response.json())
-              .then((data) => {
-                  if (data.success) {
-                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
-                      window.location.href = '/home';  // Redirect to home
-                  } else {
-                      showAlertInSignInModal(data.message, 'danger');
-                  }
-              })
-              .catch((error) => {
-                  console.error('Error:', error);
-                  showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
-              });
-          });
-      });
-
-      // Function to display a Bootstrap alert inside the signup modal
-      function showAlertInSignUpModal(message, type) {
-        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signUp');
+      // Function to display a Bootstrap alert inside the password modal
+      function showAlertInPasswordModal(message, type) {
+        const alertPlaceholder = document.getElementById('passwords-placeholder');
         const alertHTML = `
           <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -315,9 +259,17 @@
         alertPlaceholder.innerHTML = alertHTML;
       }
 
-      // Function to display a Bootstrap alert inside the signIn modal
-      function showAlertInSignInModal(message, type) {
-        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signIn');
+      function showSuccessModal(message, type) {
+        // Hide the password modal
+        const passwordModalElement = document.getElementById('updatePasswordModal');
+        const signInModalInstance = bootstrap.Modal.getInstance(passwordModalElement);
+        if (signInModalInstance) {
+          signInModalInstance.hide();
+        }
+
+        // Show the success  modal
+        const alertPlaceholder = document.getElementById('success-placeholder');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         const alertHTML = `
           <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -325,13 +277,16 @@
           </div>
         `;
         alertPlaceholder.innerHTML = alertHTML;
+        successModal.show();
       }
+
+
 
 
       function showLeftFaceUploadModal() {
-        // Hide the sign-in modal
-        const signInModalElement = document.getElementById('signUpModal');
-        const signInModalInstance = bootstrap.Modal.getInstance(signInModalElement);
+        // Hide the password modal
+        const passwordModalElement = document.getElementById('updatePasswordModal');
+        const signInModalInstance = bootstrap.Modal.getInstance(passwordModalElement);
         if (signInModalInstance) {
           signInModalInstance.hide();
         }
@@ -385,7 +340,7 @@
             } else if (faceType === 'right') {
               showMiddleFaceUploadModal();
             } else if (faceType === 'middle') {
-              window.location.href = '/home';
+                showSuccessModal("Successfully uploaded photos.", "success");
             }
           } else {
             alert('Error uploading photo. Please try again.');

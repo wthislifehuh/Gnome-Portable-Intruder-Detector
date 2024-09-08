@@ -331,79 +331,103 @@
     <script>
       let globalSubscriptionCode = null;
 
-      // Sign Up
+      // Store subscription code in session via Flask backend
+      function storeSubscriptionCodeInSession(subscriptionCode) {
+        fetch('/store_subscription_code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionCode: subscriptionCode,
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) {
+            console.error("Failed to store subscription code in session.");
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+      }
+
+      // Sign Up Logic
       document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('nextStepButton').addEventListener('click', function() {
-              const subscriptionCode = document.getElementById('subscriptionCode-signUp').value;
-              const password = document.getElementById('password-signUp').value; 
-              const telegramChatID = document.getElementById('telegramChatID').value;
+        document.getElementById('nextStepButton').addEventListener('click', function() {
+          const subscriptionCode = document.getElementById('subscriptionCode-signUp').value;
+          const password = document.getElementById('password-signUp').value;
+          const telegramChatID = document.getElementById('telegramChatID').value;
 
-              // Validate that the chat ID is a 10-digit number
-              const chatIDRegex = /^\d{10}$/;
-              if (!chatIDRegex.test(telegramChatID)) {
-                  showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
-                  return;
-              }
+          // Validate Telegram Chat ID
+          const chatIDRegex = /^\d{10}$/;
+          if (!chatIDRegex.test(telegramChatID)) {
+            showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
+            return;
+          }
 
-              // Make an AJAX request to validate subscription code, password, and chat ID
-              fetch('/validate_signUp', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    subscriptionCode: subscriptionCode,
-                    password: password,
-                    telegramChatID: telegramChatID,
-                  }),
-              })
-              .then((response) => response.json())
-              .then((data) => {
-                  if (data.success) {
-                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
-                      showLeftFaceUploadModal(); // Proceed to face photo upload
-                  } else {
-                      showAlertInSignUpModal(data.message, 'danger');
-                  }
-              })
-              .catch((error) => {
-                  console.error('Error:', error);
-                  showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
-              });
+          // AJAX Request to validate subscription code, password, and chat ID
+          fetch('/validate_signUp', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              subscriptionCode: subscriptionCode,
+              password: password,
+              telegramChatID: telegramChatID,
+            }),
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              globalSubscriptionCode = subscriptionCode;
+              storeSubscriptionCodeInSession(subscriptionCode);  // Store in session
+              showLeftFaceUploadModal();  // Proceed to face photo upload
+            } else {
+              showAlertInSignUpModal(data.message, 'danger');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
           });
+        });
       });
 
-      // Sign In
+      // Sign In Logic
       document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('signInSubmit').addEventListener('click', function() {
-              const subscriptionCode = document.getElementById('subscriptionCode-signIn').value;
-              const password = document.getElementById('password-signIn').value;
+        document.getElementById('signInSubmit').addEventListener('click', function() {
+          const subscriptionCode = document.getElementById('subscriptionCode-signIn').value;
+          const password = document.getElementById('password-signIn').value;
 
-              // Make an AJAX request to validate subscription code, password
-              fetch('/validate_signIn', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    subscriptionCode: subscriptionCode,
-                    password: password,
-                  }),
-              })
-              .then((response) => response.json())
-              .then((data) => {
-                  if (data.success) {
-                      globalSubscriptionCode = subscriptionCode;  // Store subscription code globally
-                      window.location.href = '/home';  // Redirect to home
-                  } else {
-                      showAlertInSignInModal(data.message, 'danger');
-                  }
-              })
-              .catch((error) => {
-                  console.error('Error:', error);
-                  showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
-              });
+          // AJAX Request to validate subscription code and password
+          fetch('/validate_signIn', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              subscriptionCode: subscriptionCode,
+              password: password,
+            }),
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              globalSubscriptionCode = subscriptionCode;
+              storeSubscriptionCodeInSession(subscriptionCode);  // Store in session
+              window.location.href = '/home';  // Redirect to home
+            } else {
+              showAlertInSignInModal(data.message, 'danger');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
           });
+        });
       });
 
       // Function to display a Bootstrap alert inside the signup modal
