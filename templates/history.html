@@ -45,10 +45,7 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
-                <a class="nav-link" href="#live-stream">Live Stream</a>
-              </li>
-              <li class="nav-item"></li>
-                <a class="nav-link" href="{{ url_for('history') }}">History</a>
+                <a class="nav-link" href="{{ url_for('home') }}">Live Stream</a>
               </li>
               <li class="nav-item"></li>
                 <a class="nav-link" href="{{ url_for('user_account') }}">User Account</a>
@@ -59,37 +56,34 @@
       </nav>
     </header>
 
-    <!-- ====================== Live Stream ====================== -->
+    <!-- ====================== Display Video and Timestamp in columns and rows ====================== -->
     <div class="container mt-5">
-      <div id="live-stream" class="live-stream">
-        <h1
-          style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
-          class="mb-5 mt-2"
-        >
-          📸 Live Stream
-        </h1>
-        <img
-          src="{{ url_for('stream_video') }}"
-          class="videoSize"
-          onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
-        />
-        <div id="no-stream" style="display: none; color: #e8e0d8">
-          <div
-            class="d-flex align-items-center justify-content-center mb-3 mt-3 p-3"
-            style="background-color: #e8e0d8; border-radius: 20px"
-          >
-            <img
-              src="{{ url_for('static', filename='images/icons/novideo.png') }}"
-              class="m-1"
-              style="width: 30px"
-              alt="Notifications"
-            />
-            <p
-              class="live-stream-text text-black mb-0 ml-2"
-              style="margin-left: 10px"
-            >
-              No Live Stream Available
-            </p>
+      <h2 class="text-center mb-4">Intrusion History</h2>
+      <ul class="list-group">
+        {% for video in video_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>Intrusion at {{ video.timestamp }}</span>
+          <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal" data-video-url="{{ video.url }}">
+            View Video
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="videoModalLabel">Intrusion Video</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <video id="intrusionVideo" class="w-100" controls>
+              <source src="" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </div>
@@ -142,6 +136,25 @@
         <p>&copy; Gnome - Intruder Detector 2024 | All Rights Reserved</p>
       </div>
     </footer>
+
+    <script>
+      // Load the video when the modal is opened
+      document.getElementById('videoModal').addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var videoUrl = button.getAttribute('data-video-url');
+        var modal = this;
+        var video = modal.querySelector('video');
+        video.src = videoUrl;
+      });
+
+      // Clear the video when the modal is closed
+      document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+        var modal = this;
+        var video = modal.querySelector('video');
+        video.pause();
+        video.src = "";
+      });
+    </script>
 
     <!-- Bootstrap core JS-->
     <script

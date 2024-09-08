@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
 from app import validate_signIn, validate_signUp, update_password, upload_photo, store_subscription_code, remove_subscription_code, add_chatID
+import datetime
 
 app = Flask(
     __name__,
@@ -49,6 +50,45 @@ def home():
 @app.route("/stream_video")
 def stream_video():
     return camera.stream_video()
+
+
+
+@app.route('/history')
+def history():
+    subscription_code = session.get('subscription_code')
+    if not subscription_code:
+        return redirect(url_for('index'))
+
+    # Get list of video files for the subscription
+    video_list = get_video_list(subscription_code)
+
+    return render_template('history.html', video_list=video_list)
+
+
+def get_video_list(subscription_code):
+    """ Helper function to get list of video files in mp4 format from the file system """
+    video_dir = os.path.join('static', 'videos', subscription_code)
+    if os.path.exists(video_dir):
+        video_files = [
+            {
+                'url': url_for('static', filename=f'videos/{subscription_code}/{video}'),
+                'timestamp': format_timestamp_from_filename(video)
+            }
+            for video in os.listdir(video_dir) if video.endswith('.mp4')
+        ]
+        return sorted(video_files, key=lambda x: x['timestamp'], reverse=True)  # Sort by latest first
+    return []
+
+
+def format_timestamp_from_filename(filename):
+    """ Convert timestamp in filename to readable format: Intrusion at dd/MM/yy hh:mm:ss """
+    try:
+        # Extract the timestamp (yyMMddhhmmss) from the filename and convert it to a datetime object
+        timestamp_str = filename.split('.')[0]
+        timestamp = datetime.strptime(timestamp_str, '%y%m%d%H%M%S')
+        return timestamp.strftime('%d/%m/%y %H:%M:%S')
+    except ValueError:
+        return 'Invalid Timestamp'
 
 # User Account Page
 @app.route('/user_account')
