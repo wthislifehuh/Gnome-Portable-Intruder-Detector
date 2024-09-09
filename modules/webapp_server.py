@@ -127,6 +127,7 @@ def stream_video():
     return camera.stream_video()
 
 
+# History page (history.html)
 @app.route("/history")
 def history():
     subscription_code = "030326"
@@ -139,7 +140,7 @@ def history():
 
     if os.path.exists(video_dir):
         for video_file in os.listdir(video_dir):
-            if video_file.endswith(".mp4"):
+            if video_file.endswith('.mp4'):
                 # Extract the timestamp from the filename
                 timestamp_str = video_file.split(".")[0]
                 timestamp = datetime.strptime(timestamp_str, "%y%m%d%H%M%S")
@@ -154,15 +155,10 @@ def history():
                         continue  # Skip videos that don't match the filter date
 
                 # Add the video to the list with its formatted timestamp and URL
-                video_list.append(
-                    {
-                        "timestamp": formatted_timestamp,
-                        "url": url_for(
-                            "static",
-                            filename=f"videos/{subscription_code}/{video_file}",
-                        ),
-                    }
-                )
+                video_list.append({
+                    'timestamp': formatted_timestamp,
+                    'url': url_for('static', filename=f'videos/{subscription_code}/{video_file}')
+                })
 
     return render_template(
         "history.html", video_list=video_list, selected_date=selected_date
@@ -170,22 +166,17 @@ def history():
 
 
 def get_video_list(subscription_code):
-    """Helper function to get list of video files in mp4 format from the file system"""
-    video_dir = os.path.join("static", "videos", subscription_code)
+    """ Helper function to get list of video files in mp4 format from the file system """
+    video_dir = os.path.join('static', 'videos', subscription_code)
     if os.path.exists(video_dir):
         video_files = [
             {
-                "url": url_for(
-                    "static", filename=f"videos/{subscription_code}/{video}"
-                ),
-                "timestamp": format_timestamp_from_filename(video),
+                'url': url_for('static', filename=f'videos/{subscription_code}/{video}'),
+                'timestamp': format_timestamp_from_filename(video)
             }
-            for video in os.listdir(video_dir)
-            if video.endswith(".mp4")
+            for video in os.listdir(video_dir) if video.endswith('.mp4')
         ]
-        return sorted(
-            video_files, key=lambda x: x["timestamp"], reverse=True
-        )  # Sort by latest first
+        return sorted(video_files, key=lambda x: x['timestamp'], reverse=True)  # Sort by latest first
     return []
 
 
