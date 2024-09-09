@@ -36,13 +36,12 @@ header .nav-link {
 .live-stream {
     background-color: #211F19;
     border-radius: 10px;
-    padding: 35px;
     text-align: center;
     margin-bottom: 40px;
 }
 
 .videoSize {
-    width: 60%;
+    width: 80%;
     height: auto;
     max-width: 80%;
   }

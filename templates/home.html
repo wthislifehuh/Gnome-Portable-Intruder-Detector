@@ -45,7 +45,7 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
               <li class="nav-item"></li>
-                <a class="nav-link" href="{{ url_for('history') }}">History</a>
+                <a class="nav-link" href="{{ url_for('history') }}">Intrusion History</a>
               </li>
               <li class="nav-item"></li>
                 <a class="nav-link" href="{{ url_for('user_account') }}">User Account</a>
@@ -55,38 +55,57 @@
         </div>
       </nav>
     </header>
-
-    <!-- ====================== Live Stream ====================== -->
+    <!-- ====================== Live Stream and Recent Activity ====================== -->
     <div class="container mt-5">
-      <div id="live-stream" class="live-stream">
-        <h1
-          style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
-          class="mb-5 mt-2"
-        >
-          📸 Live Stream
-        </h1>
-        <img
-          src="{{ url_for('stream_video') }}"
-          class="videoSize"
-          onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
-        />
-        <div id="no-stream" style="display: none; color: #e8e0d8">
-          <div
-            class="d-flex align-items-center justify-content-center mb-3 mt-3"
-            style="background-color: #e8e0d8; border-radius: 20px"
-          >
-            <img
-              src="{{ url_for('static', filename='images/icons/novideo.png') }}"
-              class="m-1"
-              style="width: 30px"
-              alt="Notifications"
-            />
-            <p
-              class="live-stream-text text-black mb-0 ml-2"
-              style="margin-left: 10px"
+      <div class="row">
+        <!-- Live Stream Column -->
+        <div class="col-md-9 pt-5 pb-5">
+          <div id="live-stream" class="live-stream">
+            <h2
+              style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
+              class="mb-5 mt-5"
             >
-              No Live Stream Available
-            </p>
+              📸 Live Stream
+            </h2>
+            <img
+              src="{{ url_for('stream_video') }}"
+              class="videoSize"
+              onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
+            />
+            <div id="no-stream" style="display: none; color: #e8e0d8">
+              <div
+                class="d-flex align-items-center justify-content-center"
+                style="background-color: #e8e0d8; border-radius: 20px"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/icons/novideo.png') }}"
+                  class="m-1"
+                  style="width: 30px"
+                  alt="Notifications"
+                />
+                <p
+                  class="live-stream-text text-black mb-0 ml-2"
+                  style="margin-left: 10px"
+                >
+                  No Live Stream Available
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Column -->
+        <div class="col-md-3">
+          <div id="recent-activity" class="recent-activity">
+            <h3
+              style="font-family: 'Poppins', sans-serif; color: #e8e0d8"
+              class="mb-5 mt-2"
+            >
+              📝 Recent Activity
+            </h3>
+            <ul id="activity-list" class="list-group">
+              <!-- Recent activities will be injected here -->
+            </ul>
           </div>
         </div>
       </div>
@@ -139,6 +158,34 @@
         <p>&copy; Gnome - Intruder Detector 2024 | All Rights Reserved</p>
       </div>
     </footer>
+
+    <!-- Script to fetch and display recent activities -->
+    <script>
+      function startRecentActivityStream() {
+        const eventSource = new EventSource('/recent-activity-stream');
+    
+        eventSource.onmessage = function(event) {
+          const activityList = document.getElementById('activity-list');
+          const activities = event.data.split('\n');  // Split the received data into individual activities
+          activityList.innerHTML = '';  // Clear the current list
+    
+          // Loop through the activities and display each one
+          activities.forEach(activity => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.textContent = activity;  // Add the recent activity
+            activityList.appendChild(listItem);
+          });
+        };
+    
+        eventSource.onerror = function(error) {
+          console.error('Error receiving recent activity stream:', error);
+        };
+      }
+    
+      // Start the event stream when the page loads
+      document.addEventListener('DOMContentLoaded', startRecentActivityStream);
+    </script>
 
     <!-- Bootstrap core JS-->
     <script

@@ -7,6 +7,7 @@ import os
 import asyncio
 from notification_alarm_handler import NotificationAlarmHandler
 from datetime import datetime
+from collections import Counter
 
 
 class Camera:
@@ -19,6 +20,8 @@ class Camera:
         self.notification_alarm_handler = NotificationAlarmHandler()
         self.is_recording = False
         self.out = None
+        self.recent_activities = []
+        self.activity_updated = False  # Flag to indicate when new activity is added
 
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
@@ -80,7 +83,8 @@ class Camera:
                             print("Trigger intruder notification")
                             # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
-
+                            # Log in website
+                            self.log_intruder_activity("human")
                             # Uncomment this section when integrating notification module
                             asyncio.run(self.notification_alarm_handler.human_trigger())
 
@@ -99,9 +103,8 @@ class Camera:
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
-                            # asyncio.run(
-                            #     self.notification_alarm_handler.animal_trigger(result)
-                            # )
+                            # Log in website
+                            self.log_intruder_activity(result['animal'])
                             animal_notification_sent = True
 
                             # Uncomment this section when integrating notification module
@@ -210,3 +213,47 @@ class Camera:
         return Response(
             self.generate_frame(), mimetype="multipart/x-mixed-replace; boundary=frame"
         )
+
+    # Method to log and format recent activity
+    def log_intruder_activity(self, intruder):
+        current_datetime = datetime.now()
+        intrusion_date = current_datetime.strftime("%d/%m/%y")
+        intrusion_time = current_datetime.strftime("%H:%M:%S")
+
+        if isinstance(intruder, list):
+            animal_count = Counter(intruder)
+            formatted_status = []
+            for animal, count in animal_count.items():
+                animal_name = animal.capitalize() + ('s' if count > 1 else '')
+                formatted_status.append(f"{count} {animal_name}")
+
+            if len(formatted_status) == 2:
+                intruder = f"{formatted_status[0]} and {formatted_status[1]}"
+            elif len(formatted_status) == 1:
+                intruder = f"{formatted_status[0]}"
+            else:
+                intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+        else:
+            intruder = intruder.capitalize()
+
+        activity_entry = f"{intrusion_date} {intrusion_time} - {intruder} intruder detected."
+
+        # Append to recent activities list (limit to last 10)
+        self.recent_activities.append(activity_entry)
+        if len(self.recent_activities) > 10:
+            self.recent_activities.pop(0)  # Keep only the last 10 activities
+
+        self.activity_updated = True  # Set flag to true when new activity is added
+
+    def stream_recent_activity(self):
+        def event_stream():
+            while True:
+                # Only send data if the activity list has been updated
+                if self.activity_updated:
+                    # Send the entire list of recent activities as a JSON string
+                    data = '\n'.join(self.recent_activities)
+                    yield f"data: {data}\n\n"
+                    self.activity_updated = False  # Reset the flag after sending data
+                time.sleep(1)  # Adjust the sleep time as needed
+
+        return Response(event_stream(), content_type='text/event-stream')

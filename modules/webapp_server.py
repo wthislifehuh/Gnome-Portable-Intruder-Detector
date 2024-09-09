@@ -91,6 +91,10 @@ app.add_url_rule("/add_chatID", "add_chatID", add_chatID, methods=["POST"])
 app.add_url_rule("/delete_chatID", "delete_chatID", delete_chatID, methods=["POST"])
 
 
+@app.route('/recent-activity-stream')
+def recent_activity_stream():
+    return camera.stream_recent_activity()
+
 # Home page (home.html - livestream page)
 @app.route("/home")
 def home():
