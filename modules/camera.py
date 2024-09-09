@@ -34,14 +34,13 @@ class Camera:
 
     def process_video(self, frame_skip=15):
         frame_count = 0
-        person_last_notification_time = 0
-        animal_last_notification_time = 0
         person_notification_sent = (
             False  # Tracks whether an intruder notification has been sent
         )
         animal_notification_sent = (
             False  # Tracks whether an animal notification has been sent
         )
+        intruder_tracked = False  # Track whether an intruder is currently being tracked
 
         while True:
             ret, frame = self.cap.read()
@@ -58,79 +57,93 @@ class Camera:
             # ---------------------------------------- Frame analysis starts here ----------------------------------------
 
             fg_mask, is_event = self.event_detector.analyze_frame(frame)
-
             if is_event:
-                print("Event Detected in frame")
-
-                # Update existing trackers first before running object detection
+                print("Event detected")
+                # Update existing trackers before running object detection
                 self.object_detector.update_trackers(frame)
 
-                # If there are no active trackers or detection is needed, run object detection
+                # Only analyze objects if no active trackers exist
                 if not self.object_detector.trackers:
-                    result = self.object_detector.analyze_object(frame)  # Detect new objects
+                    result = self.object_detector.analyze_object(
+                        frame
+                    )  # Detect new objects
                     print(result)
 
-                    # Handle human intruder detection
+                    # Handle intruder detection (Unknown Person)
                     if result["is_intruder"]:
-                        if not person_notification_sent:
+                        if (
+                            not person_notification_sent
+                        ):  # Check if notification has already been sent
                             current_time = time.time()
 
                             # Trigger intruder notification and start recording
                             print("Trigger intruder notification")
-                            person_last_notification_time = current_time
+                            asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
-
-                            # Uncomment this section when integrating notification module
-                            # asyncio.run(self.notification_alarm_handler.human_trigger())
 
                             if not self.is_recording:
                                 self.start_recording(self.cap, self.channel)
 
+                        intruder_tracked = True  # Mark that intruder is being tracked
+
                     # Handle animal detection
                     if result["is_animal"]:
-                        if not animal_notification_sent:
+                        if (
+                            not animal_notification_sent
+                        ):  # Check if notification has already been sent
                             current_time = time.time()
 
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
-                            animal_last_notification_time = current_time
+                            asyncio.run(self.notification_alarm_handler.animal_trigger(result))
                             animal_notification_sent = True
-
-                            # Uncomment this section when integrating notification module
-                            # asyncio.run(self.notification_alarm_handler.animal_trigger(result['animal']))
 
                     # Continuously write frames to the video file while recording
                     if self.is_recording and self.out:
                         self.out.write(frame)
 
+                else:
+                    # Update trackers for intruders and animals, and track if intruder is still present
+                    active_person_trackers = any(
+                        identity["identity"]
+                        == "Unknown"  # Track only if it's an unknown person
+                        for identity in self.object_detector.tracking_ids.values()
+                    )
+
+                    if not active_person_trackers:
+                        # If no intruder is being tracked, stop recording and reset notification flag
+                        if self.is_recording:
+                            self.stop_recording()
+                            print("Stopped recording: Intruder is no longer tracked.")
+                        person_notification_sent = (
+                            False  # Reset to allow for new intruder notifications
+                        )
+                        intruder_tracked = (
+                            False  # Mark that no intruder is being tracked
+                        )
+
+                    else:
+                        intruder_tracked = True  # Intruder is still being tracked
+
+                    # Check if all animal trackers are lost and reset notification status for animals
+                    active_animal_trackers = any(
+                        identity["identity"] == "Animal"
+                        for identity in self.object_detector.tracking_ids.values()
+                    )
+
+                    if not active_animal_trackers:
+                        animal_notification_sent = (
+                            False  # Reset for new animal detection
+                        )
+
             else:
-                # If no event detected, continue to update the positions of tracked objects
-                self.object_detector.update_trackers(frame)
-
-                # Check if there are still active person trackers
-                active_person_trackers = any(
-                    identity["identity"] != "Unknown" and identity["identity"] != "Animal"
-                    for identity in self.object_detector.tracking_ids.values()
-                )
-
-                # Stop recording if no intruder is being tracked anymore
-                if not active_person_trackers and self.is_recording:
+                print("No event detected.")
+                if self.is_recording:
                     self.stop_recording()
-                    person_notification_sent = False  # Reset for new intruder detection
-                    print("Stopped recording due to no intruder")
-
-                # Check if all animal trackers are lost and reset notification status for animals
-                active_animal_trackers = any(
-                    identity["identity"] == "Animal"
-                    for identity in self.object_detector.tracking_ids.values()
-                )
-
-                if not active_animal_trackers:
-                    animal_notification_sent = False  # Reset for new animal detection
-
+                    print("Stopped recording: No event detected.")
             # Display the current frame
-            cv2.imshow("Camera Feed", frame)
+            cv2.imshow("Gnome", frame)
 
             # Check for user input to exit
             if cv2.waitKey(1) & 0xFF == ord("q"):
@@ -152,7 +165,7 @@ class Camera:
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         self.out = cv2.VideoWriter(
-            output_filepath, fourcc, 20.0, (frame_width, frame_height)
+            output_filepath, fourcc, 30.0, (frame_width, frame_height)
         )
         self.is_recording = True
         print("Recording started...")
