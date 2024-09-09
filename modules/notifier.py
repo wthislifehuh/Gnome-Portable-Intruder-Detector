@@ -50,11 +50,13 @@ class TelegramNotifier:
             if len(formatted_status) == 2:
                 # For two types of animals, join with "and"
                 status = f"{formatted_status[0]} and {formatted_status[1]}"
+            elif len(formatted_status) == 1:
+                status = f"{formatted_status[0]}"
             else:
                 # For more than two types of animals, join with commas and "and" before the last one
                 status = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
         else:
-            # Capitalize the first letter if status is a single string
+            # Capitalize the first letter if status is a single string (human)
             status = status.capitalize()
 
         # Create the button list for the message
