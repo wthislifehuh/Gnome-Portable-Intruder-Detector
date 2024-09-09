@@ -3,12 +3,14 @@ import cv2
 from deepface import DeepFace
 import os
 import re
+from scipy.spatial import distance
+import numpy as np
+import sqlite3
+import json
 
 
 class ObjectDetector:
-    def __init__(
-        self, yolov5_model_name="yolov5s", db_path="./face_recognition/faces/"
-    ):
+    def __init__(self, yolov5_model_name="yolov5s", db_file="face_embeddings.db"):
         # Load YOLOv5 model for human and animal detection
         yolo_model_path = "./models/yolov5s.pt"
         self.yolo_model = torch.hub.load(
@@ -25,7 +27,7 @@ class ObjectDetector:
             "cat",
         ]
         # Face recognition database path
-        self.db_path = db_path
+        self.db_file = db_file
         # Initialize the face detector
         self.face_detector = cv2.CascadeClassifier(
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -53,27 +55,75 @@ class ObjectDetector:
         )
         return faces
 
+    def get_embeddings_from_db(self):
+        """Fetch all embeddings and their corresponding image filenames from the database."""
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT image_path, embedding FROM face_embeddings")
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        embeddings = []
+        for row in rows:
+            image_path = row[0]
+            embedding_json = row[1]
+
+            # Use json.loads to safely parse the embedding
+            try:
+                embedding_data = json.loads(
+                    embedding_json
+                )  # Parse the JSON string safely
+                embedding = np.array(
+                    embedding_data[0]["embedding"]
+                )  # Convert to a numpy array
+                embeddings.append((image_path, embedding))
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"Error parsing embedding for {image_path}: {e}")
+
+        return embeddings
+
     def recognize_face(self, face_img):
-        recognition = DeepFace.find(
+        """Recognize a face using embeddings stored in the local database."""
+        # Get the embedding of the input face
+        input_embedding = DeepFace.represent(
             img_path=face_img,
             model_name="Facenet512",
-            db_path=self.db_path,
             enforce_detection=False,
-            silent=True,
         )
+        if not input_embedding:
+            return "Unknown"  # Unable to extract embedding from the input image
 
-        if recognition and not recognition[0].empty:
-            filename = (
-                recognition[0]["identity"].values[0].split("/")[-1]
+        input_embedding = np.array(input_embedding[0]["embedding"])
+
+        # Fetch all stored embeddings from the database
+        stored_embeddings = self.get_embeddings_from_db()
+
+        # Compare the input embedding with each stored embedding
+        best_match = None
+        best_distance = float("inf")  # Initialize with a very large value
+
+        for image_path, stored_embedding in stored_embeddings:
+            # Compute the distance between the input embedding and the stored embedding (e.g., cosine similarity)
+            dist = distance.cosine(input_embedding, stored_embedding)
+
+            if dist < best_distance:
+                best_distance = dist
+                best_match = image_path
+
+        # If a match was found with a sufficiently low distance
+        if (
+            best_match and best_distance < 0.4
+        ):  # You can tune this threshold based on your accuracy needs
+            filename = os.path.basename(
+                best_match
             )  # Get the filename, e.g., 'joe_ee2.jpg'
-            # Remove the file extension
             name_without_extension = os.path.splitext(filename)[0]  # Get 'joe_ee2'
-            # Remove digits from the name
             name_without_numbers = re.sub(
                 r"\d+", "", name_without_extension
-            )  # Get 'joe_ee'
-            # Replace underscores with spaces and capitalize each word
-            identity = name_without_numbers.replace("_", " ").title()
+            )  # Remove digits
+            identity = name_without_numbers.replace("_", " ").title()  # Format the name
         else:
             identity = "Unknown"
 
