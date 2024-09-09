@@ -48,15 +48,13 @@
                       <a class="nav-link" href="{{ url_for('home') }}">Live Stream</a>
                     </li>
                     <li class="nav-item"></li>
-                        <a class="nav-link" href="{{ url_for('history') }}">History</a>
+                        <a class="nav-link" href="{{ url_for('history') }}">Intrusion History</a>
                     </li>
                 </ul>
               </div>
           </div>
       </nav>
     </header>
-
-
 
     <!-- Left Face Photo Upload Modal -->
     <div class="modal fade" id="leftFaceModal" tabindex="-1" aria-labelledby="leftFaceModalLabel" aria-hidden="true">
@@ -67,8 +65,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <p>Enter your preferred name.</p>
+            <input type="text" id="registeredName" class="form-control mb-3" placeholder="eg. Joe Ee" required>
+            <!-- Alert placeholder -->
+            <div class="mt-4" id="name-placeholder"></div>
             <p>Please upload a clear photo showing your left side face.</p>
-            <input type="file" id="leftFacePhoto" class="form-control" accept="image/*">
+            <input type="file" id="leftFacePhoto" class="form-control" accept="image/*" required>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="left"></div>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/left.jpg" class="img-fluid" alt="Left Side">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadLeftPhotoButton">Next</button>
           </div>
         </div>
@@ -86,6 +94,12 @@
           <div class="modal-body">
             <p>Please upload a clear photo showing your right side face.</p>
             <input type="file" id="rightFacePhoto" class="form-control" accept="image/*">
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="right"></div>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/right.jpg" class="img-fluid" alt="Right Side Face">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadRightPhotoButton">Next</button>
           </div>
         </div>
@@ -97,12 +111,18 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="middleFaceModalLabel">Upload Middle Face Photo</h5>
+            <h5 class="modal-title" id="middleFaceModalLabel">Upload Front Face Photo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <p>Please upload a clear photo showing your front face.</p>
             <input type="file" id="middleFacePhoto" class="form-control" accept="image/*">
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="middle"></div>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/front.jpg" class="img-fluid" alt="Front Face">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadMiddlePhotoButton">Submit</button>
           </div>
         </div>
@@ -115,7 +135,7 @@
         <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="addChatIDModalLabel">Sign Up</h5>
+            <h5 class="modal-title" id="addChatIDModalLabel">Add Chat ID</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -125,8 +145,8 @@
             <!-- Telegram Chat ID -->
             <form id="addChatIDForm">
                 <div class="mb-3">
-                <label for="telegramChatID" class="form-label">Add Telegram Chat ID</label>
-                <input type="text" class="form-control" id="telegramChatID" required>
+                <label for="telegramChatID" class="form-label">Enter Telegram Chat ID to be added</label>
+                <input type="text" class="form-control" id="telegramChatID" placeholder="eg. 1234567890" required>
                 <small class="form-text text-muted">🔗NOTE: Visit BOT @raw_info_bot and send any message to it to obtain your chat_id. It should be a 10-digit number.</small>
                 </div>
                 <button type="submit" class="btn btn-dark" id="addChatIDButton">Add</button>
@@ -135,6 +155,33 @@
         </div>
         </div>
       </div>
+
+
+      <!-- Delete Chat ID Modal -->
+      <div class="modal fade" id="deleteChatIDModal" tabindex="-1" aria-labelledby="deleteChatIDModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h5 class="modal-title" placeholder="eg. 1234567890" id="addChatIDModalLabel">Delete Telegram Chat ID </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          <!-- Alert placeholder -->
+          <div id="delete-chat-placeholder"></div>
+
+          <!-- Telegram Chat ID -->
+          <form id="deleteChatIDForm">
+              <div class="mb-3">
+              <label for="delete-telegramChatID" class="form-label">Enter Telegram Chat ID to be deleted</label>
+              <input type="text" class="form-control" id="delete-telegramChatID" required>
+              <small class="form-text text-muted">🔗NOTE: Refer to the existing Chat ID for deletion.</small>
+              </div>
+              <button type="submit" class="btn btn-dark" id="deleteChatIDButton">Delete</button>
+          </form>
+          </div>
+      </div>
+      </div>
+    </div>
 
     <!-- Update Password Modal -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
@@ -181,14 +228,21 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Subscription Code: {{ subscription_code }}</h5>
-                <button class="btn btn-dark float-end" data-bs-toggle="modal" data-bs-target="#updatePasswordModal">Update Password</button>
+                <button class="btn btn-dark float-end" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#updatePasswordModal">Update Password</button>
                 <h6 class="mt-4">Telegram Chat IDs:</h6>
                 <ul>
                     {% for chat_id in telegram_chat_ids %}
                         <li>{{ chat_id }}</li>
                     {% endfor %}
                 </ul>
-                <button class="btn btn-dark float-end" data-bs-toggle="modal" style="min-width: 70px;" data-bs-target="#addChatIDModal">   Add Chat ID   </button>
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-dark ml-2" style="min-width: 150px; border-radius: 10px; margin-right: 15px;" data-bs-toggle="modal" data-bs-target="#addChatIDModal">
+                    Add Chat ID
+                  </button>
+                  <button class="btn btn-dark ml-2" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
+                    Delete Chat ID
+                  </button>
+                </div>
             </div>
         </div>
 
@@ -203,10 +257,10 @@
                         </div>
                     {% endfor %}
                 </div>
-                <button class="btn btn-dark mt-5 float-end" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Upload Photo</button>
+                <button class="btn btn-dark mt-5 float-end" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Upload Photo</button>
             </div>
         </div>
-        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px;" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">Log Out</button>
+        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px; min-width: 150px; border-radius: 10px; margin-right: 15px;" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">Log Out</button>
     </div>
 
     <!-- ====================== Footer ====================== -->
@@ -286,6 +340,49 @@
             });
         });
 
+
+      // delete chat ID Logic
+      document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('deleteChatIDButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                const telegramChatID = document.getElementById('delete-telegramChatID').value;
+
+                // Validate Telegram Chat ID
+                const chatIDRegex = /^\d{10}$/;
+                if (!chatIDRegex.test(telegramChatID)) {
+                    showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'delete-chat-placeholder');
+                    return;
+                }
+
+                // AJAX Request to delete chat ID
+                fetch('/delete_chatID', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        subscriptionCode: "{{ subscription_code }}", 
+                        telegramChatID: telegramChatID,
+                    }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        showAlertInModal('Telegram ChatID deleted successfully', 'success', 'delete-chat-placeholder')
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteChatIDModal'));
+                        modal.hide();
+                    } else {
+                        showAlertInModal(data.message, 'danger', 'delete-chat-placeholder');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showAlertInModal('An error occurred. Please try again later.', 'danger', 'delete-chat-placeholder');
+                });
+            });
+        });
+
+
       // Handle update password form submission
       document.getElementById('updatePasswordForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -339,7 +436,7 @@
           signInModalInstance.hide();
         }
 
-        // Show the success  modal
+        // Show the success modal
         const alertPlaceholder = document.getElementById('success-placeholder');
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         const alertHTML = `
@@ -421,10 +518,14 @@
       }
 
 
-      function handleUploadPhoto(file, faceType) {
+      function handleUploadPhoto(file, faceType, registeredName = '') {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('subscriptionCode', globalSubscriptionCode);  // Attach subscription code
+        formData.append('subscriptionCode', "{{ subscription_code }}");
+        formData.append('side', faceType);
+        if (registeredName) {
+            formData.append('registeredName', registeredName);  // Include registered name
+        }
 
         fetch('/upload_photo', {
           method: 'POST',
@@ -438,10 +539,10 @@
             } else if (faceType === 'right') {
               showMiddleFaceUploadModal();
             } else if (faceType === 'middle') {
-                showSuccessModal("Successfully uploaded photos.", "success");
+              showSuccessModal("Successfully uploaded photos.", "success");
             }
           } else {
-            alert('Error uploading photo. Please try again.');
+            showAlertInModal(data.message, 'danger', faceType);
           }
         })
         .catch((error) => {
@@ -451,7 +552,13 @@
 
       document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
           const fileInput = document.getElementById('leftFacePhoto').files[0];
-          handleUploadPhoto(fileInput, 'left');
+          const registeredName = document.getElementById('registeredName').value.trim();  // Capture registered name
+          if (registeredName.length > 0) {
+            handleUploadPhoto(fileInput, 'left', registeredName);
+          }
+          else{
+            showAlertInModal("Please enter a valid name", "danger", "name-placeholder");
+          }
       });
 
       document.getElementById('uploadRightPhotoButton').addEventListener('click', function() {

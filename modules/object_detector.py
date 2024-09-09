@@ -59,20 +59,20 @@ class ObjectDetector:
         """Fetch all embeddings and their corresponding image filenames from the database."""
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
-        cursor.execute("SELECT image_path, embedding FROM face_embeddings")
+        cursor.execute("SELECT embedding_name, embedding FROM face_embeddings")
         rows = cursor.fetchall()
         conn.close()
 
         embeddings = []
         for row in rows:
-            image_path = row[0]
+            embedding_name = row[0]
             embedding_json = row[1]
             try:
                 embedding_data = json.loads(embedding_json)
                 embedding = np.array(embedding_data[0]["embedding"])
-                embeddings.append((image_path, embedding))
+                embeddings.append((embedding_name, embedding))
             except (json.JSONDecodeError, KeyError) as e:
-                print(f"Error parsing embedding for {image_path}: {e}")
+                print(f"Error parsing embedding for {embedding_name}: {e}")
 
         return embeddings
 
@@ -94,17 +94,17 @@ class ObjectDetector:
         best_match = None
         best_distance = float("inf")
 
-        for image_path, stored_embedding in stored_embeddings:
+        for embedding_name, stored_embedding in stored_embeddings:
             dist = distance.cosine(input_embedding, stored_embedding)
             if dist < best_distance:
                 best_distance = dist
-                best_match = image_path
+                best_match = embedding_name
 
         if best_match and best_distance < 0.4:
             filename = os.path.basename(best_match)
             name_without_extension = os.path.splitext(filename)[0]
             name_without_numbers = re.sub(r"\d+", "", name_without_extension)
-            identity = name_without_numbers.replace("_", " ").title()
+            identity = name_without_numbers.split('_')[0].title()
         else:
             identity = "Unknown"
 

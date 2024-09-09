@@ -30,7 +30,6 @@ class NotificationAlarmHandler:
     async def human_trigger(self):
         await self.send_notification("human")
         await self.trigger_alarm("human")
-        print("trigger human")
 
     async def animal_trigger(self, animal):
         if len(animal) > 1:

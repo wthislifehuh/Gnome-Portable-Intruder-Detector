@@ -72,17 +72,17 @@
           <form id="signUpForm">
               <div class="mb-3">
               <label for="subscriptionCode-signUp" class="form-label">Channel Subscription Code</label>
-              <input type="text" class="form-control" id="subscriptionCode-signUp" required>
+              <input type="text" class="form-control" id="subscriptionCode-signUp" placeholder="eg. 000000" required>
               <small class="form-text text-muted">📍NOTE: If you're new to our service or lost your subscription code, please contact our staff at Telegram <bold>@gnomeIntruderDetector</bold>.</small>
               </div>
               <div class="mb-3">
               <label for="password-signUp" class="form-label">Password</label>
-              <input type="password" class="form-control" id="password-signUp" required>
+              <input type="password" class="form-control" id="password-signUp" placeholder="eg. 123456" required>
               <small class="form-text text-muted">Enter your password (or temporary password).</small>
               </div>
               <div class="mb-3">
               <label for="telegramChatID" class="form-label">Telegram Chat ID</label>
-              <input type="text" class="form-control" id="telegramChatID" required>
+              <input type="text" class="form-control" id="telegramChatID" placeholder="eg. 1234567890" required>
               <small class="form-text text-muted">📍NOTE: Visit BOT <bold>@raw_info_bot</bold> and send any message to it to obtain your chat_id. It should be a 10-digit number. Visit our TELEGRAM BOT at <bold>@intruderrDetector_bot</bold></small>
               </div>
               <button type="button" class="btn btn-dark" id="nextStepButton">Next</button>
@@ -109,12 +109,12 @@
           <form id="signInForm">
               <div class="mb-3">
               <label for="subscriptionCode-signIn" class="form-label">Channel Subscription Code</label>
-              <input type="text" class="form-control" id="subscriptionCode-signIn" required>
+              <input type="text" class="form-control" id="subscriptionCode-signIn" placeholder="eg. 000000" required>
               <small class="form-text text-muted">📍NOTE: If you lost your subscription code, please contact our staff at Telegram @gnomeIntruderDetector.</small>
               </div>
               <div class="mb-3">
                 <label for="password-signIn" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password-signIn" required>
+                <input type="password" class="form-control" id="password-signIn" placeholder="eg. 123456" required>
                 <small class="form-text text-muted">Enter your password.</small>
               </div>
               <button type="button" class="btn btn-dark mt-3" id="signInSubmit">Submit</button>
@@ -123,6 +123,7 @@
       </div>
       </div>
     </div>
+
 
     <!-- Left Face Photo Upload Modal -->
     <div class="modal fade" id="leftFaceModal" tabindex="-1" aria-labelledby="leftFaceModalLabel" aria-hidden="true">
@@ -133,8 +134,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <p>Enter your preferred name.</p>
+            <input type="text" id="registeredName" class="form-control mb-3" placeholder="eg. Joe Ee" required>
+            <!-- Alert placeholder -->
+            <div class="mt-4" id="name-placeholder"></div>
             <p>Please upload a clear photo showing your left side face.</p>
-            <input type="file" id="leftFacePhoto" class="form-control" accept="image/*">
+            <input type="file" id="leftFacePhoto" class="form-control" accept="image/*" required>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="left"></div>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/left.jpg" class="img-fluid" alt="Left Side">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadLeftPhotoButton">Next</button>
           </div>
         </div>
@@ -152,6 +163,12 @@
           <div class="modal-body">
             <p>Please upload a clear photo showing your right side face.</p>
             <input type="file" id="rightFacePhoto" class="form-control" accept="image/*">
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="right"></div>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/right.jpg" class="img-fluid" alt="Right Side Face">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadRightPhotoButton">Next</button>
           </div>
         </div>
@@ -163,12 +180,18 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="middleFaceModalLabel">Upload Middle Face Photo</h5>
+            <h5 class="modal-title" id="middleFaceModalLabel">Upload Front Face Photo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <p>Please upload a clear photo showing your front face.</p>
             <input type="file" id="middleFacePhoto" class="form-control" accept="image/*">
+            <!-- Alert placeholder -->
+            <div class="mt-4 mb-4" id="middle"></div>
+            <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
+            <div class="d-flex justify-content-center align-items-center">
+              <img src="../static/images/front.jpg" class="img-fluid" alt="Front Face">
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadMiddlePhotoButton">Submit</button>
           </div>
         </div>
@@ -363,7 +386,7 @@
           // Validate Telegram Chat ID
           const chatIDRegex = /^\d{10}$/;
           if (!chatIDRegex.test(telegramChatID)) {
-            showAlertInSignUpModal('Telegram Chat ID must be exactly 10 digits.', 'danger');
+            showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-signUp');
             return;
           }
 
@@ -386,12 +409,12 @@
               storeSubscriptionCodeInSession(subscriptionCode);  // Store in session
               showLeftFaceUploadModal();  // Proceed to face photo upload
             } else {
-              showAlertInSignUpModal(data.message, 'danger');
+              showAlertInModal(data.message, 'danger', 'modal-alert-placeholder-signUp');
             }
           })
           .catch((error) => {
             console.error('Error:', error);
-            showAlertInSignUpModal('An error occurred. Please try again later.', 'danger');
+            showAlertInModal('An error occurred. Please try again later.', 'danger', 'modal-alert-placeholder-signUp');
           });
         });
       });
@@ -420,31 +443,19 @@
               storeSubscriptionCodeInSession(subscriptionCode);  // Store in session
               window.location.href = '/home';  // Redirect to home
             } else {
-              showAlertInSignInModal(data.message, 'danger');
+              showAlertInModal(data.message, 'danger', 'modal-alert-placeholder-signIn');
             }
           })
           .catch((error) => {
             console.error('Error:', error);
-            showAlertInSignInModal('An error occurred. Please try again later.', 'danger');
+            showAlertInModal('An error occurred. Please try again later.', 'danger', 'modal-alert-placeholder-signIn');
           });
         });
       });
 
-      // Function to display a Bootstrap alert inside the signup modal
-      function showAlertInSignUpModal(message, type) {
-        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signUp');
-        const alertHTML = `
-          <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        `;
-        alertPlaceholder.innerHTML = alertHTML;
-      }
-
-      // Function to display a Bootstrap alert inside the signIn modal
-      function showAlertInSignInModal(message, type) {
-        const alertPlaceholder = document.getElementById('modal-alert-placeholder-signIn');
+      // Function to display a Bootstrap alert inside the modal
+      function showAlertInModal(message, type, placeholder) {
+        const alertPlaceholder = document.getElementById(placeholder);
         const alertHTML = `
           <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -495,10 +506,14 @@
       }
 
 
-      function handleUploadPhoto(file, faceType) {
+      function handleUploadPhoto(file, faceType, registeredName = '') {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('subscriptionCode', globalSubscriptionCode);  // Attach subscription code
+        formData.append('subscriptionCode', globalSubscriptionCode);
+        formData.append('side', faceType);
+        if (registeredName) {
+            formData.append('registeredName', registeredName);  // Include registered name
+        }
 
         fetch('/upload_photo', {
           method: 'POST',
@@ -512,10 +527,10 @@
             } else if (faceType === 'right') {
               showMiddleFaceUploadModal();
             } else if (faceType === 'middle') {
-              window.location.href = '/home';
+              showSuccessModal("Successfully uploaded photos.", "success");
             }
           } else {
-            alert('Error uploading photo. Please try again.');
+            showAlertInModal(data.message, 'danger', faceType);
           }
         })
         .catch((error) => {
@@ -525,7 +540,13 @@
 
       document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
           const fileInput = document.getElementById('leftFacePhoto').files[0];
-          handleUploadPhoto(fileInput, 'left');
+          const registeredName = document.getElementById('registeredName').value.trim();  // Capture registered name
+          if (registeredName.length > 0) {
+            handleUploadPhoto(fileInput, 'left', registeredName);
+          }
+          else{
+            showAlertInModal("Please enter a valid name", "danger", "name-placeholder");
+          }
       });
 
       document.getElementById('uploadRightPhotoButton').addEventListener('click', function() {

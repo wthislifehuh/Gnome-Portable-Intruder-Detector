@@ -22,7 +22,8 @@ from app import (
     upload_photo,
     store_subscription_code,
     remove_subscription_code,
-    add_chatID,
+    add_chatID,  
+    delete_chatID,
 )
 from datetime import datetime
 from watchdog.observers import Observer
@@ -87,6 +88,7 @@ app.add_url_rule(
     methods=["POST"],
 )
 app.add_url_rule("/add_chatID", "add_chatID", add_chatID, methods=["POST"])
+app.add_url_rule("/delete_chatID", "delete_chatID", delete_chatID, methods=["POST"])
 
 
 # Home page (home.html - livestream page)

@@ -81,6 +81,9 @@ class Camera:
                             # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
 
+                            # Uncomment this section when integrating notification module
+                            asyncio.run(self.notification_alarm_handler.human_trigger())
+
                             if not self.is_recording:
                                 self.start_recording(self.cap, self.channel)
 
@@ -100,6 +103,9 @@ class Camera:
                             #     self.notification_alarm_handler.animal_trigger(result)
                             # )
                             animal_notification_sent = True
+
+                            # Uncomment this section when integrating notification module
+                            asyncio.run(self.notification_alarm_handler.animal_trigger(result['animal']))
 
                     # Continuously write frames to the video file while recording
                     if self.is_recording and self.out:
