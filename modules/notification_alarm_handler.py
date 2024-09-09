@@ -19,15 +19,16 @@ class NotificationAlarmHandler:
         self.alarm.trigger_alarm("human")
 
     async def animal_trigger(self, detection_result):
-        if len(detection_result['animal_array']) > 1:
-            # Multiple animals, trigger common alarm
-            self.notifier.send_notification("human")
-            self.alarm.trigger_alarm("human")
+        if len(detection_result['animal']) > 1:
+            # Multiple animals, trigger common alarm, send notification for animals
+            await self.notifier.send_notification(detection_result['animal'])  # Send notification for each animal
+            self.alarm.trigger_alarm("human")  # Trigger common alarm for multiple animals
+            
         else:
             # Single animal, trigger specific alarm
-            animal_type = detection_result['animal_array'][0]
-            self.notifier.send_notification(animal_type)
-            self.alarm.trigger_alarm(animal_type)
+            animal_type = detection_result['animal'][0]
+            await self.notifier.send_notification(animal_type)  # Send notification for the single animal
+            self.alarm.trigger_alarm(animal_type)  # Trigger alarm specific to the animal
 
     # async def send_notification_and_trigger_alarm(self):
     #     if detection_result['is_intruder']:
