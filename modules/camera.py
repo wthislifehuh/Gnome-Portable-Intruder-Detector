@@ -63,56 +63,72 @@ class Camera:
 
             if is_event:
                 print("Event Detected in frame")
-                result = self.object_detector.analyze_object(frame)
-                print(result)
 
-                if result["is_intruder"]:  # If intruder is detected
-                    intruder_counter += 1  # Update intruder counter
+                # Update existing trackers first before running object detection
+                self.object_detector.update_trackers(frame)
 
-                    if (
-                        intruder_counter >= intruder_debounce_threshold
-                    ):  # Confirm that an intruder is detected
+                # If there are no active trackers or detection is needed, run object detection
+                if not self.object_detector.trackers:
+                    result = self.object_detector.analyze_object(
+                        frame
+                    )  # Detect new objects
+                    print(result)
 
-                        current_time = time.time()
-
-                        if (
-                            current_time - person_last_notification_time
-                            > notification_cooldown
-                        ):  # Make sure that the notification is sent only after certain threshold
-                            # Trigger notification module here!!!
-                            asyncio.run(self.notification_alarm_handler.human_trigger())
-
-                            # Trigger video recording
-                            if not self.is_recording:
-                                self.start_recording(self.cap, self.channel)
-                            person_last_notification_time = current_time
-
-                if result["is_animal"]:  # If animal is detected
-                    animal_counter += 1  # Update animal counter
-
-                    if (
-                        animal_counter >= animal_debounce_threshold
-                    ):  # Confirm that animal is detected
-
-                        current_time = time.time()
+                    if result["is_intruder"]:  # If intruder is detected
+                        intruder_counter += 1  # Update intruder counter
 
                         if (
-                            current_time - animal_last_notification_time
-                            > notification_cooldown
-                        ):  # Make sure that the notification is sent only after certain threshold
-                            # Trigger notification module here!!!
-                            asyncio.run(
-                                self.notification_alarm_handler.animal_trigger(result)
-                            )
-                            print(result["animal"])
-                            print("Trigger animal notification")
-                            animal_last_notification_time = current_time
+                            intruder_counter >= intruder_debounce_threshold
+                        ):  # Confirm that an intruder is detected
 
-                # Continuously write frames to the video file while recording
-                if self.is_recording and self.out:
-                    self.out.write(frame)
+                            current_time = time.time()
+
+                            if (
+                                current_time - person_last_notification_time
+                                > notification_cooldown
+                            ):  # Make sure that the notification is sent only after certain threshold
+                                # Trigger notification module here!!!
+                                # asyncio.run(
+                                #     self.notification_alarm_handler.human_trigger()
+                                # )
+
+                                # Trigger video recording
+                                if not self.is_recording:
+                                    self.start_recording(self.cap, self.channel)
+                                person_last_notification_time = current_time
+
+                    if result["is_animal"]:  # If animal is detected
+                        animal_counter += 1  # Update animal counter
+
+                        if (
+                            animal_counter >= animal_debounce_threshold
+                        ):  # Confirm that animal is detected
+
+                            current_time = time.time()
+
+                            if (
+                                current_time - animal_last_notification_time
+                                > notification_cooldown
+                            ):  # Make sure that the notification is sent only after certain threshold
+                                # Trigger notification module here!!!
+                                # asyncio.run(
+                                #     self.notification_alarm_handler.animal_trigger(
+                                #         result
+                                #     )
+                                # )
+                                print(result["animal"])
+                                print("Trigger animal notification")
+                                animal_last_notification_time = current_time
+
+                    # Continuously write frames to the video file while recording
+                    if self.is_recording and self.out:
+                        self.out.write(frame)
 
             else:
+                # If no event detected, continue to update the positions of tracked objects
+                self.object_detector.update_trackers(frame)
+
+                # Reset counters when no event is detected
                 intruder_counter = 0
                 animal_counter = 0
                 if self.is_recording:
@@ -133,7 +149,7 @@ class Camera:
         current_datetime = datetime.now()
 
         # Format the datetime as yymmddhhmmss
-        formatted_datetime = current_datetime.strftime('%y%m%d%H%M%S')
+        formatted_datetime = current_datetime.strftime("%y%m%d%H%M%S")
         output_filename = formatted_datetime + ".webm"  # Save as WEBM format
         output_filepath = os.path.join(output_dir, output_filename)
 
@@ -154,7 +170,7 @@ class Camera:
                 self.out.release()
                 self.out = None
             print("Recording stopped.")
-            
+
     def generate_frame(self):
         while True:
             ret, frame = self.cap.read()
