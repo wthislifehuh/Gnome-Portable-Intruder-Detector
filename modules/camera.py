@@ -20,7 +20,6 @@ class Camera:
         self.is_recording = False
         self.out = None
 
-
     def start_camera(self):
         self.cap = cv2.VideoCapture(self.camera_index)
         if not self.cap.isOpened():
@@ -35,12 +34,11 @@ class Camera:
 
     def process_video(
         self,
-        frame_skip=5,
+        frame_skip=15,
         notification_cooldown=10,
-        intruder_debounce_threshold=3,
-        animal_debounce_threshold=3,
+        intruder_debounce_threshold=30,
+        animal_debounce_threshold=30,
     ):
-        line_position = 200
         frame_count = 0
         person_last_notification_time = 0
         animal_last_notification_time = 0
@@ -61,23 +59,11 @@ class Camera:
 
             # ---------------------------------------- Frame analysis starts here ----------------------------------------
 
-            # Draw the vertical line to separate inside and outside areas
-            cv2.line(
-                frame,
-                (line_position, 0),
-                (line_position, frame.shape[0]),
-                (0, 255, 0),
-                2,
-            )
-
-            # Define the region of interest (ROI) to the right of the vertical line
-            roi = frame[:, line_position:]
-
-            fg_mask, is_event = self.event_detector.analyze_frame(roi)
+            fg_mask, is_event = self.event_detector.analyze_frame(frame)
 
             if is_event:
-                print("Event Detected in ROI")
-                result = self.object_detector.analyze_object(roi)
+                print("Event Detected in frame")
+                result = self.object_detector.analyze_object(frame)
                 print(result)
 
                 if result["is_intruder"]:  # If intruder is detected
@@ -115,7 +101,9 @@ class Camera:
                             > notification_cooldown
                         ):  # Make sure that the notification is sent only after certain threshold
                             # Trigger notification module here!!!
-                            asyncio.run(self.notification_alarm_handler.animal_trigger(result))
+                            asyncio.run(
+                                self.notification_alarm_handler.animal_trigger(result)
+                            )
                             print(result["animal"])
                             print("Trigger animal notification")
                             animal_last_notification_time = current_time
@@ -129,7 +117,7 @@ class Camera:
                 animal_counter = 0
                 if self.is_recording:
                     self.stop_recording()
-                print("No Event Detected in ROI")
+                print("No Event Detected in frame")
 
             # Display the current frame
             cv2.imshow("Camera Feed", frame)
@@ -138,18 +126,18 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    def start_recording(self, cap, channel = "030326"):
+    def start_recording(self, cap, channel="030326"):
         # Define the path where the video will be saved
         output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
         os.makedirs(output_dir, exist_ok=True)
         current_datetime = datetime.now()
         # Format the datetime as yymmddhhmmss
-        formatted_datetime = current_datetime.strftime('%y%m%d%H%M%S')
-        output_filename = formatted_datetime +".mp4"
+        formatted_datetime = current_datetime.strftime("%y%m%d%H%M%S")
+        output_filename = formatted_datetime + ".mp4"
         output_filepath = os.path.join(output_dir, output_filename)
 
         # Define the codec and create a VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v") 
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         self.out = cv2.VideoWriter(
