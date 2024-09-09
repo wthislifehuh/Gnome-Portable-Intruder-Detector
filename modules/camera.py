@@ -78,7 +78,7 @@ class Camera:
 
                             # Trigger intruder notification and start recording
                             print("Trigger intruder notification")
-                            asyncio.run(self.notification_alarm_handler.human_trigger())
+                            # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
 
                             if not self.is_recording:
@@ -96,7 +96,9 @@ class Camera:
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
-                            asyncio.run(self.notification_alarm_handler.animal_trigger(result))
+                            # asyncio.run(
+                            #     self.notification_alarm_handler.animal_trigger(result)
+                            # )
                             animal_notification_sent = True
 
                     # Continuously write frames to the video file while recording
@@ -149,7 +151,7 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    def start_recording(self, cap, channel="030326"):
+    def start_recording(self, cap, channel="030326", frame_skip=15):
         # Define the path where the video will be saved
         output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
         os.makedirs(output_dir, exist_ok=True)
@@ -164,9 +166,13 @@ class Camera:
         fourcc = cv2.VideoWriter_fourcc(*"VP80")  # VP8 codec for WEBM format
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
+
+        # Set the frame rate to reflect the actual FPS being processed
+        actual_fps = 30.0 / frame_skip
         self.out = cv2.VideoWriter(
-            output_filepath, fourcc, 30.0, (frame_width, frame_height)
+            output_filepath, fourcc, actual_fps, (frame_width, frame_height)
         )
+
         self.is_recording = True
         print("Recording started...")
 
