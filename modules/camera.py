@@ -88,9 +88,9 @@ class Camera:
                                 > notification_cooldown
                             ):  # Make sure that the notification is sent only after certain threshold
                                 # Trigger notification module here!!!
-                                # asyncio.run(
-                                #     self.notification_alarm_handler.human_trigger()
-                                # )
+                                asyncio.run(
+                                    self.notification_alarm_handler.human_trigger()
+                                )
 
                                 # Trigger video recording
                                 if not self.is_recording:
@@ -111,11 +111,11 @@ class Camera:
                                 > notification_cooldown
                             ):  # Make sure that the notification is sent only after certain threshold
                                 # Trigger notification module here!!!
-                                # asyncio.run(
-                                #     self.notification_alarm_handler.animal_trigger(
-                                #         result
-                                #     )
-                                # )
+                                asyncio.run(
+                                    self.notification_alarm_handler.animal_trigger(
+                                        result
+                                    )
+                                )
                                 print(result["animal"])
                                 print("Trigger animal notification")
                                 animal_last_notification_time = current_time
