@@ -17,11 +17,11 @@ class BotHandler:
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         button_list = [
-            [InlineKeyboardButton("📌 Subscription", callback_data='subscription')],
+            [InlineKeyboardButton("📺 Live Stream", callback_data='live_feed')],
+            [InlineKeyboardButton("📽️ Recordings", callback_data='recordings')],
+            [InlineKeyboardButton("📌 Add Subscription Chat IDs", callback_data='subscription')],
             [InlineKeyboardButton("📍 Information", callback_data='info')],
             [InlineKeyboardButton("📞 Emergency", callback_data='emergency')],
-            [InlineKeyboardButton("📺 Live Stream", callback_data='live_feed')],
-            [InlineKeyboardButton("📽️ Recordings", callback_data='recordings')]
         ]
 
         reply_markup = InlineKeyboardMarkup(button_list)
@@ -36,11 +36,11 @@ class BotHandler:
         await query.answer()
 
         if query.data == 'subscription':
-            await query.message.reply_text("Please enter your intruder detection channel subscription code.\n\n📍NOTE: If you lost your subscription code, please contact our admin at @gnomeIntruderDetector.")
+            await query.message.reply_text(f"Please enter your intruder detection channel subscription code and password.\nFormat: subscription_code<space>password\n\n📍NOTE: If you lost your subscription code, please contact our admin at @gnomeIntruderDetector. If you haven't sign up, please visit our website at {self.livefeed_link}")
             context.user_data['awaiting_subscription_code'] = True
         elif query.data == 'info':
             await query.message.reply_text(
-                f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}",
+                f"To know more about Gnome - Intruder detector, \nHere is the link to the bot information page: \n📍{self.info_link}. \n\nYou can also visit our website at \n📍{self.livefeed_link}.",
             )
         elif query.data == 'recordings':
             await self.list_recordings(update, context)
@@ -139,22 +139,67 @@ class BotHandler:
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)
         text = update.message.text
+        context.user_data['subscription_code'] = text
 
         if context.user_data.get('awaiting_subscription_code'):
-            context.user_data['subscription_code'] = text
-            context.user_data['awaiting_subscription_code'] = False
-
-            if self.subscription_manager.verify_subscription_code(text):
-                await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \n🔗NOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
-                context.user_data['awaiting_chat_id'] = True
-            else:
-                await update.message.reply_text(
-                    "🚫 Sorry, you can't access our services without a correct subscription code.",
+             # The pattern now captures a 6-digit subscription code and a password of at least 6 characters
+            pattern = r'^(\d{6})\s+(\S{6,})$'
+            match = re.match(pattern, text)
+            if match:
+                subscription_code = match.group(1)
+                password = match.group(2)
+                if len(subscription_code) == 6 and subscription_code.isdigit():
+                    if self.subscription_manager.verify_subscription_code(subscription_code):
+                        if self.subscription_manager.verify_password(subscription_code, password):
+                            await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \n🔗NOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
+                            context.user_data['awaiting_chat_id'] = True
+                        else:
+                            await update.message.reply_text(
+                            "🚫 Wrong password! Sorry, you can't access our services without a correct password.Please sign up via our website - {self.live_feed}.",
+                            reply_markup=InlineKeyboardMarkup([
+                                [InlineKeyboardButton("📌Subscription", callback_data='subscription')],
+                                [InlineKeyboardButton("📍Information", callback_data='info')]
+                            ])
+                            )
+                    else:
+                        await update.message.reply_text(
+                        "🚫 Sorry, you can't access our services without a correct subscription code. Please sign up via our website - {self.live_feed}",
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton("📌Subscription", callback_data='subscription')],
+                            [InlineKeyboardButton("📍Information", callback_data='info')]
+                        ])
+                        )
+                else:
+                    await update.message.reply_text(
+                    "🚫 Sorry, you can't access our services without a correct subscription code format (6 digit).",
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("📌Subscription", callback_data='subscription')],
                         [InlineKeyboardButton("📍Information", callback_data='info')]
                     ])
-                )
+                    )
+            else:
+                await update.message.reply_text(
+                    "🚫 Invalid input format. Please try again.",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("📌Subscription", callback_data='subscription')],
+                        [InlineKeyboardButton("📍Information", callback_data='info')]
+                    ])
+                    )
+            context.user_data['awaiting_subscription_code'] = False
+
+            
+            # context.user_data['awaiting_subscription_code'] = False
+            # if self.subscription_manager.verify_subscription_code(text):
+            #     await update.message.reply_text("🎊 Subscription code verified. Please enter your chat_id. \n🔗NOTE: You can visit BOT @raw_info_bot and send any message to it to obtain your chat_id.")
+            #     context.user_data['awaiting_chat_id'] = True
+            # else:
+            #     await update.message.reply_text(
+            #         "🚫 Sorry, you can't access our services without a correct subscription code.",
+            #         reply_markup=InlineKeyboardMarkup([
+            #             [InlineKeyboardButton("📌Subscription", callback_data='subscription')],
+            #             [InlineKeyboardButton("📍Information", callback_data='info')]
+            #         ])
+            #     )
         elif context.user_data.get('awaiting_chat_id'):
             if self.subscription_manager.verify_chat_id(text):
                 await update.message.reply_text("You are already subscribed and can access our services.")
@@ -350,7 +395,7 @@ class BotHandler:
         await self.list_recordings(update, context)
 
     async def prompt_subscription(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text("Please enter your intruder detection channel subscription code.\n\n📍NOTE: If you lost your subscription code, please contact our admin at @gnomeIntruderDetector.")
+        await update.message.reply_text("Please enter your intruder detection channel subscription code and password.\nFormat: subscription_code<space>password\n\n📍NOTE: If you lost your subscription code, please contact our admin at @gnomeIntruderDetector.")
         context.user_data['awaiting_subscription_code'] = True
     
     async def subscription(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

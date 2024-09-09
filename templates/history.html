@@ -25,6 +25,13 @@
       href="https://fonts.googleapis.com/css?family=Open+Sans|Poppins:400,700&display=swap"
       rel="stylesheet"
     />
+    <!-- Video.js -->
+    <!-- <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script> -->
+
+    <!-- Ply.js -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.2/plyr.js"></script>
   </head>
   <body>
     <header>
@@ -82,6 +89,16 @@
         </li>
         {% endfor %}
       </ul>
+      <!-- <ul class="list-group">
+        {% for video in video_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>Intrusion at {{ video.timestamp }}</span>
+          <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal" data-video-url="{{ url_for('serve_video', subscription_code=video.subscription_code, filename=video.filename) }}">
+            View Video
+          </button>
+        </li>
+        {% endfor %}
+      </ul> -->
     </div>
 
     <!-- Video Modal -->
@@ -92,15 +109,40 @@
             <h5 class="modal-title" id="videoModalLabel">Intrusion Video</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <video id="intrusionVideo" class="w-100" controls>
-              <source src="" type="video/mp4">
+
+          <!-- Video.js -->
+          <!-- <div class="modal-body">
+            <video
+              id="intrusionVideo"
+              class="video-js vjs-default-skin"
+              controls
+              preload="auto"
+              width="100%"
+              height="auto"
+              data-setup="{}"
+            >
+              <source src="" type="video/webm">
+            </video>
+         </div> -->
+
+         <!-- Ply.js -->
+         <div class="modal-body">
+          <video id="intrusionVideo" class="plyr__video-embed" controls>
+            <source src="" type="video/webm">
+          </video>
+       </div>
+
+         <!-- Normal HTML5 Video tag -->
+          <!-- <div class="modal-body">
+            <video id="intrusionVideo" class="w-100" width='640' height="480" controls>
+              <source src="" type="video/webm">
               Your browser does not support the video tag.
             </video>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
+    
 
     <!-- ====================== Display ====================== -->
     <section class="display-section text-center pb-5 mb-5" id="display">
@@ -152,6 +194,10 @@
 
     <script>
       // Load the video when the modal is opened
+      document.addEventListener('DOMContentLoaded', () => {
+        const players = Plyr.setup('.plyr__video-embed');
+      });
+
       document.getElementById('videoModal').addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget;
         var videoUrl = button.getAttribute('data-video-url');
@@ -160,7 +206,6 @@
         video.src = videoUrl;
       });
 
-      // Clear the video when the modal is closed
       document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
         var modal = this;
         var video = modal.querySelector('video');

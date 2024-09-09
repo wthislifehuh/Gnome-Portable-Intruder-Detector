@@ -131,13 +131,14 @@ class Camera:
         output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
         os.makedirs(output_dir, exist_ok=True)
         current_datetime = datetime.now()
+
         # Format the datetime as yymmddhhmmss
-        formatted_datetime = current_datetime.strftime("%y%m%d%H%M%S")
-        output_filename = formatted_datetime + ".mp4"
+        formatted_datetime = current_datetime.strftime('%y%m%d%H%M%S')
+        output_filename = formatted_datetime + ".webm"  # Save as WEBM format
         output_filepath = os.path.join(output_dir, output_filename)
 
         # Define the codec and create a VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        fourcc = cv2.VideoWriter_fourcc(*"VP80")  # VP8 codec for WEBM format
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         self.out = cv2.VideoWriter(
@@ -153,7 +154,7 @@ class Camera:
                 self.out.release()
                 self.out = None
             print("Recording stopped.")
-
+            
     def generate_frame(self):
         while True:
             ret, frame = self.cap.read()

@@ -127,6 +127,7 @@ def stream_video():
     return camera.stream_video()
 
 
+# History page (history.html)
 @app.route("/history")
 def history():
     subscription_code = "030326"
@@ -139,7 +140,7 @@ def history():
 
     if os.path.exists(video_dir):
         for video_file in os.listdir(video_dir):
-            if video_file.endswith(".mp4"):
+            if video_file.endswith('.webm'):
                 # Extract the timestamp from the filename
                 timestamp_str = video_file.split(".")[0]
                 timestamp = datetime.strptime(timestamp_str, "%y%m%d%H%M%S")
@@ -154,39 +155,18 @@ def history():
                         continue  # Skip videos that don't match the filter date
 
                 # Add the video to the list with its formatted timestamp and URL
-                video_list.append(
-                    {
-                        "timestamp": formatted_timestamp,
-                        "url": url_for(
-                            "static",
-                            filename=f"videos/{subscription_code}/{video_file}",
-                        ),
-                    }
-                )
+                video_list.append({
+                    'timestamp': formatted_timestamp,
+                    'url': url_for('static', filename=f'videos/{subscription_code}/{video_file}')
+                })
 
     return render_template(
         "history.html", video_list=video_list, selected_date=selected_date
     )
 
-
-def get_video_list(subscription_code):
-    """Helper function to get list of video files in mp4 format from the file system"""
-    video_dir = os.path.join("static", "videos", subscription_code)
-    if os.path.exists(video_dir):
-        video_files = [
-            {
-                "url": url_for(
-                    "static", filename=f"videos/{subscription_code}/{video}"
-                ),
-                "timestamp": format_timestamp_from_filename(video),
-            }
-            for video in os.listdir(video_dir)
-            if video.endswith(".mp4")
-        ]
-        return sorted(
-            video_files, key=lambda x: x["timestamp"], reverse=True
-        )  # Sort by latest first
-    return []
+@app.route('/videos/<subscription_code>/<filename>')
+def serve_video(subscription_code, filename):
+    return send_from_directory(f'static/videos/{subscription_code}', filename, mimetype='video/webm')
 
 
 def format_timestamp_from_filename(filename):
@@ -234,10 +214,10 @@ def serve_face_images(subscription_code, filename):
     return send_from_directory(face_directory, filename)
 
 
+# ---------------------------------------- Start Flask app ----------------------------------------
+
 def start_flask_app():
     app.run(host="0.0.0.0", port=5000, debug=False)
-
-# ---------------------------------------- Start Flask app ----------------------------------------
 
 if __name__ == "__main__":
     start_flask_app()
