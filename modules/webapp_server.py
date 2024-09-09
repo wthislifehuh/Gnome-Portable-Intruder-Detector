@@ -26,7 +26,7 @@ from app import (
 )
 from datetime import datetime
 from watchdog.observers import Observer
-from face_image_handler import FaceImageHandler
+
 
 # ---------------------------------------- Create Flask app ----------------------------------------
 
@@ -54,35 +54,9 @@ cap = camera.start_camera()
 video_processing_thread = Thread(target=camera.process_video, daemon=True)
 video_processing_thread.start()
 
-# ---------------------------------------- Thread to extract face embeddings from images ----------------------------------------
-
-# Directory where face images are uploaded
-subscription_code = "030326"
-faces_dir = os.path.join("face_recognition", "faces", subscription_code)
-
-
-# Function to monitor directory for new image uploads
-def monitor_directory(directory):
-    """Start monitoring the specified directory for new images"""
-    event_handler = FaceImageHandler()
-    observer = Observer()
-    observer.schedule(event_handler, directory, recursive=False)
-    observer.start()
-    try:
-        while True:
-            observer.join(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
-
-
-# Start the directory monitoring thread
-face_processing_thread = Thread(
-    target=monitor_directory, args=(faces_dir,), daemon=True
-)
-face_processing_thread.start()
 
 # ---------------------------------------- Routes ----------------------------------------
+
 
 # Route for the main page
 @app.route("/")
@@ -140,7 +114,7 @@ def history():
 
     if os.path.exists(video_dir):
         for video_file in os.listdir(video_dir):
-            if video_file.endswith('.webm'):
+            if video_file.endswith(".webm"):
                 # Extract the timestamp from the filename
                 timestamp_str = video_file.split(".")[0]
                 timestamp = datetime.strptime(timestamp_str, "%y%m%d%H%M%S")
@@ -155,18 +129,26 @@ def history():
                         continue  # Skip videos that don't match the filter date
 
                 # Add the video to the list with its formatted timestamp and URL
-                video_list.append({
-                    'timestamp': formatted_timestamp,
-                    'url': url_for('static', filename=f'videos/{subscription_code}/{video_file}')
-                })
+                video_list.append(
+                    {
+                        "timestamp": formatted_timestamp,
+                        "url": url_for(
+                            "static",
+                            filename=f"videos/{subscription_code}/{video_file}",
+                        ),
+                    }
+                )
 
     return render_template(
         "history.html", video_list=video_list, selected_date=selected_date
     )
 
-@app.route('/videos/<subscription_code>/<filename>')
+
+@app.route("/videos/<subscription_code>/<filename>")
 def serve_video(subscription_code, filename):
-    return send_from_directory(f'static/videos/{subscription_code}', filename, mimetype='video/webm')
+    return send_from_directory(
+        f"static/videos/{subscription_code}", filename, mimetype="video/webm"
+    )
 
 
 def format_timestamp_from_filename(filename):
@@ -216,8 +198,10 @@ def serve_face_images(subscription_code, filename):
 
 # ---------------------------------------- Start Flask app ----------------------------------------
 
+
 def start_flask_app():
     app.run(host="0.0.0.0", port=5000, debug=False)
+
 
 if __name__ == "__main__":
     start_flask_app()
