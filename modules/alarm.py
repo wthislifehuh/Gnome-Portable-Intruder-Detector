@@ -1,29 +1,65 @@
 # Using Method 2
-import requests
+# import requests
+
+# class AlarmTrigger:
+#     def __init__(self):
+#         # Initialize the session object when the class is instantiated
+#         self.session = requests.Session()
+
+#     def trigger_alarm(self, event):
+#         """
+#         Trigger an alarm based on the event type.
+#         Parameters:
+#             event (str): The type of event to trigger (e.g., 'human', 'dog', 'cat').
+#         """
+#         if event == "human":
+#             url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+#         elif event == "dog":
+#             url = "https://vybit.net/trigger/2uqg0zrx9wof9jgx"
+#         elif event == "cat":
+#             url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+#         else:
+#             print(f"Unknown event: {event}")
+#             return
+        
+#         response = self.session.post(url)
+#         print(f'Triggered {event} event with status: {response.status_code}')
+
+
+import aiohttp
+import asyncio
 
 class AlarmTrigger:
     def __init__(self):
-        # Initialize the session object when the class is instantiated
-        self.session = requests.Session()
+        # Define a dictionary for event to URL mapping
+        self.event_url_map = {
+            "human": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5",
+            "dog": "https://vybit.net/trigger/2uqg0zrx9wof9jgx",
+            "cat": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+        }
 
-    def trigger_alarm(self, event):
+    async def trigger_alarm(self, event):
         """
         Trigger an alarm based on the event type.
         Parameters:
             event (str): The type of event to trigger (e.g., 'human', 'dog', 'cat').
         """
-        if event == "human":
-            url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
-        elif event == "dog":
-            url = "https://vybit.net/trigger/2uqg0zrx9wof9jgx"
-        elif event == "cat":
-            url = "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
+        url = self.event_url_map.get(event)
+        if url:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url) as response:
+                    print(f'Triggered {event} event with status: {response.status}')
         else:
             print(f"Unknown event: {event}")
-            return
-        
-        response = self.session.post(url)
-        print(f'Triggered {event} event with status: {response.status_code}')
+
+# Example usage
+async def main():
+    alarm = AlarmTrigger()
+    await alarm.trigger_alarm("human")  # Trigger an alarm for human event
+
+# Run the asynchronous code
+asyncio.run(main())
+
 
 
 # Usage
