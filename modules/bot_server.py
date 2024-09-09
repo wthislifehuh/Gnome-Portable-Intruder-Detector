@@ -4,7 +4,7 @@ from bot_handler import BotHandler
 from notifier import TelegramNotifier
 from database3 import  SubscriptionManager
 # , initialize_database
-
+  
 async def main():
     # initialize_database()
     subscription_manager = SubscriptionManager()

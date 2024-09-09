@@ -40,7 +40,7 @@ class BotHandler:
             context.user_data['awaiting_subscription_code'] = True
         elif query.data == 'info':
             await query.message.reply_text(
-                f"To know more about Gnome - Intruder detector, \nHere is the link to the bot information page: \n📍{self.info_link}. \n\nYou can also visit our website at \n📍{self.livefeed_link}.",
+                f"To know more about Gnome - Intruder detector, \nHere is the link to the bot information page: \n📍{self.info_link}. \n\nYou can also visit our website at \n📍{self.livefeed_link}.\n\nIf you have any questions, please contact us at \n@gnomeIntruderDetector.",
             )
         elif query.data == 'recordings':
             await self.list_recordings(update, context)
@@ -72,7 +72,7 @@ class BotHandler:
                     video_files = os.listdir(video_folder)
                     if video_files:
                         numbered_list = "\n".join([f"{i+1}. {filename}" for i, filename in enumerate(video_files)])
-                        response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view.\n\n🔗Note: The filename is the time of the intrusion in this format: [YYMMDDHHMMSS].mp4"
+                        response_text = f"📁 Available Recordings:\n{numbered_list}\n\nPlease send the number associated with the filename you want to view.\n\n🔗Note: The filename is the time of the intrusion in this format: [YYMMDDHHMMSS].webm"
 
                         if update.callback_query:
                             await update.callback_query.message.reply_text(response_text)
@@ -355,7 +355,7 @@ class BotHandler:
             if self.subscription_manager.verify_chat_id(text):
                 self.subscription_manager.delete_chat_id(text)
                 await update.message.reply_text(f"🎊 Chat ID '{text}' deleted successfully!")
-                context.user_data['awaiting_admin_action'] = False
+                await self.admin_menu(update, context)
             else:
                 await update.message.reply_text(f"🚫 Invalid Chat ID. Returning to admin menu.")
                 await self.admin_menu(update, context)
@@ -386,7 +386,7 @@ class BotHandler:
             await update.message.reply_text("🚫 You are not authorized to access the live feed. Please subscribe first.")
     
     async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text(f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}")
+        await update.message.reply_text(f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}\n\nYou can also visit our website at \n📍{self.livefeed_link}.\n\nIf you have any questions, please contact us at 📍@gnomeIntruderDetector.")
     
     async def emergency(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Here are some emergency contacts in Kampar: \n\n📞General: 999\n📞Bomba Kampar: 054664444\n📞Hospital Kampar: 05465333\n📞Police Kampar: 054652222")
