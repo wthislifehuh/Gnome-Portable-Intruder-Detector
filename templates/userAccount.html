@@ -123,10 +123,10 @@
             <div class="d-flex justify-content-center align-items-center">
               <img src="../static/images/front.jpg" class="img-fluid" alt="Front Face">
             </div>
-            <div class="mt-4 mb-4">
-              <h4>Processing image data may take some time...</h4>
-              <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+            <div class="mt-4 mb-4 d-flex flex-column align-items-center">
+              <h6 class="mb-3">Processing image data may take some time...</h6>
+              <div class="spinner-border text-dark" role="status">
+                <span class="visually-hidden">Loading...</span>
               </div>
             </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadMiddlePhotoButton">Submit</button>
@@ -305,6 +305,7 @@
 
     <script>
       let globalSubscriptionCode = null;
+      let registeredName = '';
         // Add chat ID Logic
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('addChatIDButton').addEventListener('click', function(e) {
@@ -483,7 +484,7 @@
         });
       }
 
-
+      //  ================================ Upload Photo Logic =================================
       function showLeftFaceUploadModal() {
         // Hide the password modal
         const passwordModalElement = document.getElementById('updatePasswordModal');
@@ -522,48 +523,11 @@
         middleFaceModal.show();
       }
 
-
-      function handleUploadPhoto(file, faceType, registeredName = '') {
-        const loadingSection = document.getElementById('loading');
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('subscriptionCode', "{{ subscription_code }}");
-        formData.append('side', faceType);
-        if (registeredName) {
-            formData.append('registeredName', registeredName);  // Include registered name
-        }
-
-        fetch('/upload_photo', {
-          method: 'POST',
-          body: formData,
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            if (faceType === 'left') {
-              showRightFaceUploadModal();
-            } else if (faceType === 'right') {
-              showMiddleFaceUploadModal();
-            } else if (faceType === 'middle') {
-              showSuccessModal("Successfully uploaded photos.", "success");
-            }
-          } else {
-            showAlertInModal(data.message, 'danger', faceType);
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-      }
-
-      
-
       document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
           const fileInput = document.getElementById('leftFacePhoto').files[0];
-          const registeredName = document.getElementById('registeredName').value.trim();  // Capture registered name
+          registeredName = document.getElementById('registeredName').value.trim();  // Capture registered name
           if (registeredName.length > 0) {
-            handleUploadPhoto(fileInput, 'left', registeredName);
+            handleUploadPhoto(fileInput, 'left');
           }
           else{
             showAlertInModal("Please enter a valid name", "danger", "name-placeholder");
@@ -585,6 +549,73 @@
         }
         handleUploadPhoto(fileInput, 'middle');
       });
+
+
+      let uploadedImagePaths = [];  // To store the file paths of the uploaded images
+
+      function handleUploadPhoto(file, faceType) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('subscriptionCode', "{{ subscription_code }}");
+          formData.append('side', faceType);
+          if (registeredName) {
+              formData.append('registeredName', registeredName);  // Include registered name
+          }
+
+          fetch('/upload_photo', {
+            method: 'POST',
+            body: formData,
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              uploadedImagePaths.push(data.file_path);  // Store uploaded file path
+              
+              if (faceType === 'left') {
+                showRightFaceUploadModal();
+              } else if (faceType === 'right') {
+                showMiddleFaceUploadModal();
+              } else if (faceType === 'middle') {
+                if (uploadedImagePaths.length === 3) {
+                  // Trigger embedding processing after all 3 images are uploaded
+                  triggerEmbeddingProcessing(uploadedImagePaths);
+                }
+                else{
+                  console.log("Error: no 3 images");
+                }
+              }
+            } else {
+              showAlertInModal(data.message, 'danger', faceType);
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+      function triggerEmbeddingProcessing(imagePaths) {
+        const formData = new FormData();
+        formData.append('imagePaths', JSON.stringify(imagePaths));  // Ensure imagePaths is JSON
+        formData.append('subscriptionCode', "{{ subscription_code }}");  // Pass subscription code
+
+          fetch('/process_embeddings', {
+            method: 'POST',
+            body: formData,
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              showSuccessModal("Successfully uploaded and processed images.", "success");
+            } else {
+              // showAlertInModal(data.message, 'danger', 'embedding-error');
+              console.error('Data message:', data.message);
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
     </script>
     
 

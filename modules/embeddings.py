@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import re
 import json
 from deepface import DeepFace
 from flask import jsonify
@@ -67,42 +68,52 @@ class FaceEmbeddingDB:
             print(f"Database error during existence check: {e}")
             return False
 
-    def process_image(self, file_path, subscription_code, side, registered_name):
-        """Process an image and save its embedding to the database."""
-        if registered_name:
-            embeddings_name = f"{registered_name}_{side}"  # Use registered name in embedding
-        else:
+    def process_images(self, file_paths, subscription_code):
+        """Process the list of images and save their embeddings."""
+        for file_path in file_paths:
             filename = os.path.basename(file_path)
-            embeddings_name = f"{filename.rsplit('.', 1)[0]}_{side}"
+            name = filename.rsplit('.', 1)[0]  # Use filename without extension as embedding name
+            # Regex to find the last occurrence of _left, _right, or _middle
+            pattern = r"(.*)_(left|right|middle)$"
+            match = re.match(pattern, name)
+            if match:
+                # Get the name part before the last underscore
+                name_part = match.group(1)
+                # Remove any underscores from the name part
+                cleaned_name = name_part.replace('_', ' ')
+                # Combine the cleaned name with the suffix (_left, _right, _middle)
+                embeddings_name = f"{cleaned_name}_{match.group(2)}"
 
-        # Check if embedding already exists
-        if self.embedding_exists(embeddings_name):
-            print(f"Embedding for {embeddings_name} already exists.")
-            return jsonify({'success': False, 'message': 'Image already exists'})
+            # Check if embedding already exists
+            if self.embedding_exists(embeddings_name):
+                print(f"Embedding for {embeddings_name} already exists.")
+                continue
 
-        try:
-            print(f"Processing image: {file_path} for subscription code: {subscription_code} and side: {side}")
-            
-            # Extract the face embedding using DeepFace
-            embedding = DeepFace.represent(img_path=file_path, model_name="Facenet512", enforce_detection=False)
-            embedding_json = json.dumps(embedding)
-            
-            # Save the embedding to the database
-            self.save_embedding_to_db(subscription_code, embeddings_name, embedding_json)
-            
-            # Remove the original image after processing
-            os.remove(file_path)
+            try:
+                print(f"Processing image: {file_path} for subscription code: {subscription_code}")
+                
+                # Extract the face embedding using DeepFace
+                embedding = DeepFace.represent(img_path=file_path, model_name="Facenet512", enforce_detection=False)
+                embedding_json = json.dumps(embedding)
+                
+                # Save the embedding to the database
+                self.save_embedding_to_db(subscription_code, embeddings_name, embedding_json)
+                
+                # Remove the original image after processing
+                os.remove(file_path)
 
-            return jsonify({'success': True, 'message': 'Embedding saved and image deleted'})
+            except Exception as e:
+                print(f"Error processing image {file_path}: {e}")
+                return jsonify({'success': False, 'message': f"Error processing image: {e}"})
 
-        except sqlite3.Error as db_error:
-            print(f"Database error: {db_error}")
-            return jsonify({'success': False, 'message': f"Database error: {db_error}"})
+        return jsonify({'success': True, 'message': 'Embeddings processed and images deleted'})
 
-        except FileNotFoundError as fnf_error:
-            print(f"File not found error: {fnf_error}")
-            return jsonify({'success': False, 'message': f"File error: {fnf_error}"})
-
-        except Exception as e:
-            print(f"General error processing image {file_path}: {e}")
-            return jsonify({'success': False, 'message': f"Error processing image: {e}"})
+    def get_side_from_path(self, file_path):
+        """Extract the side information (left, right, middle) from the file path."""
+        if 'left' in file_path:
+            return 'left'
+        elif 'right' in file_path:
+            return 'right'
+        elif 'middle' in file_path:
+            return 'middle'
+        return 'unknown'

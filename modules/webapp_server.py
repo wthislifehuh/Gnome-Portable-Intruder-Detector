@@ -20,6 +20,7 @@ from app import (
     validate_signUp,
     update_password,
     upload_photo,
+    process_embeddings,
     store_subscription_code,
     remove_subscription_code,
     add_chatID,  
@@ -75,6 +76,7 @@ app.add_url_rule(
     "/update_password", "update_password", update_password, methods=["POST"]
 )
 app.add_url_rule("/upload_photo", "upload_photo", upload_photo, methods=["POST"])
+app.add_url_rule("/process_embeddings", "process_embeddings", process_embeddings, methods=["POST"])
 app.add_url_rule(
     "/store_subscription_code",
     "store_subscription_code",

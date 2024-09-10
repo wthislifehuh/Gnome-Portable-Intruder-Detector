@@ -138,31 +138,6 @@ def update_password():
     
 
 
-# def upload_photo():
-#     if 'file' not in request.files or 'subscriptionCode' not in request.form:
-#         return jsonify({'success': False, 'message': 'No file or subscription code part'})
-
-#     file = request.files['file']
-#     subscription_code = request.form['subscriptionCode']  # Retrieve the subscription code
-#     side = request.form['side']
-
-#     if file.filename == '':
-#         return jsonify({'success': False, 'message': 'No selected file'})
-
-#     if file and subscription_code:
-#         # Create the folder for the subscription if it doesn't exist
-#         subscription_dir = os.path.join('face_recognition/faces', subscription_code)
-#         os.makedirs(subscription_dir, exist_ok=True)
-
-#         # Save the file in the subscription folder
-#         filename = secure_filename(file.filename)
-#         file.save(os.path.join(subscription_dir, filename))
-
-#         return jsonify({'success': True})
-#     else:
-#         return jsonify({'success': False, 'message': 'File or subscription code missing'})
-    
-
 # ============================ Embeddings database ===================================================================
 
 # Route to handle face photo uploads
@@ -179,17 +154,35 @@ def upload_photo():
         return jsonify({'success': False, 'message': 'No selected file'})
 
     if file and subscription_code and side:
+        # Define the storage directory
         subscription_dir = os.path.join('face_recognition/faces', subscription_code)
         os.makedirs(subscription_dir, exist_ok=True)
 
-        filename = secure_filename(file.filename)
+        # Construct the new filename using the registered name and side
+        if registered_name:
+            filename = f"{registered_name.replace(' ', '_')}_{side}.jpg"  # Replace spaces in the name
+        else:
+            filename = f"{secure_filename(file.filename.rsplit('.', 1)[0])}_{side}.jpg"
+
         file_path = os.path.join(subscription_dir, filename)
         file.save(file_path)
 
-        # Pass registered name to process_image function
-        return embedding.process_image(file_path, subscription_code, side, registered_name)
+        # Return the uploaded file path without embedding processing
+        return jsonify({'success': True, 'file_path': file_path})
     else:
         return jsonify({'success': False, 'message': 'Missing required fields'})
+
+
+def process_embeddings():
+    image_paths = json.loads(request.form['imagePaths'])
+    subscription_code = request.form['subscriptionCode']
+
+    if len(image_paths) != 3:
+        return jsonify({'success': False, 'message': 'Incomplete image set for processing'})
+
+    # Call the embedding function
+    return embedding.process_images(image_paths, subscription_code)
+
 
 # @app.route('/retrieve_image/<subscription_code>/<embedding_name>', methods=['GET'])
 # def retrieve_image(subscription_code, embedding_name):
