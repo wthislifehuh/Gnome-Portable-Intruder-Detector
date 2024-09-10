@@ -528,6 +528,7 @@
               showMiddleFaceUploadModal();
             } else if (faceType === 'middle') {
               showSuccessModal("Successfully uploaded photos.", "success");
+              window.location.href = '/home';
             }
           } else {
             showAlertInModal(data.message, 'danger', faceType);
