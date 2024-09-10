@@ -202,7 +202,7 @@
                     <div id="passwords-placeholder"></div>
                     <form id="updatePasswordForm">
                         <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
+                            <label for="newPassword" class="form-label">Enter Your New Password</label>
                             <input type="password" class="form-control" id="newPassword" required>
                         </div>
                         <button type="submit" class="btn btn-dark">Update</button>
@@ -226,45 +226,76 @@
     </div>
 
     <!-- ====================== User Account Information ====================== -->
-        <!-- Account Information -->
     <div class="container mt-5">
-        <h2 class="text-center mb-5">Account Information</h2>
-
-        <!-- Container 1: Subscription Code & Telegram Chat IDs -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Subscription Code: {{ subscription_code }}</h5>
-                <button class="btn btn-dark float-end" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#updatePasswordModal">Update Password</button>
-                <h6 class="mt-4">Telegram Chat IDs:</h6>
-                <ul>
-                    {% for chat_id in telegram_chat_ids %}
-                        <li>{{ chat_id }}</li>
-                    {% endfor %}
-                </ul>
-                <div class="d-flex justify-content-end">
-                  <button class="btn btn-dark ml-2" style="min-width: 150px; border-radius: 10px; margin-right: 15px;" data-bs-toggle="modal" data-bs-target="#addChatIDModal">
-                    Add Chat ID
-                  </button>
-                  <button class="btn btn-dark ml-2" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
-                    Delete Chat ID
-                  </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Container 2: Registered Persons -->
-        <div class="card mb-4">
-          <div class="card-body">
-              <h5 class="card-title">Registered Person</h5>
-              <ul>
-                  {% for person in registered_persons %}
-                      <li>{{ person }}</li>
-                  {% endfor %}
-              </ul>
-              <button class="btn btn-dark mt-5 float-end" style="min-width: 150px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#leftFaceModal">Register New Photo</button>
+      <h2 class="text-center mb-1">Account Information</h2>
+      <p class="text-center mb-5">📍Telegram Bot: @intruderrDetector_bot</p>
+      <!-- Container 1: Subscription Code & Update Password -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Row for Subscription Code and Update Password Button -->
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title"><bold>Subscription Code: {{ subscription_code }}</bold></h5>
+            <button
+              class="btn btn-dark"
+              style="min-width: 180px; border-radius: 10px;"
+              data-bs-toggle="modal"
+              data-bs-target="#updatePasswordModal"
+            >
+              Update Password
+            </button>
           </div>
         </div>
-        <button class="btn btn-dark mt-5 float-end" style="margin-bottom: 150px; min-width: 150px; border-radius: 10px; margin-right: 15px;" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">Log Out</button>
+      </div>
+
+      <!-- Container 2: Telegram Chat IDs -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Telegram Chat IDs Header -->
+          <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
+            <h6 class="m-0">Telegram Chat IDs</h6>
+          </div>
+          <!-- Telegram Chat IDs List -->
+          <ul class="list-group mt-3">
+            {% for chat_id in telegram_chat_ids %}
+              <li class="list-group-item">{{ chat_id }}</li>
+            {% endfor %}
+          </ul>
+          <!-- Buttons for Add/Delete Chat ID -->
+          <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px " data-bs-toggle="modal" data-bs-target="#addChatIDModal">
+              Add Chat ID
+            </button>
+            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
+              Delete Chat ID
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container 3: Registered Persons -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Registered Person Header -->
+          <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
+            <h6 class="m-0">Registered Person</h6>
+          </div>
+          <!-- Registered Persons List -->
+          <ul class="list-group mt-3">
+            {% for person in registered_persons %}
+              <li class="list-group-item">{{ person }}</li>
+            {% endfor %}
+          </ul>
+          <!-- Button for Registering New Photo -->
+          <button class="btn btn-dark mt-5 float-end" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#leftFaceModal">
+            Register New Photo
+          </button>
+        </div>
+      </div>
+
+      <!-- Log Out Button -->
+      <button class="btn btn-dark mt-5 float-end" style="min-width: 180px; border-radius: 10px; margin-bottom: 150px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">
+        Log Out
+      </button>
     </div>
 
     <!-- ====================== Footer ====================== -->
