@@ -245,13 +245,13 @@ footer {
     flex-direction: column;
 }
 
-.footer .social {
+.social {
     position: relative;
     margin: 7px 0;
     flex-wrap: wrap;
 }
 
-.footer .social a {
+.social a {
     text-align: center;
     height: 3rem;
     width: 3rem;
@@ -264,11 +264,32 @@ footer {
     opacity: 0.8;
 }
 
-.footer .social a:hover {
+.social a:hover {
     color: #211F19;
     opacity: 1.5;
     transform: translateY(-10px);
 }
+
+.telegram-link{
+    text-align: center;
+    height: 3rem;
+    width: 3rem;
+    background: #F7F0E8;
+    border-radius: 100%;
+    line-height: 3rem;
+    color: #211F19;
+    transition: 0.5s;
+    font-size: 20px;
+    opacity: 0.8;
+}
+
+.telegram-link:hover {
+    color: #211F19;
+    opacity: 1.5;
+    transform: translateY(-10px);
+}
+
+
 
 footer p {
     color: #fff;
