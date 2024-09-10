@@ -4,6 +4,7 @@ from deepface import DeepFace
 import os
 import re
 from scipy.spatial import distance
+from embeddings import FaceEmbeddingDB
 import numpy as np
 import sqlite3
 import json
@@ -33,6 +34,10 @@ class ObjectDetector:
         self.identity_confirmation_frames = (
             identity_confirmation_frames  # Number of frames to confirm identity
         )
+
+        # Ensure the database exists by calling FaceEmbeddingDB.create_db()
+        if not os.path.exists(self.db_file):
+            FaceEmbeddingDB(self.db_file).create_db()
 
     def detect_objects(self, frame):
         """Perform object detection on the frame using YOLOv5."""
