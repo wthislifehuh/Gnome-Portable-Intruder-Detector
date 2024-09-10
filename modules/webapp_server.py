@@ -15,6 +15,7 @@ from threading import Thread
 from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
+from embeddings import FaceEmbeddingDB
 from app import (
     validate_signIn,
     validate_signUp,
@@ -43,6 +44,7 @@ app = Flask(
 # ---------------------------------------- Define variables ----------------------------------------
 
 sub_manager = SubscriptionManager()
+embedding = FaceEmbeddingDB()
 app.secret_key = "your_secret_key"  # Needed for session management
 channel = "030326"
 
@@ -178,30 +180,15 @@ def user_account():
         return redirect(url_for("index"))
 
     telegram_chat_ids = sub_manager.get_chat_ids_by_subscription_code(subscription_code)
-    registered_photos = get_registered_photos(subscription_code)
+    registered_name = embedding.get_registered_persons(subscription_code)
 
     return render_template(
         "userAccount.html",
         subscription_code=subscription_code,
         telegram_chat_ids=telegram_chat_ids,
-        registered_photos=registered_photos,  # Pass this to the template
+        registered_persons=registered_name,  # Pass this to the template
     )
 
-
-def get_registered_photos(subscription_code):
-    """Helper function to get list of registered photos from the file system"""
-    subscription_dir = os.path.join("face_recognition", "faces", subscription_code)
-    if os.path.exists(subscription_dir):
-        print(os.listdir(subscription_dir))
-        return os.listdir(subscription_dir)  # Return the list of photo filenames
-    print(f"Directory does not exist: {subscription_dir}")
-    return []
-
-
-@app.route("/face_recognition/faces/<subscription_code>/<filename>")
-def serve_face_images(subscription_code, filename):
-    face_directory = os.path.join("face_recognition", "faces", subscription_code)
-    return send_from_directory(face_directory, filename)
 
 
 # ---------------------------------------- Start Flask app ----------------------------------------

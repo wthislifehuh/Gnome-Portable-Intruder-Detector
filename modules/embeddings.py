@@ -117,3 +117,30 @@ class FaceEmbeddingDB:
         elif 'middle' in file_path:
             return 'middle'
         return 'unknown'
+
+
+    def get_registered_persons(self, subscription_code):
+            """Fetch and clean the names of registered persons from the database."""
+            conn = sqlite3.connect(self.db_file)
+            cursor = conn.cursor()
+
+            # Retrieve embedding names for the specified subscription code
+            cursor.execute(
+                "SELECT embedding_name FROM face_embeddings WHERE subscription_code = ?", 
+                (subscription_code,)
+            )
+            rows = cursor.fetchall()
+            conn.close()
+
+            # Extract and clean names (remove _left, _right, _middle)
+            person_names = set()
+            for row in rows:
+                embedding_name = row[0]
+
+                # Use regex to extract the person's name, removing side information
+                match = re.match(r"(.*)_(left|right|middle)$", embedding_name)
+                if match:
+                    person_name = match.group(1).replace('_', ' ').title()  # Clean and format the name
+                    person_names.add(person_name)
+
+            return list(person_names)
