@@ -242,18 +242,19 @@ class Camera:
         self.recent_activities.append(activity_entry)
         if len(self.recent_activities) > 10:
             self.recent_activities.pop(0)  # Keep only the last 10 activities
-
+        print("log: ", activity_entry)
         self.activity_updated = True  # Set flag to true when new activity is added
 
     def stream_recent_activity(self):
         def event_stream():
+            last_sent = ""  # Store the last sent activity data
             while True:
-                # Only send data if the activity list has been updated
                 if self.activity_updated:
-                    # Send the entire list of recent activities as a JSON string
                     data = '\n'.join(self.recent_activities)
-                    yield f"data: {data}\n\n"
-                    self.activity_updated = False  # Reset the flag after sending data
-                time.sleep(1)  # Adjust the sleep time as needed
-
+                    print("Recent activity: ", self.recent_activities)
+                    if data != last_sent:  # Only send if there's new data
+                        yield f"data: {data}\n\n"
+                        last_sent = data  # Update last sent data
+                    self.activity_updated = False  # Reset the update flag
+                time.sleep(1)  # Sleep for 1 second before checking again
         return Response(event_stream(), content_type='text/event-stream')

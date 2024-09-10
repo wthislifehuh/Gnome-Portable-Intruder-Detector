@@ -55,54 +55,50 @@
         </div>
       </nav>
     </header>
+
     <!-- ====================== Live Stream and Recent Activity ====================== -->
     <div class="container mt-5">
       <div class="row">
         <!-- Live Stream Column -->
-        <div class="col-md-9 pt-5 pb-5">
-          <div id="live-stream" class="live-stream">
-            <h2
-              style="font-family: 'Poppins', sans-serif; color: #f6f3ef"
-              class="mb-5 mt-5"
+        <div class="col-md-8 col-12 live-stream pb-5">
+          <h2 class="mt-4 mb-4" style="font-family: 'Poppins', sans-serif; color: #f6f3ef">
+            📸 Live Stream
+          </h2>
+          <img
+            src="{{ url_for('stream_video') }}"
+            class="videoSize"
+            onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
+          />
+          <div id="no-stream" style="display: none; color: #e8e0d8">
+            <div
+              class="d-flex align-items-center justify-content-center"
+              style="background-color: #e8e0d8; border-radius: 20px"
             >
-              📸 Live Stream
-            </h2>
-            <img
-              src="{{ url_for('stream_video') }}"
-              class="videoSize"
-              onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('no-stream').style.display='block';"
-            />
-            <div id="no-stream" style="display: none; color: #e8e0d8">
-              <div
-                class="d-flex align-items-center justify-content-center"
-                style="background-color: #e8e0d8; border-radius: 20px"
+              <img
+                src="{{ url_for('static', filename='images/icons/novideo.png') }}"
+                class="m-1"
+                style="width: 30px"
+                alt="Notifications"
+              />
+              <p
+                class="live-stream-text text-black mb-0 ml-2"
+                style="margin-left: 10px"
               >
-                <img
-                  src="{{ url_for('static', filename='images/icons/novideo.png') }}"
-                  class="m-1"
-                  style="width: 30px"
-                  alt="Notifications"
-                />
-                <p
-                  class="live-stream-text text-black mb-0 ml-2"
-                  style="margin-left: 10px"
-                >
-                  No Live Stream Available
-                </p>
-              </div>
+                No Live Stream Available
+              </p>
             </div>
           </div>
         </div>
-
+    
         <!-- Recent Activity Column -->
-        <div class="col-md-3">
+        <div class="col-md-4 col-12">
           <div id="recent-activity" class="recent-activity">
-            <h3
-              style="font-family: 'Poppins', sans-serif; color: #e8e0d8"
+            <h5
+              style="font-family: 'Poppins', sans-serif; color: #211F19"
               class="mb-5 mt-2"
             >
               📝 Recent Activity
-            </h3>
+            </h5>
             <ul id="activity-list" class="list-group">
               <!-- Recent activities will be injected here -->
             </ul>
@@ -110,6 +106,7 @@
         </div>
       </div>
     </div>
+    
 
     <!-- ====================== Display ====================== -->
     <section class="display-section text-center pb-5 mb-5" id="display">
@@ -159,7 +156,6 @@
       </div>
     </footer>
 
-    <!-- Script to fetch and display recent activities -->
     <script>
       function startRecentActivityStream() {
         const eventSource = new EventSource('/recent-activity-stream');
@@ -167,14 +163,14 @@
         eventSource.onmessage = function(event) {
           const activityList = document.getElementById('activity-list');
           const activities = event.data.split('\n');  // Split the received data into individual activities
-          activityList.innerHTML = '';  // Clear the current list
-    
+          print("Event Data: ", activities)
+          activityList.innerHTML = ''; 
           // Loop through the activities and display each one
           activities.forEach(activity => {
             const listItem = document.createElement('li');
             listItem.className = 'list-group-item';
             listItem.textContent = activity;  // Add the recent activity
-            activityList.appendChild(listItem);
+            activityList.appendChild(listItem);  // Append to the list
           });
         };
     
