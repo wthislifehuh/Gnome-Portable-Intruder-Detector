@@ -43,6 +43,7 @@ class Camera:
         animal_notification_sent = (
             False  # Tracks whether an animal notification has been sent
         )
+        intruder_tracked = False  # Track whether an intruder is currently being tracked
 
         while True:
             ret, frame = self.cap.read()
@@ -90,6 +91,8 @@ class Camera:
                             if not self.is_recording:
                                 self.start_recording(self.cap, self.channel)
 
+                        intruder_tracked = True  # Mark that intruder is being tracked
+
                     # Handle animal detection
                     if result["is_animal"]:
                         if (
@@ -102,7 +105,7 @@ class Camera:
                             print("Trigger animal notification")
                             animal_notification_sent = True
                             # Uncomment this section when integrating notification module
-                            asyncio.run(self.notification_alarm_handler.animal_trigger(result["animal"]))
+                            asyncio.run(self.notification_alarm_handler.animal_trigger(result['animal']))
                             # Log in website
                             self.log_intruder_activity(result['animal'])
                             
@@ -127,6 +130,12 @@ class Camera:
                         person_notification_sent = (
                             False  # Reset to allow for new intruder notifications
                         )
+                        intruder_tracked = (
+                            False  # Mark that no intruder is being tracked
+                        )
+
+                    else:
+                        intruder_tracked = True  # Intruder is still being tracked
 
                     # Check if all animal trackers are lost and reset notification status for animals
                     active_animal_trackers = any(
@@ -212,24 +221,32 @@ class Camera:
         intrusion_time = current_datetime.strftime("%H:%M:%S")
 
         if isinstance(intruder, list):
-            animal_count = Counter(intruder)
-            formatted_status = []
-            for animal, count in animal_count.items():
-                animal_name = animal.capitalize() + ('s' if count > 1 else '')
-                formatted_status.append(f"{count} {animal_name}")
-
-            if len(formatted_status) == 2:
-                intruder = f"{formatted_status[0]} and {formatted_status[1]}"
-            elif len(formatted_status) == 1:
-                intruder = f"{formatted_status[0]}"
+            if all(item == 'Unknown' for item in intruder):  # Check if all elements in the list are 'unknown'
+                # Handle the special case for 'unknown' treated as 'Human'
+                human_count = len(intruder)
+                if human_count == 1:
+                    intruder = "Human"
+                else:
+                    intruder = f"{human_count} Humans"
             else:
-                intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                if len(intruder) > 1:
+                    animal_count = Counter(intruder)
+                    formatted_status = []
+                    for animal, count in animal_count.items():
+                        animal_name = animal.capitalize() + ('s' if count > 1 else '')
+                        formatted_status.append(f"{count} {animal_name}")
+                    if len(formatted_status) == 2:
+                        intruder = f"{formatted_status[0]} and {formatted_status[1]}"
+                    elif len(formatted_status) == 1:
+                        intruder = f"{formatted_status[0]}"
+                    else:
+                        intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                else:
+                    intruder = intruder[0].capitalize()
         else:
             intruder = intruder.capitalize()
 
-        activity_entry = (
-            f"{intrusion_date} {intrusion_time} - {intruder} intruder detected."
-        )
+        activity_entry = f"{intrusion_date} {intrusion_time} - {intruder} intruder detected."
 
         # Append to recent activities list (limit to last 10)
         self.recent_activities.append(activity_entry)
@@ -242,12 +259,11 @@ class Camera:
             last_sent = ""  # Store the last sent activity data
             while True:
                 if self.activity_updated:
-                    data = ",".join(self.recent_activities)
+                    data = ','.join(self.recent_activities)
                     print("Recent activity: ", self.recent_activities)
                     if data != last_sent:  # Only send if there's new data
                         yield f"data: {data}\n\n"
                         last_sent = data  # Update last sent data
                     self.activity_updated = False  # Reset the update flag
                 time.sleep(1)  # Sleep for 1 second before checking again
-
-        return Response(event_stream(), content_type="text/event-stream")
+        return Response(event_stream(), content_type='text/event-stream')
