@@ -250,7 +250,7 @@ class Camera:
             last_sent = ""  # Store the last sent activity data
             while True:
                 if self.activity_updated:
-                    data = '\n'.join(self.recent_activities)
+                    data = ','.join(self.recent_activities)
                     print("Recent activity: ", self.recent_activities)
                     if data != last_sent:  # Only send if there's new data
                         yield f"data: {data}\n\n"

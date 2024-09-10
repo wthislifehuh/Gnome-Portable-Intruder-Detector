@@ -162,8 +162,8 @@
     
         eventSource.onmessage = function(event) {
           const activityList = document.getElementById('activity-list');
-          const activities = event.data.split('\n');  // Split the received data into individual activities
-          print("Event Data: ", activities)
+          const activities = event.data.split(',');  // Split the received data into individual activities
+          console.log("Event Data: ", activities)
           activityList.innerHTML = ''; 
           // Loop through the activities and display each one
           activities.forEach(activity => {
