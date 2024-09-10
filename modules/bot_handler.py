@@ -12,7 +12,7 @@ class BotHandler:
         self.notifier = NotificationAlarmHandler()
         self.subscription_manager = SubscriptionManager()
         self.application = Application.builder().token(self.notifier.token).build()
-        self.livefeed_link = "http://192.168.1.19:5000"
+        self.livefeed_link = "http://192.168.1.5:5000"
         self.info_link = "https://playful-router-dca.notion.site/Gnome-Intruder-Detector-1ee22862e81244a8a083ee262e2274f8"
         
 

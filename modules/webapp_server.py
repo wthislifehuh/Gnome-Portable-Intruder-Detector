@@ -146,8 +146,16 @@ def history():
                             "static",
                             filename=f"videos/{subscription_code}/{video_file}",
                         ),
+                        "datetime": timestamp  # Store the actual datetime object for sorting
                     }
                 )
+
+    # Sort the video_list by the 'datetime' key in descending order (latest first)
+    video_list.sort(key=lambda x: x["datetime"], reverse=True)
+
+    # Remove the 'datetime' key from each dictionary after sorting, as it's not needed in the template
+    for video in video_list:
+        del video["datetime"]
 
     return render_template(
         "history.html", video_list=video_list, selected_date=selected_date

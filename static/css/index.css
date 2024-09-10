@@ -41,10 +41,16 @@ header .nav-link {
 }
 
 .videoSize {
-    width: 80%;
     height: auto;
-    max-width: 80%;
-  }
+    max-width: 90%; /* Default max-width for laptop size */
+}
+
+/* For very large screens (e.g., desktop) or very small screens (e.g., phone) */
+@media only screen and (max-width: 768px), (min-width: 1200px) {
+    .videoSize {
+        max-width: 100%; /* On phone or large screen, max-width is 100% */
+    }
+}
 
 .live-stream-text{
     color: #211F19;

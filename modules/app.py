@@ -21,6 +21,7 @@ import numpy as np
 sub_manager = SubscriptionManager()
 embedding = FaceEmbeddingDB()
 
+# Route to validate sign up information
 def validate_signUp():
     try:
         data = request.json
@@ -49,7 +50,7 @@ def validate_signUp():
         print(f"Error: {e}")
         return jsonify({'success': False, 'message': 'Server error'}), 500
 
-
+# Route to validate sign in information
 def validate_signIn():
     try:
         data = request.json
@@ -182,37 +183,3 @@ def process_embeddings():
 
     # Call the embedding function
     return embedding.process_images(image_paths, subscription_code)
-
-
-# @app.route('/retrieve_image/<subscription_code>/<embedding_name>', methods=['GET'])
-# def retrieve_image(subscription_code, embedding_name):
-#     """Retrieve and decode the embedding, convert it back to an image, and serve it"""
-#     try:
-#         conn = sqlite3.connect(db_file)
-#         cursor = conn.cursor()
-
-#         cursor.execute(
-#             "SELECT embedding FROM face_embeddings WHERE subscription_code = ? AND embedding_name = ?",
-#             (subscription_code, embedding_name)
-#         )
-#         row = cursor.fetchone()
-
-#         if row:
-#             embedding_json = row[0]
-#             embedding = json.loads(embedding_json)[0]['embedding']
-
-#             # Convert embedding back to image (assuming embedding was an image, adjust this if necessary)
-#             image_data = np.array(embedding).astype(np.uint8)
-#             image = Image.fromarray(image_data)
-#             buffer = BytesIO()
-#             image.save(buffer, format="PNG")
-#             encoded_image = base64.b64encode(buffer.getvalue()).decode('utf-8') v    
-
-#             conn.close()
-#             return jsonify({'success': True, 'image': encoded_image})
-#         else:
-#             conn.close()
-#             return jsonify({'success': False, 'message': 'Embedding not found'})
-
-#     except sqlite3.Error as e:
-#         return jsonify({'success': False, 'message': f'Database error: {e}'})
