@@ -123,6 +123,12 @@
             <div class="d-flex justify-content-center align-items-center">
               <img src="../static/images/front.jpg" class="img-fluid" alt="Front Face">
             </div>
+            <div class="mt-4 mb-4">
+              <h4>Processing image data may take some time...</h4>
+              <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
             <button type="button" class="btn btn-dark mt-3" id="uploadMiddlePhotoButton">Submit</button>
           </div>
         </div>
@@ -498,7 +504,6 @@
         if (leftFaceModalInstance) {
           leftFaceModalInstance.hide(); // Hide the left-side face modal
         }
-
         // Show the right-side face photo upload modal
         const rightFaceModal = new bootstrap.Modal(document.getElementById('rightFaceModal'));
         rightFaceModal.show();
@@ -519,6 +524,8 @@
 
 
       function handleUploadPhoto(file, faceType, registeredName = '') {
+        const loadingSection = document.getElementById('loading');
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('subscriptionCode', "{{ subscription_code }}");
@@ -550,6 +557,8 @@
         });
       }
 
+      
+
       document.getElementById('uploadLeftPhotoButton').addEventListener('click', function() {
           const fileInput = document.getElementById('leftFacePhoto').files[0];
           const registeredName = document.getElementById('registeredName').value.trim();  // Capture registered name
@@ -567,8 +576,14 @@
       });
 
       document.getElementById('uploadMiddlePhotoButton').addEventListener('click', function() {
-          const fileInput = document.getElementById('middleFacePhoto').files[0];
-          handleUploadPhoto(fileInput, 'middle');
+        const fileInput = document.getElementById('middleFacePhoto').files[0];
+        // Hide the right-side face modal
+        const middleFaceModalElement = document.getElementById('middleFaceModal');
+        const middleFaceModalInstance = bootstrap.Modal.getInstance(middleFaceModalElement);
+        if (middleFaceModalInstance) {
+          middleFaceModalInstance.hide(); // Hide the right-side face modal
+        }
+        handleUploadPhoto(fileInput, 'middle');
       });
     </script>
     

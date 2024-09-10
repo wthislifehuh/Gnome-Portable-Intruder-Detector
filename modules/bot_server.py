@@ -1,15 +1,14 @@
 # bot_run.py
 import asyncio
 from bot_handler import BotHandler
-from notifier import TelegramNotifier
+from notification_alarm_handler import NotificationAlarmHandler
 from database3 import  SubscriptionManager
 # , initialize_database
   
 async def main():
     # initialize_database()
-    subscription_manager = SubscriptionManager()
-    notifier = TelegramNotifier(subscription_manager)
-    bot_handler = BotHandler(notifier)
+    # subscription_manager = SubscriptionManager()
+    bot_handler = BotHandler()
 
     await bot_handler.run()
 

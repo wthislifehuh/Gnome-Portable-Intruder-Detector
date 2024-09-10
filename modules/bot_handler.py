@@ -1,16 +1,17 @@
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
-from notifier import TelegramNotifier
+from notification_alarm_handler import NotificationAlarmHandler
+from database3 import SubscriptionManager
 import os
 import re
 import asyncio
 
 class BotHandler:
-    def __init__(self, notifier: TelegramNotifier):
-        self.notifier = notifier
-        self.subscription_manager = notifier.subscription_manager
-        self.application = Application.builder().token(notifier.token).build()
+    def __init__(self):
+        self.notifier = NotificationAlarmHandler()
+        self.subscription_manager = SubscriptionManager()
+        self.application = Application.builder().token(self.notifier.token).build()
         self.livefeed_link = "http://192.168.1.19:5000"
         self.info_link = "https://playful-router-dca.notion.site/Gnome-Intruder-Detector-1ee22862e81244a8a083ee262e2274f8"
         
@@ -274,7 +275,7 @@ class BotHandler:
             context.user_data['awaiting_deletion_subscription_code'] = True
             context.user_data['awaiting_admin_action'] = False
         elif action == '3':
-            await update.message.reply_text("Please enter the chat ID to delete:")
+            await update.message.reply_text("Please enter the chatID to delete. \n\nFormat: subscription code (6 digits) <space>chatID (10 digits):")
             context.user_data['awaiting_deletion_chat_id'] = True
             context.user_data['awaiting_admin_action'] = False
         elif action == '4':
@@ -351,15 +352,29 @@ class BotHandler:
                 await update.message.reply_text(f"🚫 Invalid subscription code. Returning to admin menu.")
                 await self.admin_menu(update, context)
             context.user_data['awaiting_deletion_subscription_code'] = False
+            
         elif context.user_data.get('awaiting_deletion_chat_id'):
-            if self.subscription_manager.verify_chat_id(text):
-                self.subscription_manager.delete_chat_id(text)
-                await update.message.reply_text(f"🎊 Chat ID '{text}' deleted successfully!")
-                await self.admin_menu(update, context)
+            pattern = r'^(\d{6})\s+(\S{10})$'
+            match = re.match(pattern, text)
+            if match:
+                subscription_code = match.group(1)
+                chatId = match.group(2)
+                if self.subscription_manager.verify_subscription_code(subscription_code):
+                    if self.subscription_manager.verify_chat_id(chatId):
+                        self.subscription_manager.delete_chat_id(subscription_code, chatId)
+                        await update.message.reply_text(f"🎊 Chat ID '{chatId}' deleted successfully!")
+                        await self.admin_menu(update, context)
+                    else:
+                        await update.message.reply_text(f"🚫 Invalid Chat ID. Returning to admin menu.")
+                        await self.admin_menu(update, context)
+                else:
+                    await update.message.reply_text(f"🚫 Invalid Subscription code in '{text}'!")
+                    await self.admin_menu(update, context)
             else:
-                await update.message.reply_text(f"🚫 Invalid Chat ID. Returning to admin menu.")
+                await update.message.reply_text(f"🚫 Invalid input format. Returning to admin menu.")
                 await self.admin_menu(update, context)
             context.user_data['awaiting_deletion_chat_id'] = False
+
         elif context.user_data.get('awaiting_update_livefeed'):
             pattern = r'^(\d{6})\s+(https?://.+)'
             match = re.match(pattern, text)
@@ -386,7 +401,7 @@ class BotHandler:
             await update.message.reply_text("🚫 You are not authorized to access the live feed. Please subscribe first.")
     
     async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text(f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}\n\nYou can also visit our website at \n📍{self.livefeed_link}.\n\nIf you have any questions, please contact us at 📍@gnomeIntruderDetector.")
+        await update.message.reply_text(f"To know more about Gnome - Intruder detector, \nHere is the link to the information page: \n📍{self.info_link}\n\nYou can also visit our website at \n📍{self.livefeed_link}.\n\nIf you have any questions, please contact us at \n📍@gnomeIntruderDetector.")
     
     async def emergency(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Here are some emergency contacts in Kampar: \n\n📞General: 999\n📞Bomba Kampar: 054664444\n📞Hospital Kampar: 05465333\n📞Police Kampar: 054652222")

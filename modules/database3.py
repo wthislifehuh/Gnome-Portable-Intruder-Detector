@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Replace with your MongoDB connection string
+# MongoDB connection string
 MONGO_URI = 'mongodb+srv://2103160:zSdnikf6JsDJRy15@gnome.kaqdi.mongodb.net/?retryWrites=true&w=majority&appName=Gnome'
 DB_NAME = 'subscriptions_db'
 
@@ -29,8 +29,8 @@ class SubscriptionManager:
             hashed_password = generate_password_hash(password)
             self.db.subscriptions.insert_one({
                 'subscription_code': subscription_code,
-                'password': hashed_password,  # Store hashed password
-                'livefeed': None
+                'password': hashed_password,  
+                'livefeed': 'http://192.168.1.5:5000'
             })
         except Exception as e:
             print(f"Error adding subscription: {e}")

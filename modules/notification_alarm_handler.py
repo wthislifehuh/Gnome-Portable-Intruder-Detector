@@ -1,6 +1,5 @@
 #noti_alarm_handler.py
 import asyncio
-from bot_handler import BotHandler
 import requests
 import aiohttp
 import asyncio
