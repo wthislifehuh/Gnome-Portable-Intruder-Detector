@@ -83,10 +83,10 @@ class Camera:
                             print("Trigger intruder notification")
                             # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
-                            # Log in website
-                            self.log_intruder_activity("human")
                             # Uncomment this section when integrating notification module
-                            asyncio.run(self.notification_alarm_handler.human_trigger())
+                            asyncio.run(self.notification_alarm_handler.human_trigger(result["intruders"]))
+                            # Log in website
+                            self.log_intruder_activity(result["intruders"])
 
                             if not self.is_recording:
                                 self.start_recording(self.cap, self.channel)
@@ -103,12 +103,12 @@ class Camera:
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
-                            # Log in website
-                            self.log_intruder_activity(result['animal'])
                             animal_notification_sent = True
-
                             # Uncomment this section when integrating notification module
                             asyncio.run(self.notification_alarm_handler.animal_trigger(result['animal']))
+                            # Log in website
+                            self.log_intruder_activity(result['animal'])
+                            
 
                     # Continuously write frames to the video file while recording
                     if self.is_recording and self.out:
@@ -221,18 +221,28 @@ class Camera:
         intrusion_time = current_datetime.strftime("%H:%M:%S")
 
         if isinstance(intruder, list):
-            animal_count = Counter(intruder)
-            formatted_status = []
-            for animal, count in animal_count.items():
-                animal_name = animal.capitalize() + ('s' if count > 1 else '')
-                formatted_status.append(f"{count} {animal_name}")
-
-            if len(formatted_status) == 2:
-                intruder = f"{formatted_status[0]} and {formatted_status[1]}"
-            elif len(formatted_status) == 1:
-                intruder = f"{formatted_status[0]}"
+            if all(item == 'Unknown' for item in intruder):  # Check if all elements in the list are 'unknown'
+                # Handle the special case for 'unknown' treated as 'Human'
+                human_count = len(intruder)
+                if human_count == 1:
+                    intruder = "Human"
+                else:
+                    intruder = f"{human_count} Humans"
             else:
-                intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                if len(intruder) > 1:
+                    animal_count = Counter(intruder)
+                    formatted_status = []
+                    for animal, count in animal_count.items():
+                        animal_name = animal.capitalize() + ('s' if count > 1 else '')
+                        formatted_status.append(f"{count} {animal_name}")
+                    if len(formatted_status) == 2:
+                        intruder = f"{formatted_status[0]} and {formatted_status[1]}"
+                    elif len(formatted_status) == 1:
+                        intruder = f"{formatted_status[0]}"
+                    else:
+                        intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                else:
+                    intruder = intruder[0].capitalize()
         else:
             intruder = intruder.capitalize()
 
@@ -242,7 +252,6 @@ class Camera:
         self.recent_activities.append(activity_entry)
         if len(self.recent_activities) > 10:
             self.recent_activities.pop(0)  # Keep only the last 10 activities
-        print("log: ", activity_entry)
         self.activity_updated = True  # Set flag to true when new activity is added
 
     def stream_recent_activity(self):

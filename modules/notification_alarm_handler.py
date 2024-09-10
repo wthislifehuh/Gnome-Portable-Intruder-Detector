@@ -26,8 +26,11 @@ class NotificationAlarmHandler:
         self.base_url = f"https://api.telegram.org/bot{self.token}"
 
         
-    async def human_trigger(self):
-        await self.send_notification("human")
+    async def human_trigger(self, result):
+        if len(result) > 1:
+            await self.send_notification(result)
+        else:
+            await self.send_notification("human")
         await self.trigger_alarm("human")
 
     async def animal_trigger(self, animal):
@@ -76,26 +79,33 @@ class NotificationAlarmHandler:
     async def send_notification(self, status):
         # Check if the status is a list of animals
         if isinstance(status, list):
-            # Count occurrences of each animal
-            animal_count = Counter(status)
-            
-            # Prepare a list to store formatted strings like '2 Dogs', '1 Cat', etc.
-            formatted_status = []
-            
-            for animal, count in animal_count.items():
-                # Capitalize the animal name and add plural form if count > 1
-                animal_name = animal.capitalize() + ('s' if count > 1 else '')
-                formatted_status.append(f"{count} {animal_name}")
-            
-            # Join the formatted strings with appropriate punctuation
-            if len(formatted_status) == 2:
-                # For two types of animals, join with "and"
-                status = f"{formatted_status[0]} and {formatted_status[1]}"
-            elif len(formatted_status) == 1:
-                status = f"{formatted_status[0]}"
+            if all(item == 'Unknown' for item in status):  # Check if all elements in the list are 'unknown'
+                # Handle the special case for 'unknown' treated as 'Human'
+                human_count = len(status)
+                if human_count == 1:
+                    status = "Human"
+                else:
+                    status = f"{human_count} Humans"
             else:
-                # For more than two types of animals, join with commas and "and" before the last one
-                status = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                # Existing animal logic remains here
+                if len(status) > 1:
+                    animal_count = Counter(status)
+                    formatted_status = []
+                    for animal, count in animal_count.items():
+                        # Capitalize the animal name and add plural form if count > 1
+                        animal_name = animal.capitalize() + ('s' if count > 1 else '')
+                        formatted_status.append(f"{count} {animal_name}")
+                    # Join the formatted strings with appropriate punctuation
+                    if len(formatted_status) == 2:
+                        # For two types of animals, join with "and"
+                        status = f"{formatted_status[0]} and {formatted_status[1]}"
+                    elif len(formatted_status) == 1:
+                        status = f"{formatted_status[0]}"
+                    else:
+                        # For more than two types of animals, join with commas and "and" before the last one
+                        status = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                else:
+                    status = status[0].capitalize()
         else:
             # Capitalize the first letter if status is a single string (human)
             status = status.capitalize()
@@ -118,3 +128,5 @@ class NotificationAlarmHandler:
                 f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:", 
                 reply_markup=reply_markup
             )
+
+            

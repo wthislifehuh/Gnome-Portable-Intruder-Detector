@@ -111,7 +111,7 @@ def stream_video():
     return camera.stream_video()
 
 
-# History page (history.html)
+# ======= History page (history.html) =======
 @app.route("/history")
 def history():
     subscription_code = "030326"
