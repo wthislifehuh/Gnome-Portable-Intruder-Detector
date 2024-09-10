@@ -109,7 +109,7 @@ class ObjectDetector:
             filename = os.path.basename(best_match)
             name_without_extension = os.path.splitext(filename)[0]
             name_without_numbers = re.sub(r"\d+", "", name_without_extension)
-            identity = name_without_numbers.split('_')[0].title()
+            identity = name_without_numbers.split("_")[0].title()
         else:
             identity = "Unknown"
 
@@ -210,7 +210,12 @@ class ObjectDetector:
     def analyze_object(self, frame):
         """Detect and recognize objects in the frame."""
         # Dictionary to return results
-        result = {"is_intruder": False, "is_animal": False, "animal": []}
+        result = {
+            "is_intruder": False,
+            "intruders": [],
+            "is_animal": False,
+            "animal": [],
+        }
 
         # Detect objects in the frame
         detected_objects = self.detect_objects(frame)
@@ -231,6 +236,7 @@ class ObjectDetector:
 
                         if identity == "Unknown":
                             result["is_intruder"] = True
+                            result["intruders"].append("Unknown")
 
                         # Initialize a new tracker for the person
                         tracker_id = self.initialize_tracker("person", bbox, frame)
@@ -256,6 +262,7 @@ class ObjectDetector:
 
                 else:
                     result["is_intruder"] = True
+                    result["intruders"].append("Unknown")
                     cv2.rectangle(
                         frame,
                         (int(xmin), int(ymin)),
