@@ -28,8 +28,9 @@ def validate_signUp():
         subscription_code = data.get('subscriptionCode')
         telegram_chat_id = data.get('telegramChatID')
         password = data.get('password') 
+        phoneNum = data.get('phoneNum')
 
-        print(f"Received subscription code: {subscription_code}, Telegram chat ID: {telegram_chat_id}, Password: {password}")
+        print(f"Received subscription code: {subscription_code}, Telegram chat ID: {telegram_chat_id}, Password: {password}, Phone Number: {phoneNum}")
 
         # Check if subscription code is valid
         if not sub_manager.verify_subscription_code(subscription_code):
@@ -40,8 +41,11 @@ def validate_signUp():
             return jsonify({'success': False, 'message': 'Incorrect password'})
         
         # Check if chat ID already exists, if not, add to the database
-        if not sub_manager.verify_chat_id(telegram_chat_id):
+        if not sub_manager.verify_chat_id(subscription_code, telegram_chat_id):
             sub_manager.add_chat_id(subscription_code, telegram_chat_id)
+
+        if not sub_manager.verify_phone_num(subscription_code, phoneNum):
+            sub_manager.add_phone_num(subscription_code, phoneNum)
 
 
         return jsonify({'success': True})
@@ -100,7 +104,7 @@ def add_chatID():
     telegram_chat_id = data.get('telegramChatID')
 
     # Check if the chat ID already exists
-    if sub_manager.verify_chat_id(telegram_chat_id):
+    if sub_manager.verify_chat_id(subscription_code, telegram_chat_id):
         return jsonify({'success': False, 'message': 'ChatID has already registered.'})
 
     # Proceed with adding the new chat ID if it doesn't exist
@@ -117,12 +121,46 @@ def delete_chatID():
     telegram_chat_id = data.get('telegramChatID')
 
     # Check if the chat ID already exists
-    if not sub_manager.verify_chat_id(telegram_chat_id):
+    if not sub_manager.verify_chat_id(subscription_code, telegram_chat_id):
         return jsonify({'success': False, 'message': 'ChatID does not exist.'})
 
     # Proceed with adding the new chat ID if it doesn't exist
     if sub_manager.delete_chat_id(subscription_code, telegram_chat_id):
         return jsonify({'success': True, 'message': 'Chat ID deleted successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'Error adding Chat ID'})
+    
+
+# Route to add Phone Number
+def add_phoneNum():
+    data = request.json
+    subscription_code = data.get('subscriptionCode')
+    phone_num = data.get('phoneNum')
+
+    # Check if the chat ID already exists
+    if sub_manager.verify_phone_num(subscription_code, phone_num):
+        return jsonify({'success': False, 'message': 'Phone Number has already registered.'})
+
+    # Proceed with adding the new chat ID if it doesn't exist
+    if sub_manager.add_phone_num(subscription_code, phone_num):
+        return jsonify({'success': True, 'message': 'Phone Number added successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'Error adding Chat ID'})
+    
+
+# Route to delete Phone Number
+def delete_phoneNum():
+    data = request.json
+    subscription_code = data.get('subscriptionCode')
+    phone_num = data.get('phoneNum')
+
+    # Check if the chat ID already exists
+    if not sub_manager.verify_phone_num(subscription_code, phone_num):
+        return jsonify({'success': False, 'message': 'Phone Number does not exist.'})
+
+    # Proceed with adding the new chat ID if it doesn't exist
+    if sub_manager.delete_phone_num(subscription_code, phone_num):
+        return jsonify({'success': True, 'message': 'Phone Number deleted successfully'})
     else:
         return jsonify({'success': False, 'message': 'Error adding Chat ID'})
 

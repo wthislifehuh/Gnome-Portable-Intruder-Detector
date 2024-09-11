@@ -85,6 +85,11 @@
               <input type="text" class="form-control" id="telegramChatID" placeholder="eg. 1234567890" required>
               <small class="form-text text-muted">📍NOTE: Visit BOT <bold><a href="https://t.me/raw_info_bot">@raw_info_bot</a></bold> and send any message to it to obtain your chat_id. It should be a 10-digit number. Visit our TELEGRAM BOT at <bold><a href="https://t.me/gnomeIntruderDetector">@intruderrDetector_bot</a></bold></small>
               </div>
+              <div class="mb-3">
+                <label for="phoneNum" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" id="phoneNum" placeholder="eg. +60171234567" required>
+                <small class="form-text text-muted">📍Enter the phone number that you want to registered. We will only send notification via SMS when the Telegram Bot fails to send alert to you.</small>
+                </div>
               <button type="button" class="btn btn-dark" id="nextStepButton">Next</button>
           </form>
           </div>
@@ -395,6 +400,7 @@
           const subscriptionCode = document.getElementById('subscriptionCode-signUp').value;
           const password = document.getElementById('password-signUp').value;
           const telegramChatID = document.getElementById('telegramChatID').value;
+          const phoneNum = document.getElementById('phoneNum').value;
 
           // Validate Telegram Chat ID
           const chatIDRegex = /^\d{10}$/;
@@ -402,6 +408,13 @@
             showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-signUp');
             return;
           }
+
+          const phoneNumFormat = /^\+\d+$/;
+          if (!phoneNumFormat.test(phoneNum)) {
+            showAlertInModal('Invalid phone number format. It must start with a "+" and contain only digits.', 'danger', 'modal-alert-placeholder-signUp');
+            return;
+          }
+
 
           // AJAX Request to validate subscription code, password, and chat ID
           fetch('/validate_signUp', {
@@ -413,6 +426,7 @@
               subscriptionCode: subscriptionCode,
               password: password,
               telegramChatID: telegramChatID,
+              phoneNum: phoneNum,
             }),
           })
           .then((response) => response.json())

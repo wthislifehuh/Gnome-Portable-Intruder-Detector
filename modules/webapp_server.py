@@ -26,6 +26,8 @@ from app import (
     remove_subscription_code,
     add_chatID,  
     delete_chatID,
+    add_phoneNum,
+    delete_phoneNum,
 )
 from datetime import datetime
 from watchdog.observers import Observer
@@ -45,8 +47,8 @@ app = Flask(
 
 sub_manager = SubscriptionManager()
 embedding = FaceEmbeddingDB()
-app.secret_key = "your_secret_key"  # Needed for session management
 channel = "030326"
+app.secret_key = os.urandom(24)
 
 # ---------------------------------------- Thread to process frames ----------------------------------------
 
@@ -68,32 +70,17 @@ def index():
     return render_template("index.html")
 
 
-app.add_url_rule(
-    "/validate_signIn", "validate_signIn", validate_signIn, methods=["POST"]
-)
-app.add_url_rule(
-    "/validate_signUp", "validate_signUp", validate_signUp, methods=["POST"]
-)
-app.add_url_rule(
-    "/update_password", "update_password", update_password, methods=["POST"]
-)
+app.add_url_rule("/validate_signIn", "validate_signIn", validate_signIn, methods=["POST"])
+app.add_url_rule("/validate_signUp", "validate_signUp", validate_signUp, methods=["POST"])
+app.add_url_rule("/update_password", "update_password", update_password, methods=["POST"])
 app.add_url_rule("/upload_photo", "upload_photo", upload_photo, methods=["POST"])
 app.add_url_rule("/process_embeddings", "process_embeddings", process_embeddings, methods=["POST"])
-app.add_url_rule(
-    "/store_subscription_code",
-    "store_subscription_code",
-    store_subscription_code,
-    methods=["POST"],
-)
-app.add_url_rule(
-    "/remove_subscription_code",
-    "remove_subscription_code",
-    remove_subscription_code,
-    methods=["POST"],
-)
+app.add_url_rule("/store_subscription_code", "store_subscription_code", store_subscription_code,methods=["POST"])
+app.add_url_rule("/remove_subscription_code", "remove_subscription_code", remove_subscription_code, methods=["POST"])
 app.add_url_rule("/add_chatID", "add_chatID", add_chatID, methods=["POST"])
 app.add_url_rule("/delete_chatID", "delete_chatID", delete_chatID, methods=["POST"])
-
+app.add_url_rule("/add_phoneNum", "add_phoneNum", add_phoneNum, methods=["POST"])
+app.add_url_rule("/delete_phoneNum", "delete_phoneNum", delete_phoneNum, methods=["POST"])
 
 @app.route('/recent-activity-stream')
 def recent_activity_stream():
@@ -102,6 +89,9 @@ def recent_activity_stream():
 # Home page (home.html - livestream page)
 @app.route("/home")
 def home():
+    subscription_code = session.get("subscription_code")
+    if not subscription_code:
+        return redirect(url_for("index"))
     return render_template("home.html")
 
 
@@ -114,7 +104,9 @@ def stream_video():
 # ======= History page (history.html) =======
 @app.route("/history")
 def history():
-    subscription_code = "030326"
+    subscription_code = session.get("subscription_code")
+    if not subscription_code:
+        return redirect(url_for("index"))
 
     # Retrieve the selected date from the query string
     selected_date = request.args.get("filter_date")
@@ -189,12 +181,14 @@ def user_account():
 
     telegram_chat_ids = sub_manager.get_chat_ids_by_subscription_code(subscription_code)
     registered_name = embedding.get_registered_persons(subscription_code)
+    phone_num = sub_manager.get_phone_nums_by_subscription_code(subscription_code)
 
     return render_template(
         "userAccount.html",
         subscription_code=subscription_code,
         telegram_chat_ids=telegram_chat_ids,
         registered_persons=registered_name,  # Pass this to the template
+        phone_num=phone_num,
     )
 
 

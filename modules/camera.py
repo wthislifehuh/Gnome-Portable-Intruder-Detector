@@ -17,7 +17,7 @@ class Camera:
         self.cap = None
         self.event_detector = EventDetector()
         self.object_detector = ObjectDetector()
-        self.notification_alarm_handler = NotificationAlarmHandler()
+        self.notification_alarm_handler = NotificationAlarmHandler(self.channel)
         self.is_recording = False
         self.out = None
         self.recent_activities = []

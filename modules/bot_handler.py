@@ -202,7 +202,7 @@ class BotHandler:
             #         ])
             #     )
         elif context.user_data.get('awaiting_chat_id'):
-            if self.subscription_manager.verify_chat_id(text):
+            if self.subscription_manager.verify_chat_id(context.user_data['subscription_code'], text):
                 await update.message.reply_text("You are already subscribed and can access our services.")
             else:
                 if len(text) == 10 and text.isdigit():
@@ -360,7 +360,7 @@ class BotHandler:
                 subscription_code = match.group(1)
                 chatId = match.group(2)
                 if self.subscription_manager.verify_subscription_code(subscription_code):
-                    if self.subscription_manager.verify_chat_id(chatId):
+                    if self.subscription_manager.verify_chat_id(subscription_code, chatId):
                         self.subscription_manager.delete_chat_id(subscription_code, chatId)
                         await update.message.reply_text(f"🎊 Chat ID '{chatId}' deleted successfully!")
                         await self.admin_menu(update, context)
@@ -395,7 +395,7 @@ class BotHandler:
 
     async def livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = str(update.message.chat_id)
-        if self.subscription_manager.verify_chat_id(chat_id):
+        if self.subscription_manager.verify_chat_id(context.user_data['subscription_code'], chat_id):
             await self.get_livefeed(update, context)
         else:
             await update.message.reply_text("🚫 You are not authorized to access the live feed. Please subscribe first.")

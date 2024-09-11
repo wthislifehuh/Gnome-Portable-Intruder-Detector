@@ -95,7 +95,7 @@
             <p>Please upload a clear photo showing your right side face.</p>
             <input type="file" id="rightFacePhoto" class="form-control" accept="image/*">
             <!-- Alert placeholder -->
-            <div class="mt-4 mb-4" id="right"></div>
+            <div class="mt-4 mb-4" id="right"></div>`
             <small class="form-text text-muted mb-4">📍NOTE: For better accuracy, please follow the demo image below and ensure that your image has a clean background.</small>
             <div class="d-flex justify-content-center align-items-center">
               <img src="../static/images/right.jpg" class="img-fluid" alt="Right Side Face">
@@ -189,6 +189,60 @@
       </div>
     </div>
 
+
+    <!-- Add Phone Number Modal -->
+    <div class="modal fade" id="addPhoneNumModal" tabindex="-1" aria-labelledby="addPhoneNumModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addPhoneNumModalLabel">Add Phone Number</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Alert placeholder -->
+            <div id="add-phoneNum-placeholder"></div>
+
+            <!-- Phone Number -->
+            <form id="addPhoneNumForm">
+              <div class="mb-3">
+                <label for="addPhoneNum" class="form-label">Enter Phone Number to be added</label>
+                <input type="text" class="form-control" id="addPhoneNum" placeholder="eg. +0171234567" required>
+                <small class="form-text text-muted">📍NOTE: We will only send notifications via SMS when Telegram Bot is not reachable at your side.</small>
+              </div>
+              <button type="submit" class="btn btn-dark" id="addPhoneNumButton">Add</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+          <!-- Delete Phone Number Modal -->
+      <div class="modal fade" id="deletePhoneNumModal" tabindex="-1" aria-labelledby="deletePhoneNumModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deletePhoneNumModalLabel">Delete Phone Number</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Alert placeholder -->
+              <div id="delete-phoneNum-placeholder"></div>
+
+              <!-- Phone Number -->
+              <form id="deletePhoneNumForm">
+                <div class="mb-3">
+                  <label for="deletePhoneNum" class="form-label">Enter Phone Number to be deleted</label>
+                  <input type="text" class="form-control" id="deletePhoneNum" placeholder="+012345675" required>
+                  <small class="form-text text-muted">🔗NOTE: Refer to the existing phone number for deletion.</small>
+                </div>
+                <button type="submit" class="btn btn-dark" id="deletePhoneNumButton">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <!-- Update Password Modal -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -272,7 +326,32 @@
         </div>
       </div>
 
-      <!-- Container 3: Registered Persons -->
+      <!-- Container 3: Registered phone number -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Phone Number Header -->
+          <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
+            <h6 class="m-0">Registered Phone Number</h6>
+          </div>
+          <!-- Telegram Chat IDs List -->
+          <ul class="list-group mt-3">
+            {% for phoneNum in phone_num %}
+              <li class="list-group-item">{{ phoneNum }}</li>
+            {% endfor %}
+          </ul>
+          <!-- Buttons for Add/Delete Chat ID -->
+          <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px " data-bs-toggle="modal" data-bs-target="#addPhoneNumModal">
+              Register New Phone Number
+            </button>
+            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deletePhoneNumModal">
+              Delete Phone Number
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container 4: Registered Persons -->
       <div class="card mb-4">
         <div class="card-body">
           <!-- Registered Person Header -->
@@ -335,6 +414,8 @@
     <script>
       let globalSubscriptionCode = null;
       let registeredName = '';
+
+      // ============================= CHAT ID ====================================
         // Add chat ID Logic
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('addChatIDButton').addEventListener('click', function(e) {
@@ -419,6 +500,79 @@
         });
 
 
+        // ============================= Phone Number ====================================
+        // Add phone number logic
+        document.getElementById('addPhoneNumButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            const phoneNum = document.getElementById('addPhoneNum').value;
+
+            // Validate phone number format
+            const phoneNumRegex = /^\+\d+$/;
+            if (!phoneNumRegex.test(phoneNum)) {
+                showAlertInModal('Phone number must start with "+" and contain only digits.', 'danger', 'add-phoneNum-placeholder');
+                return;
+            }
+
+            // AJAX request to add phone number
+            fetch('/add_phoneNum', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subscriptionCode: "{{ subscription_code }}", 
+                    phoneNum: phoneNum,
+                }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    showAlertInModal('Phone number added successfully', 'success', 'add-phoneNum-placeholder');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addPhoneNumModal'));
+                    modal.hide();
+                } else {
+                    showAlertInModal(data.message, 'danger', 'add-phoneNum-placeholder');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showAlertInModal('An error occurred. Please try again later.', 'danger', 'add-phoneNum-placeholder');
+            });
+        });
+
+        // Delete phone number logic
+        document.getElementById('deletePhoneNumButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            const phoneNum = document.getElementById('deletePhoneNum').value;
+
+            // AJAX request to delete phone number
+            fetch('/delete_phoneNum', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subscriptionCode: "{{ subscription_code }}", 
+                    phoneNum: phoneNum,
+                }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    showAlertInModal('Phone number deleted successfully', 'success', 'delete-phoneNum-placeholder');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deletePhoneNumModal'));
+                    modal.hide();
+                } else {
+                    showAlertInModal(data.message, 'danger', 'delete-phoneNum-placeholder');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showAlertInModal('An error occurred. Please try again later.', 'danger', 'delete-phoneNum-placeholder');
+            });
+        });
+
+      // ============================== Password ===================================
       // Handle update password form submission
       document.getElementById('updatePasswordForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -452,6 +606,7 @@
             });
         });
 
+      // ============================= Alert Modal ====================================
       // Function to display a Bootstrap alert inside the password modal
       function showAlertInModal(message, type, placeholder) {
         const alertPlaceholder = document.getElementById(placeholder);
@@ -485,6 +640,7 @@
         successModal.show();
       }
 
+      // ====================== Log Out =================
       document.getElementById('logOutModal').addEventListener('click', function(e) {
         // removeSubscriptionCodeInSession(subscriptionCode);
         showSuccessModal("Sign Out Successfully", "success", 'passwords-placeholder') 

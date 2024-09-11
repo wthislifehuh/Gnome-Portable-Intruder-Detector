@@ -14,7 +14,8 @@ def initialize_database():
     # Ensure indexes for unique fields
     db.subscriptions.create_index('subscription_code', unique=True)
     db.chat_ids.create_index('chat_id', unique=True)
-    
+    db.phone_nums.create_index('phone_num', unique=True)  # Ensure unique phone numbers
+
     client.close()
 
 
@@ -23,6 +24,7 @@ class SubscriptionManager:
         self.client = MongoClient(mongo_uri)
         self.db = self.client[db_name]
 
+    # =============== Subscription =============== 
     def add_subscription(self, subscription_code, password):
         try:
             # Hash the password before storing it
@@ -62,6 +64,7 @@ class SubscriptionManager:
             'subscription_code': subscription_code
         })
 
+    # =============== Chat ID =============== 
     def add_chat_id(self, subscription_code, chat_id):
         subscription = self.db.subscriptions.find_one({
             'subscription_code': subscription_code
@@ -104,8 +107,9 @@ class SubscriptionManager:
         })
         return result is not None
 
-    def verify_chat_id(self, chat_id):
+    def verify_chat_id(self, subscription_code, chat_id):
         result = self.db.chat_ids.find_one({
+            'subscription_code': subscription_code,
             'chat_id': chat_id
         })
         return result is not None
@@ -130,7 +134,74 @@ class SubscriptionManager:
         """
         chat_ids = self.db.chat_ids.find({'subscription_code': subscription_code}, {'chat_id': 1, '_id': 0})
         return [chat['chat_id'] for chat in chat_ids]
+    
+    # =============== Phone Numbers =============== 
+    def get_all_phone_nums(self):
+        """
+        Retrieve all phone numbers from the database.
+        """
+        phone_nums = self.db.phone_nums.find({}, {'phone_num': 1})
+        return [phone['phone_num'] for phone in phone_nums]
 
+    def get_phone_nums_by_subscription_code(self, subscription_code):
+        """
+        Retrieve all phone numbers associated with the given subscription code.
+        """
+        phone_nums = self.db.phone_nums.find({'subscription_code': subscription_code}, {'phone_num': 1, '_id': 0})
+        return [phone['phone_num'] for phone in phone_nums]
+
+
+    def verify_phone_num(self, subscription_code, phone_num):
+        result = self.db.phone_nums.find_one({
+            'subscription_code': subscription_code,
+            'phone_num': phone_num
+        })
+
+        return result is not None
+
+    def add_phone_num(self, subscription_code, phone_num):
+        """
+        Add a phone number to a subscription.
+        """
+        subscription = self.db.subscriptions.find_one({
+            'subscription_code': subscription_code
+        })
+
+        if subscription:
+            try:
+                self.db.phone_nums.insert_one({
+                    'subscription_code': subscription_code,
+                    'phone_num': phone_num
+                })
+                return True
+            except Exception as e:
+                print(f"Error adding phone number: {e}")
+        else:
+            print(f"Subscription code {subscription_code} does not exist.")
+        return False
+
+    def delete_phone_num(self, subscription_code, phone_num):
+        """
+        Delete a phone number from a subscription.
+        """
+        subscription = self.db.subscriptions.find_one({
+            'subscription_code': subscription_code
+        })
+
+        if subscription:
+            try:
+                self.db.phone_nums.delete_one({
+                    'subscription_code': subscription_code,
+                    'phone_num': phone_num
+                })
+                return True
+            except Exception as e:
+                print(f"Error deleting phone number: {e}")
+        else:
+            print(f"Subscription code {subscription_code} does not exist.")
+        return False
+
+    # =============== Livefeed =============== 
     def add_livefeed(self, subscription_code, livefeed_url):
         self.db.subscriptions.update_one(
             {'subscription_code': subscription_code},
@@ -142,6 +213,7 @@ class SubscriptionManager:
             'subscription_code': subscription_code
         })
         return subscription['livefeed'] if subscription else None
+
 
     def get_all(self):
         result = []

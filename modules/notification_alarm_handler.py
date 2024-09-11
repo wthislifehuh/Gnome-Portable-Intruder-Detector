@@ -9,10 +9,11 @@ import requests
 from dotenv import load_dotenv
 from database3 import SubscriptionManager
 from collections import Counter
+from twilio.rest import Client
 
 
 class NotificationAlarmHandler:
-    def __init__(self):
+    def __init__(self, channel):
         self.subscription = SubscriptionManager()
         self.event_url_map = {
             "human": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5",
@@ -20,10 +21,17 @@ class NotificationAlarmHandler:
             "cat": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
         }
         load_dotenv()
+        self.channel = channel
         self.token = os.getenv('BOT_TOKEN')
-        if not self.token:
-            raise ValueError("Bot token not found in environment variables.")
+        self.twilio_sid = os.getenv('TWILIO_SID')
+        self.twilio_auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+        self.twilio_number = os.getenv('TWILIO_NUMBER')
+
+        if not self.token or not self.twilio_sid or not self.twilio_auth_token or not self.twilio_number:
+            raise ValueError("Required environment variables not found.")
+
         self.base_url = f"https://api.telegram.org/bot{self.token}"
+        self.twilio_client = Client(self.twilio_sid, self.twilio_auth_token)
 
         
     async def human_trigger(self, result):
@@ -59,7 +67,7 @@ class NotificationAlarmHandler:
         else:
             print(f"Unknown event: {event}")
 
-    def send_message(self, chat_id: str, message: str, reply_markup=None):
+    def send_message(self, chat_id: str, message: str, user_phone: str, reply_markup=None):
         url = f"{self.base_url}/sendMessage"
         params = {
             "chat_id": chat_id,
@@ -70,11 +78,23 @@ class NotificationAlarmHandler:
             params["reply_markup"] = json.dumps(reply_markup)
 
         response = requests.get(url, params=params)
+
         if response.status_code == 200:
             print(f"Message sent successfully to chat_id {chat_id}.")
+            return True  # Telegram message sent successfully
         else:
-            print(f"Failed to send message to chat_id {chat_id}. Status code: {response.status_code}. Response: {response.json()}")
-        return response
+            print(f"Failed to send message to chat_id {chat_id}. Status code: {response.status_code}.")
+            # Trigger SMS alert if Telegram message fails
+            self.send_sms_alert(user_phone, message)
+            return False  # Telegram message failed
+
+    def send_sms_alert(self, phone_number, message):
+        sms_message = self.twilio_client.messages.create(
+            body=f"🚨 Alert! {message} Intruders Detected! Check your app for details.",
+            from_=self.twilio_number,
+            to=phone_number
+        )
+        print(f"SMS sent to {phone_number}, SID: {sms_message.sid}")
 
     async def send_notification(self, status):
         # Check if the status is a list of animals
@@ -110,7 +130,7 @@ class NotificationAlarmHandler:
             # Capitalize the first letter if status is a single string (human)
             status = status.capitalize()
 
-        # Create the button list for the message
+        # Prepare message and buttons
         button_list = [
             [{"text": "📺 Live Feeds", "callback_data": 'live_feed'}],
             [{"text": "📽️ Intruders Recording", "callback_data": 'recordings'}],
@@ -118,14 +138,16 @@ class NotificationAlarmHandler:
         ]
         reply_markup = {"inline_keyboard": button_list}
 
-        # Get all chat IDs from the subscription manager
-        chat_ids = self.subscription.get_all_chat_ids()
+        # Get all chat IDs and corresponding phone numbers from the subscription manager
+        chat_ids = self.subscription.get_chat_ids_by_subscription_code(self.channel)
+        phone_numbers = self.subscription.get_phone_nums_by_subscription_code(self.channel)
 
-        # Send a notification to all chat IDs
-        for chat_id in chat_ids:
+        # Send notifications to all users
+        for chat_id, phone_number in zip(chat_ids, phone_numbers):
             self.send_message(
                 chat_id, 
                 f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:", 
+                user_phone=phone_number,
                 reply_markup=reply_markup
             )
 
