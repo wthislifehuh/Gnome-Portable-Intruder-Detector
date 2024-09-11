@@ -137,30 +137,36 @@
 
 
      <!-- Add Chat ID Modal -->
-     <div class="modal fade" id="addChatIDModal" tabindex="-1" aria-labelledby="addChatIDModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="addChatIDModalLabel">Add Chat ID</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-            <!-- Alert placeholder -->
-            <div id="modal-alert-placeholder-chat"></div>
-  
-            <!-- Telegram Chat ID -->
-            <form id="addChatIDForm">
-                <div class="mb-3">
-                <label for="telegramChatID" class="form-label">Enter Telegram Chat ID to be added</label>
-                <input type="text" class="form-control" id="telegramChatID" placeholder="eg. 1234567890" required>
-                <small class="form-text text-muted">🔗NOTE: Visit BOT @raw_info_bot and send any message to it to obtain your chat_id. It should be a 10-digit number.</small>
-                </div>
-                <button type="submit" class="btn btn-dark" id="addChatIDButton">Add</button>
-            </form>
-            </div>
-        </div>
-        </div>
+    <div class="modal fade" id="addChatIDModal" tabindex="-1" aria-labelledby="addChatIDModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="addChatIDModalLabel">Add Chat ID</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <!-- Alert placeholder -->
+                  <div id="modal-alert-placeholder-chat"></div>
+
+                  <!-- Telegram Chat ID -->
+                  <form id="addChatIDForm">
+                      <div class="mb-3">
+                          <label for="telegramChatID" class="form-label">Enter Telegram Chat ID</label>
+                          <input type="text" class="form-control" id="telegramChatID" placeholder="e.g., 1234567890" required>
+                      </div>
+
+                      <!-- Optional Phone Number -->
+                      <div class="mb-3">
+                          <label for="phoneNum" class="form-label">Enter Phone Number (Optional)</label>
+                          <input type="text" class="form-control" id="phoneNum" placeholder="e.g., +1234567890">
+                          <small class="form-text text-muted">NOTE: Phone number will be stored with the chat ID. We will only send notifications via SMS when Telegram Bot is not reachable at your side.</small>
+                      </div>
+                      <button type="submit" class="btn btn-dark">Add Chat ID</button>
+                  </form>
+              </div>
+          </div>
       </div>
+    </div>
 
 
       <!-- Delete Chat ID Modal -->
@@ -190,58 +196,36 @@
     </div>
 
 
-    <!-- Add Phone Number Modal -->
-    <div class="modal fade" id="addPhoneNumModal" tabindex="-1" aria-labelledby="addPhoneNumModalLabel" aria-hidden="true">
+    <!-- Update Phone Number Modal -->
+    <div class="modal fade" id="updatePhoneNumModal" tabindex="-1" aria-labelledby="updatePhoneNumModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addPhoneNumModalLabel">Add Phone Number</h5>
+            <h5 class="modal-title" id="updatePhoneNumModalLabel">Update Phone Number</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- Alert placeholder -->
             <div id="add-phoneNum-placeholder"></div>
-
             <!-- Phone Number -->
-            <form id="addPhoneNumForm">
+            <form id="updatePhoneNumForm">
               <div class="mb-3">
-                <label for="addPhoneNum" class="form-label">Enter Phone Number to be added</label>
-                <input type="text" class="form-control" id="addPhoneNum" placeholder="eg. +0171234567" required>
+                <label for="updatePhoneNumChat" class="form-label">Enter Chat ID to update the associated phone number</label>
+                <input type="text" class="form-control" id="updatePhoneNumChat" placeholder="eg. 0000000000" required>
+                <small class="form-text text-muted">📍NOTE: We will only send notifications to your chatID when Telegram Bot is reachable at your side.</small>
+              </div>
+              <div class="mb-3">
+                <label for="updatePhoneNum" class="form-label">Enter Phone Number to be updated</label>
+                <input type="text" class="form-control" id="updatePhoneNum" placeholder="eg. +0171234567" required>
                 <small class="form-text text-muted">📍NOTE: We will only send notifications via SMS when Telegram Bot is not reachable at your side.</small>
               </div>
-              <button type="submit" class="btn btn-dark" id="addPhoneNumButton">Add</button>
+              <button type="submit" class="btn btn-dark" id="updatePhoneNumButton">Update</button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-
-          <!-- Delete Phone Number Modal -->
-      <div class="modal fade" id="deletePhoneNumModal" tabindex="-1" aria-labelledby="deletePhoneNumModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="deletePhoneNumModalLabel">Delete Phone Number</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <!-- Alert placeholder -->
-              <div id="delete-phoneNum-placeholder"></div>
-
-              <!-- Phone Number -->
-              <form id="deletePhoneNumForm">
-                <div class="mb-3">
-                  <label for="deletePhoneNum" class="form-label">Enter Phone Number to be deleted</label>
-                  <input type="text" class="form-control" id="deletePhoneNum" placeholder="+012345675" required>
-                  <small class="form-text text-muted">🔗NOTE: Refer to the existing phone number for deletion.</small>
-                </div>
-                <button type="submit" class="btn btn-dark" id="deletePhoneNumButton">Delete</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
 
     <!-- Update Password Modal -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
@@ -282,7 +266,7 @@
     <!-- ====================== User Account Information ====================== -->
     <div class="container mt-5">
       <h2 class="text-center mb-1">Account Information</h2>
-      <p class="text-center mb-5">📍Telegram Bot: @intruderrDetector_bot</p>
+      <p class="text-center mb-5">📍Telegram Bot: <a href="https://t.me/intruderrDetector_bot">@intruderrDetector_bot</a></p>
       <!-- Container 1: Subscription Code & Update Password -->
       <div class="card mb-4">
         <div class="card-body">
@@ -301,57 +285,50 @@
         </div>
       </div>
 
-      <!-- Container 2: Telegram Chat IDs -->
+      <!-- Container 2: Telegram Chat IDs and Phone Numbers -->
       <div class="card mb-4">
         <div class="card-body">
-          <!-- Telegram Chat IDs Header -->
-          <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
-            <h6 class="m-0">Telegram Chat IDs</h6>
-          </div>
-          <!-- Telegram Chat IDs List -->
-          <ul class="list-group mt-3">
-            {% for chat_id in telegram_chat_ids %}
-              <li class="list-group-item">{{ chat_id }}</li>
-            {% endfor %}
-          </ul>
-          <!-- Buttons for Add/Delete Chat ID -->
-          <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px " data-bs-toggle="modal" data-bs-target="#addChatIDModal">
-              Add Chat ID
-            </button>
-            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
-              Delete Chat ID
-            </button>
-          </div>
+            <!-- Header -->
+            <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
+                <h6 class="m-0">Telegram Chat IDs and Phone Numbers</h6>
+            </div>
+
+            <!-- Table of Chat IDs and Phone Numbers -->
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Telegram Chat ID</th>
+                            <th class="text-center">Phone Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chat in telegram_chat_ids %}
+                        <tr>
+                            <td class="text-center">{{ chat.chat_id }}</td>
+                            <td class="text-center">{{ chat.phone_num if chat.phone_num else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Buttons for Add/Delete Chat ID -->
+            <div class="d-flex justify-content-end mt-4">
+                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#addChatIDModal">
+                    Add Chat ID
+                </button>
+                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
+                    Delete Chat ID
+                </button>
+                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#updatePhoneNumModal">
+                  Update Phone Number
+              </button>
+            </div>
         </div>
       </div>
 
-      <!-- Container 3: Registered phone number -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <!-- Phone Number Header -->
-          <div class="p-2 pt-3 pb-3 text-center" style="background-color: #23292E; color: white; border-radius: 5px;">
-            <h6 class="m-0">Registered Phone Number</h6>
-          </div>
-          <!-- Telegram Chat IDs List -->
-          <ul class="list-group mt-3">
-            {% for phoneNum in phone_num %}
-              <li class="list-group-item">{{ phoneNum }}</li>
-            {% endfor %}
-          </ul>
-          <!-- Buttons for Add/Delete Chat ID -->
-          <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px " data-bs-toggle="modal" data-bs-target="#addPhoneNumModal">
-              Register New Phone Number
-            </button>
-            <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#deletePhoneNumModal">
-              Delete Phone Number
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Container 4: Registered Persons -->
+      <!-- Container 3: Registered Persons -->
       <div class="card mb-4">
         <div class="card-body">
           <!-- Registered Person Header -->
@@ -417,46 +394,52 @@
 
       // ============================= CHAT ID ====================================
         // Add chat ID Logic
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('addChatIDButton').addEventListener('click', function(e) {
-                e.preventDefault();
-                const telegramChatID = document.getElementById('telegramChatID').value;
+        document.getElementById('addChatIDForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const telegramChatID = document.getElementById('telegramChatID').value;
+            const phoneNum = document.getElementById('phoneNum').value || null;  // Default to null if empty
 
-                // Validate Telegram Chat ID
-                const chatIDRegex = /^\d{10}$/;
-                if (!chatIDRegex.test(telegramChatID)) {
-                    showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
-                    return;
+            // Validate Telegram Chat ID
+            const chatIDRegex = /^\d{10}$/;
+            if (!chatIDRegex.test(telegramChatID)) {
+                showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
+                return;
+            }
+
+            // Validate Phone Number (optional)
+            const phoneNumRegex = /^\+?\d+$/;
+            if (phoneNum && !phoneNumRegex.test(phoneNum)) {
+                showAlertInModal('Phone number must start with "+" and contain only digits.', 'danger', 'modal-alert-placeholder-chat');
+                return;
+            }
+
+            // AJAX Request to add chat ID and phone number
+            fetch('/add_chatID', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subscriptionCode: "{{ subscription_code }}", 
+                    telegramChatID: telegramChatID,
+                    phoneNum: phoneNum
+                }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    showAlertInModal('Telegram Chat ID added successfully', 'success', 'modal-alert-placeholder-chat');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addChatIDModal'));
+                    modal.hide();
+                } else {
+                    showAlertInModal(data.message, 'danger', 'modal-alert-placeholder-chat');
                 }
-
-                // AJAX Request to add chat ID
-                fetch('/add_chatID', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        subscriptionCode: "{{ subscription_code }}", 
-                        telegramChatID: telegramChatID,
-                    }),
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        showAlertInModal('Telegram ChatID added successfully', 'success', 'modal-alert-placeholder-chat')
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('addChatIDModal'));
-                        modal.hide();
-                    } else {
-                        showAlertInModal(data.message, 'danger', 'modal-alert-placeholder-chat');
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    showAlertInModal('An error occurred. Please try again later.', 'danger', 'modal-alert-placeholder-chat');
-                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showAlertInModal('An error occurred. Please try again later.', 'danger', 'modal-alert-placeholder-chat');
             });
         });
-
 
       // delete chat ID Logic
       document.addEventListener('DOMContentLoaded', function() {
@@ -501,10 +484,18 @@
 
 
         // ============================= Phone Number ====================================
-        // Add phone number logic
-        document.getElementById('addPhoneNumButton').addEventListener('click', function(e) {
+        // update phone number logic
+        document.getElementById('updatePhoneNumButton').addEventListener('click', function(e) {
             e.preventDefault();
-            const phoneNum = document.getElementById('addPhoneNum').value;
+            const phoneNum = document.getElementById('updatePhoneNum').value;
+            const chat_id = document.getElementById('updatePhoneNumChat').value;
+
+            // Validate Telegram Chat ID
+            const chatIDRegex = /^\d{10}$/;
+            if (!chatIDRegex.test(chat_id)) {
+                showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
+                return;
+            }
 
             // Validate phone number format
             const phoneNumRegex = /^\+\d+$/;
@@ -514,21 +505,22 @@
             }
 
             // AJAX request to add phone number
-            fetch('/add_phoneNum', {
+            fetch('/update_phoneNum', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     subscriptionCode: "{{ subscription_code }}", 
+                    chat_id: chat_id,
                     phoneNum: phoneNum,
                 }),
             })
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {
-                    showAlertInModal('Phone number added successfully', 'success', 'add-phoneNum-placeholder');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addPhoneNumModal'));
+                    showAlertInModal('Phone number updated successfully', 'success', 'add-phoneNum-placeholder');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('updatePhoneNumModal'));
                     modal.hide();
                 } else {
                     showAlertInModal(data.message, 'danger', 'add-phoneNum-placeholder');
@@ -537,38 +529,6 @@
             .catch((error) => {
                 console.error('Error:', error);
                 showAlertInModal('An error occurred. Please try again later.', 'danger', 'add-phoneNum-placeholder');
-            });
-        });
-
-        // Delete phone number logic
-        document.getElementById('deletePhoneNumButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            const phoneNum = document.getElementById('deletePhoneNum').value;
-
-            // AJAX request to delete phone number
-            fetch('/delete_phoneNum', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    subscriptionCode: "{{ subscription_code }}", 
-                    phoneNum: phoneNum,
-                }),
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    showAlertInModal('Phone number deleted successfully', 'success', 'delete-phoneNum-placeholder');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('deletePhoneNumModal'));
-                    modal.hide();
-                } else {
-                    showAlertInModal(data.message, 'danger', 'delete-phoneNum-placeholder');
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                showAlertInModal('An error occurred. Please try again later.', 'danger', 'delete-phoneNum-placeholder');
             });
         });
 

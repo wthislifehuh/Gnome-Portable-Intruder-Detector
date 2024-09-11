@@ -26,8 +26,7 @@ from app import (
     remove_subscription_code,
     add_chatID,  
     delete_chatID,
-    add_phoneNum,
-    delete_phoneNum,
+    update_phoneNum,
 )
 from datetime import datetime
 from watchdog.observers import Observer
@@ -79,8 +78,7 @@ app.add_url_rule("/store_subscription_code", "store_subscription_code", store_su
 app.add_url_rule("/remove_subscription_code", "remove_subscription_code", remove_subscription_code, methods=["POST"])
 app.add_url_rule("/add_chatID", "add_chatID", add_chatID, methods=["POST"])
 app.add_url_rule("/delete_chatID", "delete_chatID", delete_chatID, methods=["POST"])
-app.add_url_rule("/add_phoneNum", "add_phoneNum", add_phoneNum, methods=["POST"])
-app.add_url_rule("/delete_phoneNum", "delete_phoneNum", delete_phoneNum, methods=["POST"])
+app.add_url_rule("/update_phoneNum", "update_phoneNum", update_phoneNum, methods=["POST"])
 
 @app.route('/recent-activity-stream')
 def recent_activity_stream():
@@ -179,19 +177,16 @@ def user_account():
     if not subscription_code:
         return redirect(url_for("index"))
 
+    # Get chat IDs and associated phone numbers
     telegram_chat_ids = sub_manager.get_chat_ids_by_subscription_code(subscription_code)
     registered_name = embedding.get_registered_persons(subscription_code)
-    phone_num = sub_manager.get_phone_nums_by_subscription_code(subscription_code)
 
     return render_template(
         "userAccount.html",
         subscription_code=subscription_code,
-        telegram_chat_ids=telegram_chat_ids,
+        telegram_chat_ids=telegram_chat_ids,  # List of dictionaries with chat_id and phone_num
         registered_persons=registered_name,  # Pass this to the template
-        phone_num=phone_num,
     )
-
-
 
 # ---------------------------------------- Start Flask app ----------------------------------------
 
