@@ -8,6 +8,7 @@ import asyncio
 from notification_alarm_handler import NotificationAlarmHandler
 from datetime import datetime
 from collections import Counter
+import threading
 
 
 class Camera:
@@ -20,6 +21,8 @@ class Camera:
         self.notification_alarm_handler = NotificationAlarmHandler(self.channel)
         self.is_recording = False
         self.out = None
+        self.recording_thread = None
+        self.recording_flag = False  # This flag controls the recording loop
         self.recent_activities = []
         self.activity_updated = False  # Flag to indicate when new activity is added
 
@@ -84,7 +87,11 @@ class Camera:
                             # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
                             # Uncomment this section when integrating notification module
-                            asyncio.run(self.notification_alarm_handler.human_trigger(result["intruders"]))
+                            # asyncio.run(
+                            #     self.notification_alarm_handler.human_trigger(
+                            #         result["intruders"]
+                            #     )
+                            # )
                             # Log in website
                             self.log_intruder_activity(result["intruders"])
 
@@ -105,14 +112,13 @@ class Camera:
                             print("Trigger animal notification")
                             animal_notification_sent = True
                             # Uncomment this section when integrating notification module
-                            asyncio.run(self.notification_alarm_handler.animal_trigger(result['animal']))
+                            # asyncio.run(
+                            #     self.notification_alarm_handler.animal_trigger(
+                            #         result["animal"]
+                            #     )
+                            # )
                             # Log in website
-                            self.log_intruder_activity(result['animal'])
-                            
-
-                    # Continuously write frames to the video file while recording
-                    if self.is_recording and self.out:
-                        self.out.write(frame)
+                            self.log_intruder_activity(result["animal"])
 
                 else:
                     # Update trackers for intruders and animals, and track if intruder is still present
@@ -160,7 +166,40 @@ class Camera:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    def start_recording(self, cap, channel="030326", frame_skip=15):
+    # def start_recording(self, cap, channel="030326", frame_skip=15):
+    #     # Define the path where the video will be saved
+    #     output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
+    #     os.makedirs(output_dir, exist_ok=True)
+    #     current_datetime = datetime.now()
+
+    #     # Format the datetime as yymmddhhmmss
+    #     formatted_datetime = current_datetime.strftime("%y%m%d%H%M%S")
+    #     output_filename = formatted_datetime + ".webm"  # Save as WEBM format
+    #     output_filepath = os.path.join(output_dir, output_filename)
+
+    #     # Define the codec and create a VideoWriter object
+    #     fourcc = cv2.VideoWriter_fourcc(*"VP80")  # VP8 codec for WEBM format
+    #     frame_width = int(cap.get(3))
+    #     frame_height = int(cap.get(4))
+
+    #     # Set the frame rate to reflect the actual FPS being processed
+    #     actual_fps = 30.0 / frame_skip
+    #     self.out = cv2.VideoWriter(
+    #         output_filepath, fourcc, actual_fps, (frame_width, frame_height)
+    #     )
+
+    #     self.is_recording = True
+    #     print("Recording started...")
+
+    # def stop_recording(self):
+    #     if self.is_recording:
+    #         self.is_recording = False
+    #         if self.out:
+    #             self.out.release()
+    #             self.out = None
+    #         print("Recording stopped.")
+
+    def start_recording(self, cap, channel="030326"):
         # Define the path where the video will be saved
         output_dir = os.path.join(os.getcwd(), "static", "videos", channel)
         os.makedirs(output_dir, exist_ok=True)
@@ -176,16 +215,37 @@ class Camera:
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
 
-        # Set the frame rate to reflect the actual FPS being processed
-        actual_fps = 30.0 / frame_skip
+        # Use the camera's actual frame rate
+        fps = cap.get(cv2.CAP_PROP_FPS)  # Get the FPS of the camera
+
+        # Create the VideoWriter object
         self.out = cv2.VideoWriter(
-            output_filepath, fourcc, actual_fps, (frame_width, frame_height)
+            output_filepath, fourcc, fps, (frame_width, frame_height)
         )
 
         self.is_recording = True
+        self.recording_flag = True  # Set the flag to True to start recording
+
+        # Start a thread to continuously record frames
+        self.recording_thread = threading.Thread(target=self._record_video)
+        self.recording_thread.start()
+
         print("Recording started...")
 
+    def _record_video(self):
+        while self.recording_flag and self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if not ret:
+                break
+
+            if self.out is not None:
+                self.out.write(frame)  # Write each frame to the video file
+
     def stop_recording(self):
+        self.recording_flag = False  # Stop the recording loop
+        if self.recording_thread is not None:
+            self.recording_thread.join()  # Wait for the recording thread to finish
+
         if self.is_recording:
             self.is_recording = False
             if self.out:
@@ -221,7 +281,9 @@ class Camera:
         intrusion_time = current_datetime.strftime("%H:%M:%S")
 
         if isinstance(intruder, list):
-            if all(item == 'Unknown' for item in intruder):  # Check if all elements in the list are 'unknown'
+            if all(
+                item == "Unknown" for item in intruder
+            ):  # Check if all elements in the list are 'unknown'
                 # Handle the special case for 'unknown' treated as 'Human'
                 human_count = len(intruder)
                 if human_count == 1:
@@ -233,20 +295,25 @@ class Camera:
                     animal_count = Counter(intruder)
                     formatted_status = []
                     for animal, count in animal_count.items():
-                        animal_name = animal.capitalize() + ('s' if count > 1 else '')
+                        animal_name = animal.capitalize() + ("s" if count > 1 else "")
                         formatted_status.append(f"{count} {animal_name}")
                     if len(formatted_status) == 2:
                         intruder = f"{formatted_status[0]} and {formatted_status[1]}"
                     elif len(formatted_status) == 1:
                         intruder = f"{formatted_status[0]}"
                     else:
-                        intruder = ', '.join(formatted_status[:-1]) + f", and {formatted_status[-1]}"
+                        intruder = (
+                            ", ".join(formatted_status[:-1])
+                            + f", and {formatted_status[-1]}"
+                        )
                 else:
                     intruder = intruder[0].capitalize()
         else:
             intruder = intruder.capitalize()
 
-        activity_entry = f"{intrusion_date} {intrusion_time} - {intruder} intruder detected."
+        activity_entry = (
+            f"{intrusion_date} {intrusion_time} - {intruder} intruder detected."
+        )
 
         # Append to recent activities list (limit to last 10)
         self.recent_activities.append(activity_entry)
@@ -259,11 +326,12 @@ class Camera:
             last_sent = ""  # Store the last sent activity data
             while True:
                 if self.activity_updated:
-                    data = ','.join(self.recent_activities)
+                    data = ",".join(self.recent_activities)
                     print("Recent activity: ", self.recent_activities)
                     if data != last_sent:  # Only send if there's new data
                         yield f"data: {data}\n\n"
                         last_sent = data  # Update last sent data
                     self.activity_updated = False  # Reset the update flag
                 time.sleep(1)  # Sleep for 1 second before checking again
-        return Response(event_stream(), content_type='text/event-stream')
+
+        return Response(event_stream(), content_type="text/event-stream")
