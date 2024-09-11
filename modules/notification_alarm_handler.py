@@ -3,11 +3,10 @@ import requests
 import aiohttp
 import os
 import json
+from bleak import BleakScanner, BleakClient  # for Bluetooth scanning and connecting
 from dotenv import load_dotenv
 from database3 import SubscriptionManager
 from collections import Counter
-from twilio.rest import Client
-
 
 class NotificationAlarmHandler:
     def __init__(self, channel):
@@ -20,16 +19,13 @@ class NotificationAlarmHandler:
         load_dotenv()
         self.channel = channel  # Set the channel to subscription_code
         self.token = os.getenv('BOT_TOKEN')
-        self.twilio_sid = os.getenv('TWILIO_SID')
-        self.twilio_auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-        self.twilio_number = os.getenv('TWILIO_NUMBER')
-
-        if not self.token or not self.twilio_sid or not self.twilio_auth_token or not self.twilio_number:
-            raise ValueError("Required environment variables not found.")
-
         self.base_url = f"https://api.telegram.org/bot{self.token}"
-        self.twilio_client = Client(self.twilio_sid, self.twilio_auth_token)
-
+        
+        # Bluetooth configurations (for bleak)
+        self.bluetooth_device_name = os.getenv('BLUETOOTH_DEVICE_NAME')
+        self.phone_service_uuid = os.getenv('PHONE_SERVICE_UUID')
+        self.phone_characteristic_uuid = os.getenv('PHONE_CHARACTERISTIC_UUID')
+        
     async def human_trigger(self, result):
         if len(result) > 1:
             await self.send_notification(result)
@@ -39,12 +35,12 @@ class NotificationAlarmHandler:
 
     async def animal_trigger(self, animal):
         if len(animal) > 1:
-            await self.send_notification(animal)  # Send notification for each animal
-            await self.trigger_alarm("human")  # Trigger common alarm for multiple animals
+            await self.send_notification(animal)
+            await self.trigger_alarm("human")
         else:
             animal_type = animal[0]
-            await self.send_notification(animal_type)  # Send notification for the single animal
-            await self.trigger_alarm(animal_type)  # Trigger alarm specific to the animal
+            await self.send_notification(animal_type)
+            await self.trigger_alarm(animal_type)
 
     async def trigger_alarm(self, event):
         url = self.event_url_map.get(event)
@@ -69,24 +65,49 @@ class NotificationAlarmHandler:
 
         if response.status_code == 200:
             print(f"Message sent successfully to chat_id {chat_id}.")
-            return True  # Telegram message sent successfully
+            return True
         else:
             print(f"Failed to send message to chat_id {chat_id}. Status code: {response.status_code}.")
             # Trigger SMS alert if Telegram message fails and phone number exists
             if user_phone:
-                self.send_sms_alert(user_phone, message)
-            return False  # Telegram message failed
+                asyncio.run(self.send_bluetooth_sms(user_phone, message))  # Send SMS via Bluetooth
+            return False
 
-    def send_sms_alert(self, phone_number, message):
-        sms_message = self.twilio_client.messages.create(
-            body=f"🚨 Alert! {message} Intruders Detected! Check your app for details.",
-            from_=self.twilio_number,
-            to=phone_number
-        )
-        print(f"SMS sent to {phone_number}, SID: {sms_message.sid}")
+    async def send_bluetooth_sms(self, phone_number: str, message: str):
+        """
+        Send an SMS via a Bluetooth connected phone using the provided phone number and message.
+        This method will scan for nearby Bluetooth devices, find the phone, and send an SMS.
+        """
+        try:
+            # Scan for Bluetooth devices
+            devices = await BleakScanner.discover()
+            target_device = None
+
+            # Search for the specific Bluetooth phone by name
+            for device in devices:
+                if self.bluetooth_device_name in device.name:
+                    target_device = device
+                    break
+
+            if not target_device:
+                print(f"Bluetooth device {self.bluetooth_device_name} not found.")
+                return
+
+            # Connect to the phone via Bluetooth
+            async with BleakClient(target_device.address) as client:
+                print(f"Connected to {target_device.name}")
+
+                # Send the SMS command (assuming the phone exposes a characteristic to send SMS)
+                # This is an example, the actual command/characteristic UUIDs depend on the phone service
+                sms_command = f"SendSMS:{phone_number}:{message}"
+                await client.write_gatt_char(self.phone_characteristic_uuid, sms_command.encode('utf-8'))
+                print(f"SMS sent via Bluetooth to {phone_number}")
+
+        except Exception as e:
+            print(f"Failed to send SMS via Bluetooth: {e}")
 
     async def send_notification(self, status):
-        # Check if the status is a list of animals
+        # Handle the animal or human status as before
         if isinstance(status, list):
             if all(item == 'Unknown' for item in status):
                 human_count = len(status)

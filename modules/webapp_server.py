@@ -63,7 +63,7 @@ video_processing_thread.start()
 # ---------------------------------------- Routes ----------------------------------------
 
 
-# Route for the main page
+# ======= Main page for log in and sign up (index.html) =======
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -84,7 +84,7 @@ app.add_url_rule("/update_phoneNum", "update_phoneNum", update_phoneNum, methods
 def recent_activity_stream():
     return camera.stream_recent_activity()
 
-# Home page (home.html - livestream page)
+# ======= Home page for livestream (home.html) =======
 @app.route("/home")
 def home():
     subscription_code = session.get("subscription_code")
@@ -169,8 +169,7 @@ def format_timestamp_from_filename(filename):
     except ValueError:
         return "Invalid Timestamp"
 
-
-# User Account Page
+# ======= User Account page (userAccount.html) =======
 @app.route("/user_account")
 def user_account():
     subscription_code = session.get("subscription_code")
@@ -185,7 +184,7 @@ def user_account():
         "userAccount.html",
         subscription_code=subscription_code,
         telegram_chat_ids=telegram_chat_ids,  # List of dictionaries with chat_id and phone_num
-        registered_persons=registered_name,  # Pass this to the template
+        registered_persons=registered_name,  
     )
 
 # ---------------------------------------- Start Flask app ----------------------------------------
