@@ -51,7 +51,7 @@ class NotificationAlarmHandler:
         else:
             print(f"Unknown event: {event}")
 
-    def send_message(self, chat_id: str, message: str, user_phone: str, reply_markup=None):
+    async def send_message(self, chat_id: str, message: str, user_phone: str, reply_markup=None):
         url = f"{self.base_url}/sendMessage"
         params = {
             "chat_id": chat_id,
@@ -70,7 +70,7 @@ class NotificationAlarmHandler:
             print(f"Failed to send message to chat_id {chat_id}. Status code: {response.status_code}.")
             # Trigger SMS alert if Telegram message fails and phone number exists
             if user_phone:
-                asyncio.run(self.send_bluetooth_sms(user_phone, message))  # Send SMS via Bluetooth
+                await self.send_bluetooth_sms(user_phone, message) # Send SMS via Bluetooth
             return False
 
     async def send_bluetooth_sms(self, phone_number: str, message: str):
@@ -143,7 +143,7 @@ class NotificationAlarmHandler:
         for chat in chat_id_phone_pairs:
             chat_id = chat['chat_id']
             phone_number = chat.get('phone_num', None)  # Get phone number or None if not available
-            self.send_message(
+            await self.send_message(
                 chat_id,
                 f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:",
                 user_phone=phone_number,
