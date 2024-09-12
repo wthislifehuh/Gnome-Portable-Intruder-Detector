@@ -16,8 +16,8 @@ class NotificationAlarmHandler:
     def __init__(self, channel):
         self.subscription = SubscriptionManager()
         self.event_url_map = {
-            "human": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5",
-            "dog": "https://vybit.net/trigger/2uqg0zrx9wof9jgx",
+            "human": "https://vybit.net/trigger/7fwkms0vtdrnuf7a",
+            "dog": "https://vybit.net/trigger/7fwkms0vtdrnuf7a",
             "cat": "https://app.vybit.net/trigger/cc6ghxxta9zkdcd5"
         }
         load_dotenv()
@@ -165,7 +165,7 @@ class NotificationAlarmHandler:
             phone_number = chat.get('phone_num', None)  # Get phone number or None if not available
             await self.send_message(
                 chat_id,
-                f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders here.",
+                f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders in our website.",
                 user_phone=phone_number,
                 reply_markup=reply_markup
             )
