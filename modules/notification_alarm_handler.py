@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from database3 import SubscriptionManager
 from collections import Counter
 import time
+import traceback
 
 class NotificationAlarmHandler:
     def __init__(self, channel):
@@ -77,7 +78,6 @@ class NotificationAlarmHandler:
             # Trigger SMS alert if Telegram message fails and phone number exists
             if user_phone:
                 await self.send_bluetooth_sms(user_phone, message) # Send SMS via Bluetooth
-                print(f"Message sent successfully to phone number {user_phone}.")
             return False
 
     async def send_bluetooth_sms(self, phone_number: str, message: str):
@@ -86,13 +86,14 @@ class NotificationAlarmHandler:
         This method will scan for nearby Bluetooth devices, find the phone, and send an SMS.
         """
         try:
-            # Scan for Bluetooth devices
+            # Scan for Bluetooth devices using bleak
             devices = await BleakScanner.discover()
+
             target_device = None
 
-            # Search for the specific Bluetooth phone by name
+            # Check if device.name is not None before checking for the desired device name
             for device in devices:
-                if self.bluetooth_device_name in device.name:
+                if device.name and self.bluetooth_device_name in device.name:
                     target_device = device
                     break
 
@@ -105,13 +106,13 @@ class NotificationAlarmHandler:
                 print(f"Connected to {target_device.name}")
 
                 # Send the SMS command (assuming the phone exposes a characteristic to send SMS)
-                # This is an example, the actual command/characteristic UUIDs depend on the phone service
                 sms_command = f"SendSMS:{phone_number}:{message}"
                 await client.write_gatt_char(self.phone_characteristic_uuid, sms_command.encode('utf-8'))
                 print(f"SMS sent via Bluetooth to {phone_number}")
 
         except Exception as e:
             print(f"Failed to send SMS via Bluetooth: {e}")
+            print(traceback.format_exc())
 
     async def send_notification(self, status):
         # Handle the animal or human status as before
