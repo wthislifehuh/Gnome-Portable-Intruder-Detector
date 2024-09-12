@@ -25,6 +25,22 @@
       href="https://fonts.googleapis.com/css?family=Open+Sans|Poppins:400,700&display=swap"
       rel="stylesheet"
     />
+    <!-- Custom CSS -->
+    <style>
+      /* Set common width for all buttons */
+      .custom-button {
+          width: 190px; /* Fixed width for buttons */
+          border-radius: 10px;
+          margin-right: 15px;
+      }
+
+      /* Adjust the buttons layout on smaller screens */
+      @media (max-width: 576px) {
+        .custom-button {
+            margin-right: 0 !important; /* Remove right margin on small screens */
+        }
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -285,7 +301,7 @@
         </div>
       </div>
 
-      <!-- Container 2: Telegram Chat IDs and Phone Numbers -->
+     <!-- Container 2: Telegram Chat IDs and Phone Numbers -->
       <div class="card mb-4">
         <div class="card-body">
             <!-- Header -->
@@ -314,17 +330,18 @@
             </div>
 
             <!-- Buttons for Add/Delete Chat ID -->
-            <div class="d-flex justify-content-end mt-4">
-                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#addChatIDModal">
-                    Add Chat ID
-                </button>
-                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
-                    Delete Chat ID
-                </button>
-                <button class="btn btn-dark ml-2" style="min-width: 180px; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#updatePhoneNumModal">
+            <div class="d-flex justify-content-end align-items-end mt-4 flex-wrap">
+              <button class="btn btn-dark ml-2 mb-2 custom-button" data-bs-toggle="modal" data-bs-target="#addChatIDModal">
+                  Add Chat ID
+              </button>
+              <button class="btn btn-dark ml-2 mb-2 custom-button" data-bs-toggle="modal" data-bs-target="#deleteChatIDModal">
+                  Delete Chat ID
+              </button>
+              <button class="btn btn-dark ml-2 mb-2 custom-button" data-bs-toggle="modal" data-bs-target="#updatePhoneNumModal">
                   Update Phone Number
               </button>
             </div>
+
         </div>
       </div>
 
@@ -349,7 +366,7 @@
       </div>
 
       <!-- Log Out Button -->
-      <button class="btn btn-dark mt-5 float-end" style="min-width: 180px; border-radius: 10px; margin-bottom: 150px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">
+      <button class="btn btn-dark mt-5 float-end custom-button" style="width: 180px; border-radius: 10px; margin-bottom: 150px; margin-left:15px; margin-right: 15px" data-bs-toggle="modal" data-bs-target="#successModal" id="logOutModal">
         Log Out
       </button>
     </div>
@@ -399,12 +416,12 @@
             const telegramChatID = document.getElementById('telegramChatID').value;
             const phoneNum = document.getElementById('phoneNum').value || null;  // Default to null if empty
 
-            // Validate Telegram Chat ID
-            const chatIDRegex = /^\d{10}$/;
-            if (!chatIDRegex.test(telegramChatID)) {
-                showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
-                return;
-            }
+            // // Validate Telegram Chat ID
+            // const chatIDRegex = /^\d{10}$/;
+            // if (!chatIDRegex.test(telegramChatID)) {
+            //     showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
+            //     return;
+            // }
 
             // Validate Phone Number (optional)
             if (!/^\d+$/.test(phoneNum)) {
@@ -447,11 +464,11 @@
                 const telegramChatID = document.getElementById('delete-telegramChatID').value;
 
                 // Validate Telegram Chat ID
-                const chatIDRegex = /^\d{10}$/;
-                if (!chatIDRegex.test(telegramChatID)) {
-                    showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'delete-chat-placeholder');
-                    return;
-                }
+                // const chatIDRegex = /^\d{10}$/;
+                // if (!chatIDRegex.test(telegramChatID)) {
+                //     showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'delete-chat-placeholder');
+                //     return;
+                // }
 
                 // AJAX Request to delete chat ID
                 fetch('/delete_chatID', {
@@ -490,11 +507,11 @@
             const chat_id = document.getElementById('updatePhoneNumChat').value;
 
             // Validate Telegram Chat ID
-            const chatIDRegex = /^\d{10}$/;
-            if (!chatIDRegex.test(chat_id)) {
-                showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
-                return;
-            }
+            // const chatIDRegex = /^\d{10}$/;
+            // if (!chatIDRegex.test(chat_id)) {
+            //     showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-chat');
+            //     return;
+            // }
 
             // Validate phone number format
             if (!/^\d+$/.test(phoneNum)) {

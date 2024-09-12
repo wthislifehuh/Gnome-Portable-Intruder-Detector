@@ -23,7 +23,7 @@ async def find_and_list_services():
     found = False
     for device in devices:
         # Ensure the device name is not None before checking
-        if device.name and "MI" in device.name: # Replace the device name
+        if device.name and "This Device" in device.name: # Replace the device name
             print(f"Found device: {device.name} ({device.address})")
             await list_services(device.address)
             found = True

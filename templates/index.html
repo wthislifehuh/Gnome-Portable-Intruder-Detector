@@ -87,7 +87,7 @@
               </div>
               <div class="mb-3">
                 <label for="phoneNum" class="form-label">Phone Number (Optional) </label>
-                <input type="text" class="form-control" id="phoneNum" placeholder="eg. +60171234567">
+                <input type="text" class="form-control" id="phoneNum" placeholder="eg. 60171234567">
                 <small class="form-text text-muted">📍Enter the phone number that you want to register. We will only send notification via SMS when the Telegram Bot is not reachable at your side. You can always update the phone number in your account.</small>
                 </div>
               <button type="button" class="btn btn-dark" id="nextStepButton">Next</button>
@@ -402,12 +402,12 @@
           const telegramChatID = document.getElementById('telegramChatID').value;
           const phoneNum = document.getElementById('phoneNum').value;
 
-          // Validate Telegram Chat ID
-          const chatIDRegex = /^\d{10}$/;
-          if (!chatIDRegex.test(telegramChatID)) {
-            showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-signUp');
-            return;
-          }
+          // // Validate Telegram Chat ID
+          // const chatIDRegex = /^\d{10}$/;
+          // if (!chatIDRegex.test(telegramChatID)) {
+          //   showAlertInModal('Telegram Chat ID must be exactly 10 digits.', 'danger', 'modal-alert-placeholder-signUp');
+          //   return;
+          // }
 
           if (!/^\d+$/.test(phoneNum)) {
             showAlertInModal('Invalid phone number format. It must be in international format (eg. 60) and contain only digits.', 'danger', 'modal-alert-placeholder-signUp');
