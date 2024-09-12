@@ -46,7 +46,6 @@ class Camera:
         animal_notification_sent = (
             False  # Tracks whether an animal notification has been sent
         )
-        intruder_tracked = False  # Track whether an intruder is currently being tracked
 
         while True:
             ret, frame = self.cap.read()
@@ -77,9 +76,7 @@ class Camera:
 
                     # Handle intruder detection (Unknown Person)
                     if result["is_intruder"]:
-                        if (
-                            not person_notification_sent
-                        ): 
+                        if not person_notification_sent:
 
                             # Trigger intruder notification and start recording
                             print("Trigger intruder notification")
@@ -97,13 +94,9 @@ class Camera:
                             if not self.is_recording:
                                 self.start_recording(self.cap, self.channel)
 
-                        intruder_tracked = True  # Mark that intruder is being tracked
-
                     # Handle animal detection
                     if result["is_animal"]:
-                        if (
-                            not animal_notification_sent
-                        ):  
+                        if not animal_notification_sent:
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
@@ -116,6 +109,17 @@ class Camera:
                             )
                             # Log in website
                             self.log_intruder_activity(result["animal"])
+
+                    if not result["is_intruder"] and not result["is_animal"]:
+                        if self.is_recording:
+                            self.stop_recording()
+                            print("Stopped recording: Intruder is no longer tracked.")
+                        person_notification_sent = (
+                            False  # Reset to allow for new intruder notifications
+                        )
+                        animal_notification_sent = (
+                            False  # Reset for new animal detection
+                        )
 
                 else:
                     # Update trackers for intruders and animals, and track if intruder is still present
@@ -133,12 +137,6 @@ class Camera:
                         person_notification_sent = (
                             False  # Reset to allow for new intruder notifications
                         )
-                        intruder_tracked = (
-                            False  # Mark that no intruder is being tracked
-                        )
-
-                    else:
-                        intruder_tracked = True  # Intruder is still being tracked
 
                     # Check if all animal trackers are lost and reset notification status for animals
                     active_animal_trackers = any(
@@ -155,6 +153,9 @@ class Camera:
                 print("No event detected.")
                 if self.is_recording:
                     self.stop_recording()
+                    person_notification_sent = (
+                        False  # Reset to allow for new intruder notifications
+                    )
                     print("Stopped recording: No event detected.")
             # Display the current frame
             cv2.imshow("Gnome", frame)
