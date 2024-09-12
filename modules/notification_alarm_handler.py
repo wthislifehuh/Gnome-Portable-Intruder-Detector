@@ -9,6 +9,8 @@ from database3 import SubscriptionManager
 from collections import Counter
 import time
 import traceback
+import concurrent.futures
+
 
 class NotificationAlarmHandler:
     def __init__(self, channel):
@@ -85,13 +87,11 @@ class NotificationAlarmHandler:
         Send an SMS via a Bluetooth connected phone using the provided phone number and message.
         This method will scan for nearby Bluetooth devices, find the phone, and send an SMS.
         """
-        try:
-            # Scan for Bluetooth devices using bleak
-            devices = await BleakScanner.discover()
-
+        def bluetooth_task():
+            # This code will run in a separate thread
+            devices = asyncio.run(BleakScanner.discover())
             target_device = None
 
-            # Check if device.name is not None before checking for the desired device name
             for device in devices:
                 if device.name and self.bluetooth_device_name in device.name:
                     target_device = device
@@ -99,20 +99,32 @@ class NotificationAlarmHandler:
 
             if not target_device:
                 print(f"Bluetooth device {self.bluetooth_device_name} not found.")
-                return
+                return False
 
-            # Connect to the phone via Bluetooth
-            async with BleakClient(target_device.address) as client:
-                print(f"Connected to {target_device.name}")
+            loop = asyncio.new_event_loop()  # Create a new event loop for the thread
+            asyncio.set_event_loop(loop)
 
-                # Send the SMS command (assuming the phone exposes a characteristic to send SMS)
-                sms_command = f"SendSMS:{phone_number}:{message}"
-                await client.write_gatt_char(self.phone_characteristic_uuid, sms_command.encode('utf-8'))
-                print(f"SMS sent via Bluetooth to {phone_number}")
+            async def connect_and_send():
+                try:
+                    async with BleakClient(target_device.address, loop=loop) as client:
+                        print(f"Connected to {target_device.name}")
+                        sms_command = f"SendSMS:{phone_number}:{message}"
+                        await client.write_gatt_char(self.phone_characteristic_uuid, sms_command.encode('utf-8'))
+                        print(f"SMS sent via Bluetooth to {phone_number}")
+                        return True
+                except Exception as e:
+                    print(f"Failed to send SMS via Bluetooth: {e}")
+                    print(traceback.format_exc())
+                    return False
 
-        except Exception as e:
-            print(f"Failed to send SMS via Bluetooth: {e}")
-            print(traceback.format_exc())
+            return loop.run_until_complete(connect_and_send())
+
+        # Run the Bluetooth task in a separate thread to avoid MTA/STA issues
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            result = await asyncio.get_event_loop().run_in_executor(executor, bluetooth_task)
+        
+        return result
+
 
     async def send_notification(self, status):
         # Handle the animal or human status as before
