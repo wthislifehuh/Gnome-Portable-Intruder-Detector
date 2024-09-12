@@ -60,7 +60,7 @@ class Camera:
                 continue
 
             # ---------------------------------------- Frame analysis starts here ----------------------------------------
-
+            
             fg_mask, is_event = self.event_detector.analyze_frame(frame)
             if is_event:
                 print("Event detected")
@@ -73,7 +73,7 @@ class Camera:
                         frame
                     )  # Detect new objects
                     print(result)
-
+                    start_time = time.time()
                     # Handle intruder detection (Unknown Person)
                     if result["is_intruder"]:
                         if not person_notification_sent:
@@ -85,7 +85,7 @@ class Camera:
                             # Uncomment this section when integrating notification module
                             asyncio.run(
                                 self.notification_alarm_handler.human_trigger(
-                                    result["intruders"]
+                                    result["intruders"], start_time
                                 )
                             )
                             # Log in website

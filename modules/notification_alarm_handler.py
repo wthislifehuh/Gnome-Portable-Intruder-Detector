@@ -7,6 +7,7 @@ from bleak import BleakScanner, BleakClient  # for Bluetooth scanning and connec
 from dotenv import load_dotenv
 from database3 import SubscriptionManager
 from collections import Counter
+import time
 
 class NotificationAlarmHandler:
     def __init__(self, channel):
@@ -26,12 +27,16 @@ class NotificationAlarmHandler:
         self.phone_service_uuid = os.getenv('PHONE_SERVICE_UUID')
         self.phone_characteristic_uuid = os.getenv('PHONE_CHARACTERISTIC_UUID')
         
-    async def human_trigger(self, result):
+    async def human_trigger(self, result, start_time):
         if len(result) > 1:
             await self.send_notification(result)
         else:
             await self.send_notification("human")
+        end_time = time.time()
+        print("Processing time for sending notification: ", end_time - start_time)
         await self.trigger_alarm("human")
+        end_time = time.time()
+        print("Processing time for triggering alarm: ", end_time - start_time)
 
     async def animal_trigger(self, animal):
         if len(animal) > 1:
@@ -47,7 +52,8 @@ class NotificationAlarmHandler:
         if url:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url) as response:
-                    print(f'Triggered {event} event with status: {response.status}')
+                    print(f'Triggered {event} alarm with status: {response.status}')
+
         else:
             print(f"Unknown event: {event}")
 
@@ -71,6 +77,7 @@ class NotificationAlarmHandler:
             # Trigger SMS alert if Telegram message fails and phone number exists
             if user_phone:
                 await self.send_bluetooth_sms(user_phone, message) # Send SMS via Bluetooth
+                print(f"Message sent successfully to phone number {user_phone}.")
             return False
 
     async def send_bluetooth_sms(self, phone_number: str, message: str):

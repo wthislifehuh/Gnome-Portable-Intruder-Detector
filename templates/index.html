@@ -409,9 +409,8 @@
             return;
           }
 
-          const phoneNumFormat = /^\+\d+$/;
-          if (!phoneNumFormat.test(phoneNum)) {
-            showAlertInModal('Invalid phone number format. It must start with a "+" and contain only digits.', 'danger', 'modal-alert-placeholder-signUp');
+          if (!/^\d+$/.test(phoneNum)) {
+            showAlertInModal('Invalid phone number format. It must be in international format (eg. 60) and contain only digits.', 'danger', 'modal-alert-placeholder-signUp');
             return;
           }
 
