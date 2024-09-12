@@ -5,13 +5,15 @@ from notification_alarm_handler import NotificationAlarmHandler
 from database3 import SubscriptionManager
 import os
 import re
+from dotenv import load_dotenv
 import asyncio
 
 class BotHandler:
     def __init__(self):
-        self.notifier = NotificationAlarmHandler()
         self.subscription_manager = SubscriptionManager()
-        self.application = Application.builder().token(self.notifier.token).build()
+        load_dotenv()
+        self.token = os.getenv('BOT_TOKEN')
+        self.application = Application.builder().token(self.token).build()
         self.livefeed_link = "http://192.168.1.5:5000"
         self.info_link = "https://playful-router-dca.notion.site/Gnome-Intruder-Detector-1ee22862e81244a8a083ee262e2274f8"
         
@@ -105,35 +107,40 @@ class BotHandler:
                 await update.message.reply_text("🚫 Unable to determine the chat ID. Please try again.")
 
     async def get_livefeed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # Determine the chat ID based on whether the function was triggered by a message or a callback query
-        chat_id = None
-        if update.message:
-            chat_id = str(update.message.chat_id)
-        elif update.callback_query:
-            chat_id = str(update.callback_query.message.chat_id)
-        
-        if chat_id:
-            # Check if the chat_id is subscribed to any channel
-            subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
-            if subscription_code:
-                link = self.subscription_manager.get_livefeed(subscription_code)
-                response_text = f"Here is the link to the live feed: \n📍{link}"
-                if update.callback_query:
-                    await update.callback_query.message.reply_text(response_text)
-                else:
-                    await update.message.reply_text(response_text)
-            else:
-                reply_text = "🚫 You are not authorized to access livefeeds. Please subscribe first."
-                if update.callback_query:
-                    await update.callback_query.message.reply_text(reply_text)
-                else:
-                    await update.message.reply_text(reply_text)
+        response_text = f"Here is the link to the live feed: \n📍{self.livefeed_link}"
+        if update.callback_query:
+            await update.callback_query.message.reply_text(response_text)
         else:
-            reply_text = "🚫 You are not authorized to access livefeeds. Please subscribe first."
-            if update.callback_query:
-                await update.callback_query.message.reply_text(reply_text)
-            else:
-                await update.message.reply_text(reply_text)
+            await update.message.reply_text(response_text)
+        # Determine the chat ID based on whether the function was triggered by a message or a callback query
+        # chat_id = None
+        # if update.message:
+        #     chat_id = str(update.message.chat_id)
+        # elif update.callback_query:
+        #     chat_id = str(update.callback_query.message.chat_id)
+        
+        # if chat_id:
+        #     # Check if the chat_id is subscribed to any channel
+        #     subscription_code = self.subscription_manager.get_subscription_code_by_chat_id(chat_id)
+        #     if subscription_code:
+        #         link = self.subscription_manager.get_livefeed(subscription_code)
+        #         response_text = f"Here is the link to the live feed: \n📍{self.livefeed_link}"
+        #         if update.callback_query:
+        #             await update.callback_query.message.reply_text(response_text)
+        #         else:
+        #             await update.message.reply_text(response_text)
+        #     else:
+        #         reply_text = "🚫 You are not authorized to access livefeeds. Please subscribe first."
+        #         if update.callback_query:
+        #             await update.callback_query.message.reply_text(reply_text)
+        #         else:
+        #             await update.message.reply_text(reply_text)
+        # else:
+        #     reply_text = "🚫 You are not authorized to access livefeeds. Please subscribe first."
+        #     if update.callback_query:
+        #         await update.callback_query.message.reply_text(reply_text)
+        #     else:
+        #         await update.message.reply_text(reply_text)
 
 
         
@@ -214,7 +221,7 @@ class BotHandler:
         elif context.user_data.get('awaiting_filename'):
             await self.handle_filename_selection(update, context, text)
         elif context.user_data.get('awaiting_admin_token'):
-            if text == self.notifier.token:
+            if text == self.token:
                 await self.admin_menu(update, context)
                 context.user_data['awaiting_admin_token'] = False  
                 context.user_data['awaiting_admin_action'] = True   

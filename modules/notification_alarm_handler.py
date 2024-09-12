@@ -145,7 +145,7 @@ class NotificationAlarmHandler:
             phone_number = chat.get('phone_num', None)  # Get phone number or None if not available
             await self.send_message(
                 chat_id,
-                f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders:",
+                f"🚨Alert! {status} Intruders Detected! \nView the live feeds here or access the recordings of the intruders here.",
                 user_phone=phone_number,
                 reply_markup=reply_markup
             )

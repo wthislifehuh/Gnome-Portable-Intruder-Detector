@@ -6,15 +6,9 @@ from werkzeug.utils import secure_filename
 import os
 from database3 import SubscriptionManager
 from embeddings import FaceEmbeddingDB
-import sqlite3
 import json
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
-from deepface import DeepFace
-import base64
-from io import BytesIO
-from PIL import Image
-import numpy as np
 
 
 # Database setup

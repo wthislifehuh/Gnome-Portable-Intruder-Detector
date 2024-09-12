@@ -79,19 +79,18 @@ class Camera:
                     if result["is_intruder"]:
                         if (
                             not person_notification_sent
-                        ):  # Check if notification has already been sent
-                            current_time = time.time()
+                        ): 
 
                             # Trigger intruder notification and start recording
                             print("Trigger intruder notification")
                             # asyncio.run(self.notification_alarm_handler.human_trigger())
                             person_notification_sent = True
                             # Uncomment this section when integrating notification module
-                            # asyncio.run(
-                            #     self.notification_alarm_handler.human_trigger(
-                            #         result["intruders"]
-                            #     )
-                            # )
+                            asyncio.run(
+                                self.notification_alarm_handler.human_trigger(
+                                    result["intruders"]
+                                )
+                            )
                             # Log in website
                             self.log_intruder_activity(result["intruders"])
 
@@ -104,19 +103,17 @@ class Camera:
                     if result["is_animal"]:
                         if (
                             not animal_notification_sent
-                        ):  # Check if notification has already been sent
-                            current_time = time.time()
-
+                        ):  
                             # Trigger animal notification
                             print(f"Animal detected: {result['animal']}")
                             print("Trigger animal notification")
                             animal_notification_sent = True
                             # Uncomment this section when integrating notification module
-                            # asyncio.run(
-                            #     self.notification_alarm_handler.animal_trigger(
-                            #         result["animal"]
-                            #     )
-                            # )
+                            asyncio.run(
+                                self.notification_alarm_handler.animal_trigger(
+                                    result["animal"]
+                                )
+                            )
                             # Log in website
                             self.log_intruder_activity(result["animal"])
 
