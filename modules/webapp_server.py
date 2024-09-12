@@ -52,7 +52,7 @@ app.secret_key = os.urandom(24)
 # ---------------------------------------- Thread to process frames ----------------------------------------
 
 # Initialize the Camera object
-camera = Camera(channel, camera_index=0)
+camera = Camera(channel, camera_index=1)
 cap = camera.start_camera()
 
 # Start the video processing in a separate thread
