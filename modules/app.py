@@ -4,7 +4,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
-from database3 import SubscriptionManager
+from database import SubscriptionManager
 from embeddings import FaceEmbeddingDB
 import json
 from flask import Flask, request, jsonify

@@ -158,7 +158,7 @@
                       <!-- Optional Phone Number -->
                       <div class="mb-3">
                           <label for="phoneNum" class="form-label">Enter Phone Number (Optional)</label>
-                          <input type="text" class="form-control" id="phoneNum" placeholder="e.g., +1234567890">
+                          <input type="text" class="form-control" id="phoneNum" placeholder="e.g., 6012345690">
                           <small class="form-text text-muted">NOTE: Phone number will be stored with the chat ID. We will only send notifications via SMS when Telegram Bot is not reachable at your side.</small>
                       </div>
                       <button type="submit" class="btn btn-dark">Add Chat ID</button>
@@ -216,7 +216,7 @@
               </div>
               <div class="mb-3">
                 <label for="updatePhoneNum" class="form-label">Enter Phone Number to be updated</label>
-                <input type="text" class="form-control" id="updatePhoneNum" placeholder="eg. +0171234567" required>
+                <input type="text" class="form-control" id="updatePhoneNum" placeholder="eg. 60171234567" required>
                 <small class="form-text text-muted">📍NOTE: We will only send notifications via SMS when Telegram Bot is not reachable at your side.</small>
               </div>
               <button type="submit" class="btn btn-dark" id="updatePhoneNumButton">Update</button>
@@ -407,10 +407,9 @@
             }
 
             // Validate Phone Number (optional)
-            const phoneNumRegex = /^\+?\d+$/;
-            if (phoneNum && !phoneNumRegex.test(phoneNum)) {
-                showAlertInModal('Phone number must start with "+" and contain only digits.', 'danger', 'modal-alert-placeholder-chat');
-                return;
+            if (!/^\d+$/.test(phoneNum)) {
+              showAlertInModal('Invalid phone number format. It must be in international format (eg. 60) and contain only digits.', 'danger', 'modal-alert-placeholder-signUp');
+              return;
             }
 
             // AJAX Request to add chat ID and phone number

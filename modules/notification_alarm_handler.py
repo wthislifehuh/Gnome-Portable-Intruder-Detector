@@ -5,7 +5,7 @@ import os
 import json
 from bleak import BleakScanner, BleakClient  # for Bluetooth scanning and connecting
 from dotenv import load_dotenv
-from database3 import SubscriptionManager
+from database import SubscriptionManager
 from collections import Counter
 import time
 
