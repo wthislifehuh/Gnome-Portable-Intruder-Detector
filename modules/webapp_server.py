@@ -14,7 +14,7 @@ import os
 from threading import Thread
 from werkzeug.utils import secure_filename
 import os
-from database import SubscriptionManager
+from database3 import SubscriptionManager
 from embeddings import FaceEmbeddingDB
 from app import (
     validate_signIn,

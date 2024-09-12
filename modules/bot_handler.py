@@ -2,7 +2,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from notification_alarm_handler import NotificationAlarmHandler
-from database import SubscriptionManager
+from database3 import SubscriptionManager
 import os
 import re
 from dotenv import load_dotenv
