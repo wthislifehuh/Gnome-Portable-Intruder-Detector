@@ -1,4 +1,4 @@
-# UCCC2513 Mini Project
+# Portable Intruder Detector
 
 ## Getting Started
 
@@ -16,3 +16,8 @@ pip install -r requirements.txt
 ```
 pip freeze > requirements.txt
 ```
+
+## Showcase
+![Project Screenshot](https://github.com/wthislifehuh/Gnome-Portable-Intruder-Detector/blob/main/image.png)
+
+![Project Screenshot](https://github.com/wthislifehuh/Gnome-Portable-Intruder-Detector/blob/main/intrusion_video.jpg)
